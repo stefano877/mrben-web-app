@@ -34,7 +34,7 @@ export default function Header() {
   return (
     <header className={scrolled ? 'scrolled' : ''}>
       <div className="wrap nav">
-        <div className="brand" onClick={() => app.goLobby()}><img src="/logo.png" alt="MrBen.com" /></div>
+        <div className="brand" onClick={() => app.goLobby()}><img src={`${import.meta.env.BASE_URL}logo.png`} alt="MrBen.com" /></div>
         <nav className="menu">
           {NAV.map(n => <a key={n} className={active === n ? 'on' : ''} onClick={() => nav(n)}>{n}</a>)}
         </nav>
