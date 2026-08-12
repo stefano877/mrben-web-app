@@ -14,6 +14,7 @@ function AuthModal() {
   const app = useApp()
   const mode = app.authModal
   const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [pass, setPass] = useState('')
   const [country, setCountry] = useState('')
   const [phone, setPhone] = useState('')
@@ -36,7 +37,7 @@ function AuthModal() {
   const submit = () => {
     if (mode === 'join') {
       const fullPhone = phone.trim() ? `+${dial} ${phone.trim()}` : ''
-      const e = app.register(email, pass, { phone: fullPhone, country, dial, marketing })
+      const e = app.register(email, pass, { username: username.trim(), phone: fullPhone, country, dial, marketing })
       if (e) { setErr(e); return }
     } else {
       const e = app.login(email, pass)
@@ -53,6 +54,9 @@ function AuthModal() {
         <div className="modal-body">
           {mode === 'join' && <p className="muted center" style={{ marginTop: 0 }}>🎩 100% up to €200 on your first deposit</p>}
           <div className="field"><label>Email</label><input type="email" value={email} placeholder="you@email.com" onChange={e => setEmail(e.target.value)} /></div>
+          {mode === 'join' && (
+            <div className="field"><label>Username</label><input type="text" value={username} placeholder="choose a username" maxLength={16} onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))} /></div>
+          )}
           <div className="field"><label>Password</label><input type="password" value={pass} placeholder="••••••••" onChange={e => setPass(e.target.value)} onKeyDown={e => mode === 'login' && e.key === 'Enter' && submit()} /></div>
 
           {mode === 'join' && <>
@@ -225,7 +229,7 @@ function AccountModal() {
           <div className="prof">
             <div className="avatar">🙂</div>
             <div>
-              <div style={{ fontWeight: 900, fontSize: 18 }}>{u.email.split('@')[0]}</div>
+              <div style={{ fontWeight: 900, fontSize: 18 }}>{u.username || u.email.split('@')[0]}</div>
               <div className="muted" style={{ fontSize: 13 }}>{u.email}</div>
               {(u.country || u.phone) && <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>{u.country ? `${flag(u.country)} ${byCode(u.country)?.name ?? u.country}` : ''}{u.phone ? ` · ${u.phone}` : ''}</div>}
               <div className="kyc" style={{ marginTop: 6 }}>✓ KYC verified{u.marketing ? ' · 📣 promos on' : ''}</div>
