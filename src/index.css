@@ -188,6 +188,15 @@ footer .rg span{ border:1px solid var(--line); padding:5px 12px; border-radius:8
 .acct-btn{ width:40px; height:40px; border-radius:50%; background:var(--sky); display:grid; place-items:center; cursor:pointer; font-size:19px; transition:.15s }
 .acct-btn:hover{ background:var(--sky-dk) }
 .err{ color:#E23B3B; font-weight:700; font-size:13px; margin:0 0 12px }
+.field .hint{ font-weight:600; color:#9aa0b2; font-size:11px; text-transform:none; letter-spacing:0 }
+.csel{ width:100%; border:1.5px solid #E4E6F0; border-radius:13px; padding:14px 15px; font-size:15px; outline:none; font-family:var(--font); background:#fff; color:var(--ink); cursor:pointer; appearance:none }
+.csel:focus{ border-color:var(--orange); box-shadow:0 0 0 3px rgba(243,81,0,.14) }
+.phone{ display:flex; align-items:stretch; border:1.5px solid #E4E6F0; border-radius:13px; overflow:hidden }
+.phone .dial{ display:flex; align-items:center; gap:5px; padding:0 13px; background:#F1F2F8; font-weight:800; font-size:14px; color:var(--ink); white-space:nowrap; border-right:1.5px solid #E4E6F0 }
+.phone input{ border:none; outline:none; padding:14px 15px; font-size:15px; flex:1; font-family:var(--font); min-width:0 }
+.phone:focus-within{ border-color:var(--orange); box-shadow:0 0 0 3px rgba(243,81,0,.14) }
+.check{ display:flex; align-items:flex-start; gap:10px; margin:2px 0 16px; font-size:13px; color:#4a5060; font-weight:600; cursor:pointer; line-height:1.35 }
+.check input{ width:18px; height:18px; margin-top:1px; accent-color:var(--orange); cursor:pointer; flex-shrink:0 }
 .btn.sec{ background:#F1F2F8; color:var(--ink) } .btn.sec:hover{ background:#E7E9F3 }
 .btn.ghost{ background:transparent; color:var(--orange-lo) }
 .btn.small{ padding:11px 12px; font-size:13.5px; border-radius:11px }

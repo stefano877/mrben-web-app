@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useApp } from '../store'
 import type { Txn } from '../store'
 import type { Game } from '../data'
 import { fmt, CHEST } from '../data'
 import { chestModalSVG } from '../art'
+import { countries, byCode, flag, detectCountry } from '../countries'
 
 let txnId = 1
 const mkTxn = (kind: Txn['kind'], amount: number, label: string): Txn => ({ id: txnId++, kind, amount, label, at: Date.now() })
@@ -14,14 +15,37 @@ function AuthModal() {
   const mode = app.authModal
   const [email, setEmail] = useState('')
   const [pass, setPass] = useState('')
+  const [country, setCountry] = useState('')
+  const [phone, setPhone] = useState('')
+  const [marketing, setMarketing] = useState(true)
+  const [detecting, setDetecting] = useState(false)
   const [err, setErr] = useState('')
+
+  // Geo-locate the player and pre-pick their country + dial code when the Join form opens.
+  useEffect(() => {
+    if (mode !== 'join' || country) return
+    let alive = true
+    setDetecting(true)
+    detectCountry().then(code => { if (alive) { setCountry(code); setDetecting(false) } })
+    return () => { alive = false }
+  }, [mode])
+
   if (!mode) return null
+  const dial = byCode(country)?.dial ?? ''
+
   const submit = () => {
-    const e = mode === 'join' ? app.register(email, pass) : app.login(email, pass)
-    if (e) { setErr(e); return }
+    if (mode === 'join') {
+      const fullPhone = phone.trim() ? `+${dial} ${phone.trim()}` : ''
+      const e = app.register(email, pass, { phone: fullPhone, country, dial, marketing })
+      if (e) { setErr(e); return }
+    } else {
+      const e = app.login(email, pass)
+      if (e) { setErr(e); return }
+    }
     app.setAuthModal(null)
     app.showToast(mode === 'join' ? '🎉 Account created. Welcome to MrBen!' : '✓ Logged in')
   }
+
   return (
     <div className="overlay open" onClick={(ev) => { if (ev.target === ev.currentTarget) app.setAuthModal(null) }}>
       <div className="modal">
@@ -29,7 +53,29 @@ function AuthModal() {
         <div className="modal-body">
           {mode === 'join' && <p className="muted center" style={{ marginTop: 0 }}>🎩 100% up to €200 on your first deposit</p>}
           <div className="field"><label>Email</label><input type="email" value={email} placeholder="you@email.com" onChange={e => setEmail(e.target.value)} /></div>
-          <div className="field"><label>Password</label><input type="password" value={pass} placeholder="••••••••" onChange={e => setPass(e.target.value)} onKeyDown={e => e.key === 'Enter' && submit()} /></div>
+          <div className="field"><label>Password</label><input type="password" value={pass} placeholder="••••••••" onChange={e => setPass(e.target.value)} onKeyDown={e => mode === 'login' && e.key === 'Enter' && submit()} /></div>
+
+          {mode === 'join' && <>
+            <div className="field">
+              <label>Country {detecting && <span className="hint">detecting…</span>}</label>
+              <select className="csel" value={country} onChange={e => setCountry(e.target.value)}>
+                <option value="" disabled>Select your country</option>
+                {countries.map(c => <option key={c.code} value={c.code}>{flag(c.code)}  {c.name}  (+{c.dial})</option>)}
+              </select>
+            </div>
+            <div className="field">
+              <label>Phone number</label>
+              <div className="phone">
+                <span className="dial">{country ? `${flag(country)} +${dial}` : '+'}</span>
+                <input type="tel" value={phone} placeholder="phone number" onChange={e => setPhone(e.target.value.replace(/[^\d ]/g, ''))} />
+              </div>
+            </div>
+            <label className="check">
+              <input type="checkbox" checked={marketing} onChange={e => setMarketing(e.target.checked)} />
+              <span>Yes, send me promotions, bonuses and free spins</span>
+            </label>
+          </>}
+
           {err && <p className="err">{err}</p>}
           <button className="btn orange" onClick={submit}>{mode === 'join' ? 'Create account' : 'Log in'}</button>
           <div className="switchline">
@@ -181,7 +227,8 @@ function AccountModal() {
             <div>
               <div style={{ fontWeight: 900, fontSize: 18 }}>{u.email.split('@')[0]}</div>
               <div className="muted" style={{ fontSize: 13 }}>{u.email}</div>
-              <div className="kyc">✓ KYC verified</div>
+              {(u.country || u.phone) && <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>{u.country ? `${flag(u.country)} ${byCode(u.country)?.name ?? u.country}` : ''}{u.phone ? ` · ${u.phone}` : ''}</div>}
+              <div className="kyc" style={{ marginTop: 6 }}>✓ KYC verified{u.marketing ? ' · 📣 promos on' : ''}</div>
             </div>
           </div>
           <div className="balrow">

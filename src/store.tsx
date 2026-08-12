@@ -4,9 +4,14 @@ import type { Game } from './data'
 
 export type Page = 'lobby' | 'offers' | 'sports' | 'vip'
 export interface Txn { id: number; kind: 'deposit' | 'withdraw' | 'bet' | 'win' | 'bonus'; amount: number; label: string; at: number }
+export interface Profile { phone: string; country: string; dial: string; marketing: boolean }
 export interface User {
   email: string
   pass: string
+  phone: string
+  country: string
+  dial: string
+  marketing: boolean
   balance: number
   bonus: number
   points: number
@@ -39,9 +44,10 @@ function load(): Root {
 }
 const enc = (s: string) => { try { return btoa(unescape(encodeURIComponent(s))) } catch { return s } }
 
-function newUser(email: string, pass: string): User {
+function newUser(email: string, pass: string, profile?: Profile): User {
   return {
     email, pass: enc(pass),
+    phone: profile?.phone ?? '', country: profile?.country ?? '', dial: profile?.dial ?? '', marketing: profile?.marketing ?? false,
     balance: 0, bonus: 0, points: 0,
     favs: [], recent: [], txns: [],
     rc: true, excluded: false, wheelClaimed: false, chestClaimed: false, firstDepositDone: false,
@@ -58,7 +64,7 @@ interface Ctx {
   authModal: 'join' | 'login' | null; setAuthModal: (m: 'join' | 'login' | null) => void
   modal: Modal; openModal: (m: Modal) => void; closeModal: () => void
   toast: string; showToast: (m: string) => void
-  register: (email: string, pass: string) => string | null
+  register: (email: string, pass: string, profile?: Profile) => string | null
   login: (email: string, pass: string) => string | null
   logout: () => void
   update: (patch: Partial<User>) => void
@@ -95,12 +101,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     timer.current = window.setTimeout(() => setToast(''), 2400)
   }
 
-  const register = (email: string, pass: string): string | null => {
+  const register = (email: string, pass: string, profile?: Profile): string | null => {
     email = email.trim().toLowerCase()
     if (!email || !/.+@.+\..+/.test(email)) return 'Enter a valid email'
     if (pass.length < 4) return 'Password must be at least 4 characters'
+    if (profile && !profile.country) return 'Please pick your country'
+    if (profile && profile.phone.replace(/\D/g, '').length < 6) return 'Enter a valid phone number'
     if (root.users[email]) return 'An account with that email already exists'
-    const u = newUser(email, pass)
+    const u = newUser(email, pass, profile)
     setRoot(r => ({ users: { ...r.users, [email]: u }, session: email }))
     return null
   }
