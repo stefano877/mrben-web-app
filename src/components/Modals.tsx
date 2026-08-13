@@ -422,6 +422,92 @@ function WheelModal() {
   )
 }
 
+/* ---------------- Info / legal pages ---------------- */
+const INFO_DOCS: Record<string, { title: string; html: string }> = {
+  about: {
+    title: 'About Us',
+    html: `<p>MrBen is a bonus-heavy, mobile-first online casino from <b>Mr iGaming Group</b>, built around Ben, your host. Our mission is simple: thousands of great games, crypto-fast payouts, and a brand that actually looks after its players.</p>
+    <p>We offer slots, live casino, table games and a sportsbook from leading studios, wrapped in a generous welcome package and a loyalty programme that rewards every spin.</p>
+    <p>MrBen operates under an Anjouan Gaming Licence and serves players worldwide, excluding restricted territories. Full company details will appear here once incorporation is complete.</p>`,
+  },
+  terms: {
+    title: 'Terms of Use',
+    html: `<p>By creating an account and using MrBen you agree to these terms. You must be at least 18 years old and legally allowed to gamble in your country.</p>
+    <p>Your account is personal and non-transferable. You are responsible for keeping your login secure and for all activity on your account.</p>
+    <p>We may update these terms and will notify you of material changes. Bonuses and promotions carry their own terms. Full terms are finalised alongside our licence; this is a plain-language summary.</p>`,
+  },
+  privacy: {
+    title: 'Privacy Policy',
+    html: `<p>We collect the information you provide at sign-up (email, username, date of birth, country and phone) and your gameplay and transaction data. We use it to run your account, verify your age and identity, prevent fraud, and meet our legal and licensing obligations.</p>
+    <p>We do not sell your personal data. You can request access to, correction of, or deletion of your data at any time via Support.</p>
+    <p>The data controller and retention periods are confirmed with our licence. Your data is stored securely and transmitted over encrypted connections.</p>`,
+  },
+  support: {
+    title: 'Support',
+    html: `<p>Need a hand? Our team is here around the clock.</p>
+    <p>📧 <b>support@mrben.com</b><br>💬 Live chat (coming soon)</p>
+    <p>We can help with your account, deposits and withdrawals, bonuses, games and responsible gambling. For account security we may ask you to verify your identity.</p>`,
+  },
+  contact: {
+    title: 'Contact Us',
+    html: `<p>Get in touch any time.</p>
+    <p>📧 <b>support@mrben.com</b><br>🏢 Mr iGaming Group (registered office to be confirmed)</p>
+    <p>For complaints, please see our Complaints &amp; procedures page first.</p>`,
+  },
+  'betting-rules': {
+    title: 'Betting Rules',
+    html: `<p>Sports bets are settled on the official result of the event. If a market is voided or an event is abandoned, affected bets are refunded.</p>
+    <p>Maximum payout limits apply per bet and per day. Palpable errors in odds may be corrected. Full rules for each sport are published with the sportsbook.</p>`,
+  },
+  complaints: {
+    title: 'Complaints & procedures',
+    html: `<p>We aim to resolve every issue quickly and fairly. Please contact Support first with your account details and a description of the problem.</p>
+    <p>If your complaint is not resolved within 8 weeks, you may escalate it to our independent dispute-resolution provider, named alongside our Anjouan licence.</p>`,
+  },
+  'promo-terms': {
+    title: 'Promotional Terms & Conditions',
+    html: `<p>Bonuses are subject to wagering requirements, a maximum bet while wagering, game-weighting rules and an expiry period. The specific terms are shown on each offer before you opt in.</p>
+    <p>Slots contribute 100% to wagering; live casino and table games contribute 10%. Bonus abuse, including collusion and irregular play, voids the bonus and any winnings from it.</p>`,
+  },
+  cookies: {
+    title: 'Cookie Settings',
+    html: `<p>We use <b>essential</b> cookies to run the site and keep you logged in. With your consent we also use <b>analytics</b> cookies to improve MrBen and <b>marketing</b> cookies to show relevant offers.</p>
+    <p>You can change your choice at any time from this panel.</p>`,
+  },
+  'rg-policy': {
+    title: 'Responsible Gambling',
+    html: `<p>Gambling should always be fun, never a way to make money or escape problems. MrBen gives you the tools to stay in control.</p>
+    <p>From your account you can set <b>deposit, loss and session limits</b>, take a <b>cool-off</b>, or <b>self-exclude</b> at any time. A decrease to a limit applies immediately.</p>
+    <p>If you need support: BeGambleAware, GamCare and Gordon Moody offer free, confidential help. You must be 18+ to play.</p>`,
+  },
+}
+
+function InfoModal({ infoKey }: { infoKey: string }) {
+  const app = useApp()
+  const doc = INFO_DOCS[infoKey] ?? { title: 'MrBen', html: '<p>Coming soon.</p>' }
+  return (
+    <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
+      <div className="modal">
+        <div className="modal-head"><h3>{doc.title}</h3><button className="x" onClick={app.closeModal}>✕</button></div>
+        <div className="modal-body">
+          <div className="doc" dangerouslySetInnerHTML={{ __html: doc.html }} />
+          {infoKey === 'rg-policy' && (
+            <button className="btn orange" onClick={() => { app.closeModal(); if (app.user) app.openModal({ type: 'account' }); else app.setAuthModal('login') }}>Manage my limits</button>
+          )}
+          {infoKey === 'cookies' ? (
+            <div className="row2">
+              <button className="btn sec" onClick={() => { app.closeModal(); app.showToast('Essential cookies only') }}>Essential only</button>
+              <button className="btn orange" onClick={() => { app.closeModal(); app.showToast('All cookies accepted') }}>Accept all</button>
+            </div>
+          ) : infoKey !== 'rg-policy' && (
+            <button className="btn sec" onClick={app.closeModal}>Close</button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Modals() {
   const app = useApp()
   return (
@@ -432,6 +518,7 @@ export default function Modals() {
       {app.modal?.type === 'account' && <AccountModal />}
       {app.modal?.type === 'chest' && <ChestModal />}
       {app.modal?.type === 'wheel' && <WheelModal />}
+      {app.modal?.type === 'info' && <InfoModal infoKey={app.modal.key} />}
     </>
   )
 }

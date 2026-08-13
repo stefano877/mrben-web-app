@@ -36,6 +36,7 @@ export type Modal =
   | { type: 'account' }
   | { type: 'chest' }
   | { type: 'wheel' }
+  | { type: 'info'; key: string }
   | { type: 'game'; game: Game }
   | null
 

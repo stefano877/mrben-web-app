@@ -344,6 +344,10 @@ footer .rg span{ border:1px solid var(--line); padding:5px 12px; border-radius:8
 .crash-card p{ margin:0 0 18px; font-size:14px; color:#5a6072; line-height:1.5 }
 .crash-btns{ display:flex; gap:10px } .crash-btns .btn{ margin:0 }
 
+/* Info / legal pages */
+.doc{ font-size:14px; line-height:1.65; color:#2a2d40; margin-bottom:16px }
+.doc p{ margin:0 0 12px } .doc b{ color:var(--ink) }
+
 /* Site footer */
 .site-footer{ background:#101A45; color:#c7cceb; padding:28px 0 44px; margin-top:30px }
 .foot-top{ display:flex; justify-content:flex-end; gap:12px; margin-bottom:34px }
