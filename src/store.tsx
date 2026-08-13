@@ -4,11 +4,12 @@ import type { Game } from './data'
 
 export type Page = 'lobby' | 'offers' | 'sports' | 'vip'
 export interface Txn { id: number; kind: 'deposit' | 'withdraw' | 'bet' | 'win' | 'bonus'; amount: number; label: string; at: number }
-export interface Profile { username: string; phone: string; country: string; dial: string; marketing: boolean }
+export interface Profile { username: string; dob: string; phone: string; country: string; dial: string; marketing: boolean }
 export interface User {
   email: string
   username: string
   pass: string
+  dob: string
   phone: string
   country: string
   dial: string
@@ -48,7 +49,7 @@ const enc = (s: string) => { try { return btoa(unescape(encodeURIComponent(s))) 
 
 function newUser(email: string, pass: string, profile?: Profile): User {
   return {
-    email, username: profile?.username ?? email.split('@')[0], pass: enc(pass),
+    email, username: profile?.username ?? email.split('@')[0], pass: enc(pass), dob: profile?.dob ?? '',
     phone: profile?.phone ?? '', country: profile?.country ?? '', dial: profile?.dial ?? '', marketing: profile?.marketing ?? false,
     balance: 0, bonus: 0, points: 0,
     favs: [], recent: [], txns: [],
@@ -111,6 +112,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!/^[a-zA-Z0-9_]{3,16}$/.test(profile.username)) return 'Username: 3 to 16 letters, numbers or underscores'
       const taken = Object.values(root.users).some(u => u.username.toLowerCase() === profile.username.toLowerCase())
       if (taken) return 'That username is already taken'
+      if (!profile.dob) return 'Enter your date of birth'
+      const d = new Date(profile.dob), now = new Date()
+      let age = now.getFullYear() - d.getFullYear()
+      const m = now.getMonth() - d.getMonth()
+      if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--
+      if (isNaN(age)) return 'Enter a valid date of birth'
+      if (age < 18) return 'You must be 18 or older to register'
       if (!profile.country) return 'Please pick your country'
       if (profile.phone.replace(/\D/g, '').length < 6) return 'Enter a valid phone number'
     }

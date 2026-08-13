@@ -33,6 +33,7 @@ function AuthModal() {
   const mode = app.authModal
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
+  const [dob, setDob] = useState('')
   const [pass, setPass] = useState('')
   const [country, setCountry] = useState('')
   const [phone, setPhone] = useState('')
@@ -51,11 +52,12 @@ function AuthModal() {
 
   if (!mode) return null
   const dial = byCode(country)?.dial ?? ''
+  const maxDob = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().slice(0, 10) })()
 
   const submit = () => {
     if (mode === 'join') {
       const fullPhone = phone.trim() ? `+${dial} ${phone.trim()}` : ''
-      const e = app.register(email, pass, { username: username.trim(), phone: fullPhone, country, dial, marketing })
+      const e = app.register(email, pass, { username: username.trim(), dob, phone: fullPhone, country, dial, marketing })
       if (e) { setErr(e); return }
     } else {
       const e = app.login(email, pass)
@@ -74,6 +76,9 @@ function AuthModal() {
           <div className="field"><label>Email</label><input type="email" value={email} placeholder="you@email.com" onChange={e => setEmail(e.target.value)} /></div>
           {mode === 'join' && (
             <div className="field"><label>Username</label><input type="text" value={username} placeholder="choose a username" maxLength={16} onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))} /></div>
+          )}
+          {mode === 'join' && (
+            <div className="field"><label>Date of birth <span className="hint">you must be 18+</span></label><input type="date" value={dob} max={maxDob} onChange={e => setDob(e.target.value)} /></div>
           )}
           <div className="field"><label>Password</label><input type="password" value={pass} placeholder="••••••••" onChange={e => setPass(e.target.value)} onKeyDown={e => mode === 'login' && e.key === 'Enter' && submit()} /></div>
 
