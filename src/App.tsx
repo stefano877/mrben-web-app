@@ -7,6 +7,7 @@ import OffersPage from './components/OffersPage'
 import Sportsbook from './components/Sportsbook'
 import VipPage from './components/VipPage'
 import Modals from './components/Modals'
+import Footer from './components/Footer'
 
 function Shell() {
   const app = useApp()
@@ -19,12 +20,7 @@ function Shell() {
       {app.page === 'offers' && <OffersPage />}
       {app.page === 'sports' && <Sportsbook />}
       {app.page === 'vip' && <VipPage />}
-      <footer>
-        <div className="wrap">
-          <div className="rg"><span>18+</span><span>Play responsibly</span><span>BeGambleAware.org</span><span>SSL secured</span></div>
-          MrBen player site, React prototype. Accounts and balances are saved in your browser only. · Mr iGaming Group
-        </div>
-      </footer>
+      <Footer />
       <button className="wheel-fab" onClick={() => { if (app.requireAuth()) app.openModal({ type: 'wheel' }) }} aria-label="Daily bonus wheel">
         <span className="tagn">1</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
