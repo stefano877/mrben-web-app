@@ -8,6 +8,7 @@ import Sportsbook from './components/Sportsbook'
 import VipPage from './components/VipPage'
 import Modals from './components/Modals'
 import Footer from './components/Footer'
+import BottomNav from './components/BottomNav'
 
 function Shell() {
   const app = useApp()
@@ -28,6 +29,7 @@ function Shell() {
         </svg>
       </button>
       <Modals />
+      <BottomNav />
       <div className={'toast' + (app.toast ? ' show' : '')}>{app.toast}</div>
     </div>
   )
