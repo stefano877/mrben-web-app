@@ -40,12 +40,55 @@ export type Modal =
   | null
 
 const KEY = 'mrben.v1'
+
+// Fill in any fields missing from a stored user so accounts saved by older builds still load.
+function normalizeUser(email: string, raw: unknown): User {
+  const u = (raw && typeof raw === 'object' ? raw : {}) as Record<string, any>
+  const lim = (u.limits && typeof u.limits === 'object' ? u.limits : {}) as Record<string, any>
+  return {
+    email: typeof u.email === 'string' ? u.email : email,
+    username: typeof u.username === 'string' ? u.username : (typeof u.email === 'string' ? u.email : email).split('@')[0],
+    pass: typeof u.pass === 'string' ? u.pass : '',
+    dob: typeof u.dob === 'string' ? u.dob : '',
+    phone: typeof u.phone === 'string' ? u.phone : '',
+    country: typeof u.country === 'string' ? u.country : '',
+    dial: typeof u.dial === 'string' ? u.dial : '',
+    marketing: !!u.marketing,
+    balance: Number.isFinite(u.balance) ? u.balance : 0,
+    bonus: Number.isFinite(u.bonus) ? u.bonus : 0,
+    points: Number.isFinite(u.points) ? u.points : 0,
+    favs: Array.isArray(u.favs) ? u.favs : [],
+    recent: Array.isArray(u.recent) ? u.recent : [],
+    txns: Array.isArray(u.txns) ? u.txns : [],
+    rc: u.rc === undefined ? true : !!u.rc,
+    excluded: !!u.excluded,
+    wheelClaimed: !!u.wheelClaimed,
+    chestClaimed: !!u.chestClaimed,
+    firstDepositDone: !!u.firstDepositDone,
+    limits: {
+      deposit: Number.isFinite(lim.deposit) ? lim.deposit : 500,
+      loss: Number.isFinite(lim.loss) ? lim.loss : 1000,
+      session: Number.isFinite(lim.session) ? lim.session : 60,
+    },
+    pending: (u.pending && typeof u.pending === 'object') ? u.pending : {},
+  }
+}
+
 function load(): Root {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) { const r = JSON.parse(raw); if (r && r.users) return r }
-  } catch { /* ignore */ }
-  return { users: {}, session: null }
+    if (!raw) return { users: {}, session: null }
+    const r = JSON.parse(raw)
+    if (!r || typeof r !== 'object' || typeof r.users !== 'object' || !r.users) return { users: {}, session: null }
+    const users: Record<string, User> = {}
+    for (const [email, u] of Object.entries(r.users)) users[email] = normalizeUser(email, u)
+    const session = typeof r.session === 'string' && users[r.session] ? r.session : null
+    return { users, session }
+  } catch {
+    // Corrupt storage: start clean rather than crash.
+    try { localStorage.removeItem(KEY) } catch { /* ignore */ }
+    return { users: {}, session: null }
+  }
 }
 const enc = (s: string) => { try { return btoa(unescape(encodeURIComponent(s))) } catch { return s } }
 

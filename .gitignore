@@ -6,3 +6,4 @@ install.log
 smoke.cjs
 .vite/
 mount.cjs
+migrate.cjs
