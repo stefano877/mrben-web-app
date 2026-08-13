@@ -1,4 +1,5 @@
 import type { Game } from './data'
+import { WHEEL } from './data'
 
 let ARTI = 0
 const esc = (s: string) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -116,6 +117,18 @@ export function promoArt(key: string): string {
 
 export function chestSVG(): string {
   return `<svg viewBox="0 0 64 64"><rect x="10" y="30" width="44" height="24" rx="4" fill="#7A4420"/><rect x="10" y="30" width="44" height="7" fill="#F4C24B"/><path d="M10 30a22 14 0 0 1 44 0Z" fill="#8A5228"/><rect x="28" y="28" width="8" height="14" rx="2" fill="#F4C24B"/><circle cx="32" cy="40" r="2.4" fill="#5a3a06"/></svg>`
+}
+export function wheelSVG(): string {
+  const cx = 131, cy = 131, R = 125, seg = 45
+  let s = ''
+  for (let i = 0; i < 8; i++) {
+    const a0 = ((-90 + i * seg) * Math.PI) / 180, a1 = ((-90 + (i + 1) * seg) * Math.PI) / 180
+    const x0 = cx + R * Math.cos(a0), y0 = cy + R * Math.sin(a0), x1 = cx + R * Math.cos(a1), y1 = cy + R * Math.sin(a1)
+    s += `<path d="M${cx} ${cy} L${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="${WHEEL[i].c}" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>`
+    const am = ((-90 + i * seg + seg / 2) * Math.PI) / 180, tx = cx + R * 0.64 * Math.cos(am), ty = cy + R * 0.64 * Math.sin(am)
+    s += `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" transform="rotate(${i * seg + seg / 2} ${tx.toFixed(1)} ${ty.toFixed(1)})" font-family="'Poppins',sans-serif" font-weight="800" font-size="15" fill="#fff">${WHEEL[i].t}</text>`
+  }
+  return `<svg viewBox="0 0 262 262"><g id="wheelSpin">${s}<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#fff" stroke-width="4" opacity=".5"/></g><circle cx="${cx}" cy="${cy}" r="22" fill="#fff"/><circle cx="${cx}" cy="${cy}" r="22" fill="none" stroke="#F35100" stroke-width="4"/></svg>`
 }
 export function chestModalSVG(): string {
   return `<svg viewBox="0 0 200 170"><ellipse cx="100" cy="150" rx="70" ry="12" fill="#000" opacity=".15"/><circle class="cglow" cx="100" cy="88" r="58" fill="#FFD86B"/><rect x="42" y="88" width="116" height="58" rx="8" fill="#7A4420"/><rect x="42" y="88" width="116" height="10" fill="#F4C24B"/><rect x="90" y="98" width="20" height="28" rx="3" fill="#F4C24B"/><circle cx="100" cy="118" r="4" fill="#5a3a06"/><g id="chestLid"><path d="M42 92 a58 34 0 0 1 116 0 Z" fill="#8A5228"/><path d="M42 86 h116 v8 h-116 Z" fill="#F4C24B"/></g></svg>`

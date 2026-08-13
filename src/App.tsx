@@ -25,6 +25,12 @@ function Shell() {
           MrBen player site, React prototype. Accounts and balances are saved in your browser only. · Mr iGaming Group
         </div>
       </footer>
+      <button className="wheel-fab" onClick={() => { if (app.requireAuth()) app.openModal({ type: 'wheel' }) }} aria-label="Daily bonus wheel">
+        <span className="tagn">1</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13M4 12v9h16v-9M12 8S10 3 7.5 4.2C5.4 5.3 7 8 12 8ZM12 8s2-5 4.5-3.8C18.6 5.3 17 8 12 8Z" />
+        </svg>
+      </button>
       <Modals />
       <div className={'toast' + (app.toast ? ' show' : '')}>{app.toast}</div>
     </div>

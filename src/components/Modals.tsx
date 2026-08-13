@@ -1,13 +1,31 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useApp } from '../store'
 import type { Txn } from '../store'
 import type { Game } from '../data'
-import { fmt, CHEST } from '../data'
-import { chestModalSVG } from '../art'
+import { fmt, CHEST, WHEEL } from '../data'
+import { chestModalSVG, wheelSVG } from '../art'
 import { countries, byCode, flag, detectCountry } from '../countries'
 
 let txnId = 1
 const mkTxn = (kind: Txn['kind'], amount: number, label: string): Txn => ({ id: txnId++, kind, amount, label, at: Date.now() })
+
+const CONFETTI_COLORS = ['#F35100', '#FFCB57', '#2A6BE0', '#12B39A', '#E85D9A', '#7A2BD0', '#5EE6A8']
+function Confetti() {
+  const pieces = useMemo(() => Array.from({ length: 40 }, () => ({
+    left: Math.random() * 100,
+    bg: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+    delay: (Math.random() * 0.25).toFixed(2),
+    dur: (0.9 + Math.random() * 0.7).toFixed(2),
+    rot: Math.floor(Math.random() * 360),
+  })), [])
+  return (
+    <div className="confetti">
+      {pieces.map((p, i) => (
+        <i key={i} style={{ left: `${p.left}%`, background: p.bg, animationDelay: `${p.delay}s`, animationDuration: `${p.dur}s`, transform: `rotate(${p.rot}deg)` }} />
+      ))}
+    </div>
+  )
+}
 
 /* ---------------- Auth ---------------- */
 function AuthModal() {
@@ -173,6 +191,7 @@ function GameModal({ game }: { game: Game }) {
   const [bet, setBet] = useState(2)
   const [reels, setReels] = useState<string[]>([game.ic, '🔔', '⭐'])
   const [win, setWin] = useState('')
+  const [burst, setBurst] = useState(0)
   const [lastBet, setLastBet] = useState(0)
   if (!app.user) return null
   const u = app.user
@@ -187,7 +206,7 @@ function GameModal({ game }: { game: Game }) {
       const txns = [mkTxn('bet', bet, `Bet · ${game.name}`), ...(w > 0 ? [mkTxn('win', w, `Win · ${game.name}`)] : []), ...user.txns].slice(0, 60)
       return { balance: user.balance - bet + w, points: user.points + Math.round(bet), txns }
     })
-    if (w > 0) { setWin('WIN ' + fmt(w) + '!'); setTimeout(() => setWin(''), 900) } else setWin('')
+    if (w > 0) { setWin('WIN ' + fmt(w) + '!'); setBurst(b => b + 1); setTimeout(() => setWin(''), 900) } else setWin('')
   }
   const rollback = () => {
     if (lastBet === 0) { app.showToast('Nothing to roll back'); return }
@@ -197,6 +216,7 @@ function GameModal({ game }: { game: Game }) {
   const adj = (d: number) => { const i = BET_STEPS.indexOf(bet); setBet(BET_STEPS[Math.max(0, Math.min(BET_STEPS.length - 1, i + d))]) }
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
+      {burst > 0 && <Confetti key={burst} />}
       <div className="modal">
         <div className="modal-head"><h3 style={{ fontSize: 16 }}>{game.name}</h3><button className="x" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
@@ -290,6 +310,46 @@ function ChestModal() {
   )
 }
 
+/* ---------------- Daily bonus wheel ---------------- */
+function WheelModal() {
+  const app = useApp()
+  const [spun, setSpun] = useState(false)
+  const [result, setResult] = useState('')
+  if (!app.user) return null
+  const claimed = app.user.wheelClaimed
+  const spin = () => {
+    if (claimed || spun) return
+    setSpun(true)
+    const idx = Math.floor(Math.random() * 8), seg = 45, target = 360 * 6 - (idx * seg + seg / 2)
+    const el = document.getElementById('wheelSpin')
+    if (el) { el.style.transition = 'transform 4.2s cubic-bezier(.15,.7,.15,1)'; el.style.transform = `rotate(${target}deg)` }
+    window.setTimeout(() => {
+      const p = WHEEL[idx]
+      const euro = p.t[0] === '€' ? parseFloat(p.t.slice(1)) : 0
+      app.mutate(u => ({
+        wheelClaimed: true,
+        bonus: u.bonus + euro,
+        txns: euro ? [mkTxn('bonus', euro, 'Daily wheel'), ...u.txns].slice(0, 60) : u.txns,
+      }))
+      setResult(p.t === 'Try again' ? 'Better luck tomorrow!' : `You won ${p.t}`)
+      app.showToast(p.t === 'Try again' ? 'So close! Try again tomorrow.' : '🎉 Daily wheel: ' + p.t)
+    }, 4300)
+  }
+  return (
+    <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
+      <div className="modal">
+        <div className="modal-head"><h3>🎁 Daily Bonus Wheel</h3><button className="x" onClick={app.closeModal}>✕</button></div>
+        <div className="modal-body">
+          <p className="muted center" style={{ marginTop: 0 }}>Spin once a day for a free bonus. Good luck!</p>
+          <div className="wheelwrap"><div className="pointer" /><div dangerouslySetInnerHTML={{ __html: wheelSVG() }} /></div>
+          <div className="wresult">{result || (claimed ? 'Come back tomorrow for another spin.' : '')}</div>
+          <button className="btn orange" disabled={claimed || spun} onClick={spin}>{claimed ? 'Come back tomorrow' : spun ? 'Spinning…' : 'SPIN'}</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Modals() {
   const app = useApp()
   return (
@@ -299,6 +359,7 @@ export default function Modals() {
       {app.modal?.type === 'game' && <GameModal game={app.modal.game} />}
       {app.modal?.type === 'account' && <AccountModal />}
       {app.modal?.type === 'chest' && <ChestModal />}
+      {app.modal?.type === 'wheel' && <WheelModal />}
     </>
   )
 }

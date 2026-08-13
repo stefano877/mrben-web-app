@@ -133,3 +133,10 @@ export const vipPerks: [string, string, string][] = [
   ['📈', 'Higher limits', 'Raised deposit and bet limits'],
 ]
 export const CHEST = ['€15 bonus', '25 free spins', '€40 bonus', '100 free spins', '€10 bonus']
+
+/* ---- Daily bonus wheel ---- */
+export interface WheelSlice { t: string; c: string }
+export const WHEEL: WheelSlice[] = [
+  { t: '10 FS', c: '#FF7A1A' }, { t: '€5', c: '#5A2A8F' }, { t: '25 FS', c: '#2A6BE0' }, { t: '€10', c: '#E0A21E' },
+  { t: '50 FS', c: '#12B39A' }, { t: '€20', c: '#E85D9A' }, { t: 'Try again', c: '#3a4060' }, { t: '€50', c: '#B23000' },
+]
