@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useApp } from '../store'
-import type { Txn } from '../store'
+import type { Txn, LimitKind } from '../store'
 import type { Game } from '../data'
 import { fmt, CHEST, WHEEL } from '../data'
 import { chestModalSVG, wheelSVG } from '../art'
@@ -242,10 +242,39 @@ function GameModal({ game }: { game: Game }) {
 }
 
 /* ---------------- Account + RG ---------------- */
+const LIMIT_ROWS: { k: LimitKind; label: string; sub: string; money: boolean }[] = [
+  { k: 'deposit', label: 'Deposit limit', sub: 'Per day', money: true },
+  { k: 'loss', label: 'Loss limit', sub: 'Per week', money: true },
+  { k: 'session', label: 'Session reminder', sub: 'Every', money: false },
+]
+const hrsLeft = (at: number) => Math.max(1, Math.ceil((at - Date.now()) / 3600000))
+
 function AccountModal() {
   const app = useApp()
+  const [editKind, setEditKind] = useState<LimitKind | null>(null)
+  const [editVal, setEditVal] = useState('')
+  const [exclOpen, setExclOpen] = useState(false)
+  const [exclPeriod, setExclPeriod] = useState('6 months')
+  const [exclType, setExclType] = useState('')
   if (!app.user) return null
   const u = app.user
+
+  const showVal = (k: LimitKind) => (LIMIT_ROWS.find(r => r.k === k)!.money ? fmt(u.limits[k]) : `${u.limits[k]} min`)
+  const startEdit = (k: LimitKind) => { setEditKind(k); setEditVal(String(u.limits[k])) }
+  const saveEdit = () => {
+    if (!editKind) return
+    const v = parseFloat(editVal)
+    if (!v || v <= 0) { app.showToast('Enter a valid amount'); return }
+    const res = app.setLimit(editKind, v)
+    app.showToast(res === 'lowered' ? 'Limit lowered, effective now' : 'Increase requested, effective in 24 hours')
+    setEditKind(null)
+  }
+  const confirmExcl = () => {
+    app.update({ excluded: true })
+    app.showToast(`🚫 Self-exclusion active for ${exclPeriod}`)
+    setExclOpen(false); setExclType('')
+  }
+
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
       <div className="modal">
@@ -268,18 +297,56 @@ function AccountModal() {
           <div className="card2" style={{ padding: '4px 17px' }}>
             <div className="li" onClick={() => app.openModal({ type: 'wallet' })}><div className="lic">💳</div><div><div className="lt">Wallet &amp; transactions</div><div className="ls">Deposits, withdrawals, play</div></div><div className="chev">›</div></div>
           </div>
-          <div className="rgbanner"><div style={{ fontSize: 22 }}>💚</div><div><div style={{ fontWeight: 900, fontSize: 15 }}>Responsible Gambling</div><div className="muted" style={{ fontSize: 12 }}>Limits are checked before every deposit and bet.</div></div></div>
+          <div className="rgbanner"><div style={{ fontSize: 22 }}>💚</div><div><div style={{ fontWeight: 900, fontSize: 15 }}>Responsible Gambling</div><div className="muted" style={{ fontSize: 12 }}>Decreases apply now. Increases wait 24 hours and can be cancelled.</div></div></div>
+
           <div className="card2">
             <div className="h">Limits</div>
-            <div className="lrow"><div><div className="lt">Deposit limit</div><div className="ls">Per day</div></div><span className="pill" onClick={() => app.showToast('Deposit limit editor')}>{fmt(u.limits.deposit)} ›</span></div>
-            <div className="lrow"><div><div className="lt">Loss limit</div><div className="ls">Per week</div></div><span className="pill" onClick={() => app.showToast('Loss limit editor')}>{fmt(u.limits.loss)} ›</span></div>
-            <div className="lrow"><div><div className="lt">Session limit</div><div className="ls">Reminder every</div></div><span className="pill" onClick={() => app.showToast('Session limit editor')}>{u.limits.session} min ›</span></div>
+            {LIMIT_ROWS.map(r => (
+              <div className="lrow" key={r.k} style={{ display: 'block' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div><div className="lt">{r.label}</div><div className="ls">{r.sub}</div></div>
+                  <span className="pill" onClick={() => (editKind === r.k ? setEditKind(null) : startEdit(r.k))}>{showVal(r.k)} ›</span>
+                </div>
+                {editKind === r.k && (
+                  <div className="lim-edit">
+                    <input type="number" value={editVal} onChange={e => setEditVal(e.target.value)} />
+                    <button className="btn orange" onClick={saveEdit}>Save</button>
+                    <button className="btn sec" onClick={() => setEditKind(null)}>Cancel</button>
+                  </div>
+                )}
+                {u.pending[r.k] && (
+                  <div className="pending-row">
+                    ⏳ Increase to {r.money ? fmt(u.pending[r.k]!.value) : `${u.pending[r.k]!.value} min`} pending, effective in {hrsLeft(u.pending[r.k]!.at)}h
+                    <span className="cancel" onClick={() => { app.cancelPending(r.k); app.showToast('Pending increase cancelled') }}>Cancel</span>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
+
           <div className="card2">
             <div className="lrow"><div><div className="lt">Reality checks</div><div className="ls">Pop-up with time and spend</div></div><div className={'toggle' + (u.rc ? ' on' : '')} onClick={() => { app.update({ rc: !u.rc }); app.showToast('Reality checks ' + (!u.rc ? 'on' : 'off')) }} /></div>
-            <div className="lrow"><div><div className="lt">Cool-off</div><div className="ls">Pause 24h to 6 weeks</div></div><span className="pill" onClick={() => app.showToast('Cool-off, choose 24h to 6 weeks')}>Set ›</span></div>
-            <div className="lrow"><div><div className="lt" style={{ color: '#E23B3B' }}>Self-exclusion</div><div className="ls">Block play 6 months+</div></div><span className="pill" onClick={() => { app.update({ excluded: !u.excluded }); app.showToast(!u.excluded ? '🚫 Self-exclusion active, play blocked' : 'Self-exclusion lifted') }}>{u.excluded ? 'Active' : 'Start'} ›</span></div>
+            <div className="lrow" style={{ display: 'block' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div><div className="lt" style={{ color: '#E23B3B' }}>Self-exclusion</div><div className="ls">Blocks all play for the chosen period</div></div>
+                {u.excluded
+                  ? <span className="pill" style={{ background: '#FDE7E7', color: '#E23B3B' }}>Active</span>
+                  : <span className="pill" onClick={() => setExclOpen(o => !o)}>Start ›</span>}
+              </div>
+              {u.excluded && <div style={{ marginTop: 8 }}><span className="demoreset" onClick={() => { app.update({ excluded: false }); app.showToast('Self-exclusion lifted (demo)') }}>Lift (demo only)</span></div>}
+              {!u.excluded && exclOpen && (
+                <div className="excl">
+                  <select value={exclPeriod} onChange={e => setExclPeriod(e.target.value)}>
+                    {['24 hours', '1 week', '1 month', '6 months', 'Permanent'].map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                  <p>This blocks all play and login for {exclPeriod}. It cannot be undone early. To confirm, type CONFIRM below.</p>
+                  <input type="text" value={exclType} placeholder="Type CONFIRM" onChange={e => setExclType(e.target.value)} />
+                  <button className="btn" disabled={exclType.trim().toUpperCase() !== 'CONFIRM'} onClick={confirmExcl}>Confirm self-exclusion</button>
+                </div>
+              )}
+            </div>
           </div>
+
           <button className="btn sec" onClick={() => { app.logout(); app.closeModal(); app.showToast('Logged out') }}>Log out</button>
         </div>
       </div>

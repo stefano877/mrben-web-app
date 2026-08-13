@@ -321,6 +321,21 @@ footer .rg span{ border:1px solid var(--line); padding:5px 12px; border-radius:8
 .toggle::after{ content:""; position:absolute; top:3px; left:3px; width:23px; height:23px; border-radius:50%; background:#fff; transition:.2s; box-shadow:0 1px 4px rgba(0,0,0,.25) } .toggle.on::after{ left:22px }
 .lrow{ display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid #EEF0F6 } .lrow:last-child{ border-bottom:none }
 
+/* RG limit editors */
+.lim-edit{ display:flex; gap:8px; margin-top:10px }
+.lim-edit input{ flex:1; border:1.5px solid #E4E6F0; border-radius:11px; padding:10px 12px; font-size:14px; font-family:var(--font); outline:none; min-width:0 }
+.lim-edit input:focus{ border-color:var(--orange); box-shadow:0 0 0 3px rgba(243,81,0,.12) }
+.lim-edit .btn{ width:auto; padding:10px 14px; font-size:13px; border-radius:11px; margin:0 }
+.pending-row{ display:flex; align-items:center; gap:8px; margin-top:9px; font-size:12px; font-weight:600; color:#8a6d1e; background:#FFF7E6; border:1px solid #F3D8A0; border-radius:10px; padding:8px 11px }
+.pending-row .cancel{ margin-left:auto; color:#E23B3B; font-weight:800; cursor:pointer }
+.excl{ margin-top:10px; border:1px solid #F3C0C0; background:#FFF4F4; border-radius:12px; padding:12px }
+.excl select{ width:100%; border:1.5px solid #E4E6F0; border-radius:11px; padding:10px 12px; font-family:var(--font); margin-bottom:8px; background:#fff }
+.excl p{ font-size:12px; color:#8a3a3a; margin:0 0 8px; line-height:1.45 }
+.excl input{ width:100%; border:1.5px solid #E4E6F0; border-radius:11px; padding:10px 12px; font-family:var(--font); margin-bottom:8px; outline:none }
+.excl input:focus{ border-color:#E23B3B }
+.excl .btn{ background:#E23B3B; color:#fff; margin:0 } .excl .btn:disabled{ opacity:.45; cursor:default }
+.demoreset{ color:#8a90a2; font-weight:700; cursor:pointer; font-size:11px; text-decoration:underline }
+
 /* Daily wheel */
 .wheel-fab{ position:fixed; right:20px; bottom:22px; z-index:70; width:60px; height:60px; border-radius:50%; border:none; cursor:pointer; background:linear-gradient(180deg,var(--orange-hi),var(--orange)); color:#fff; box-shadow:0 12px 26px rgba(243,81,0,.5); display:grid; place-items:center; animation:fabPulse 2s ease-in-out infinite }
 .wheel-fab svg{ width:30px; height:30px }

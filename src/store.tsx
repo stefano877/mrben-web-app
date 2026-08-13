@@ -26,7 +26,9 @@ export interface User {
   chestClaimed: boolean
   firstDepositDone: boolean
   limits: { deposit: number; loss: number; session: number }
+  pending: { deposit?: { value: number; at: number }; loss?: { value: number; at: number }; session?: { value: number; at: number } }
 }
+export type LimitKind = 'deposit' | 'loss' | 'session'
 interface Root { users: Record<string, User>; session: string | null }
 
 export type Modal =
@@ -54,7 +56,7 @@ function newUser(email: string, pass: string, profile?: Profile): User {
     balance: 0, bonus: 0, points: 0,
     favs: [], recent: [], txns: [],
     rc: true, excluded: false, wheelClaimed: false, chestClaimed: false, firstDepositDone: false,
-    limits: { deposit: 500, loss: 1000, session: 60 },
+    limits: { deposit: 500, loss: 1000, session: 60 }, pending: {},
   }
 }
 
@@ -72,6 +74,8 @@ interface Ctx {
   logout: () => void
   update: (patch: Partial<User>) => void
   mutate: (fn: (u: User) => Partial<User>) => void
+  setLimit: (kind: LimitKind, value: number) => 'lowered' | 'scheduled'
+  cancelPending: (kind: LimitKind) => void
   toggleFav: (name: string) => void
   pushRecent: (name: string) => void
   requireAuth: () => boolean
@@ -151,6 +155,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return { ...r, users: { ...r.users, [r.session]: { ...cur, ...fn(cur) } } }
     })
   }
+  // RG limits: a decrease takes effect immediately; an increase is delayed 24h and shown as pending (cancellable).
+  const setLimit = (kind: LimitKind, value: number): 'lowered' | 'scheduled' => {
+    let outcome: 'lowered' | 'scheduled' = 'lowered'
+    mutate(u => {
+      if (value <= u.limits[kind]) {
+        const pending = { ...u.pending }; delete pending[kind]
+        outcome = 'lowered'
+        return { limits: { ...u.limits, [kind]: value }, pending }
+      }
+      outcome = 'scheduled'
+      return { pending: { ...u.pending, [kind]: { value, at: Date.now() + 24 * 3600 * 1000 } } }
+    })
+    return outcome
+  }
+  const cancelPending = (kind: LimitKind) => mutate(u => { const pending = { ...u.pending }; delete pending[kind]; return { pending } })
+
+  // Apply any scheduled increase whose effective time has passed.
+  useEffect(() => {
+    if (!user) return
+    const kinds: LimitKind[] = ['deposit', 'loss', 'session']
+    const due = kinds.filter(k => { const p = user.pending[k]; return p && p.at <= Date.now() })
+    if (due.length) mutate(u => {
+      const limits = { ...u.limits }; const pending = { ...u.pending }
+      due.forEach(k => { const p = pending[k]; if (p) { limits[k] = p.value; delete pending[k] } })
+      return { limits, pending }
+    })
+  }, [user])
+
   const toggleFav = (name: string) => {
     if (!user) { setAuthModal('join'); return }
     const has = user.favs.includes(name)
@@ -167,7 +199,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<Ctx>(() => ({
     page, setPage, lobbyView, setLobbyView, goLobby, user, authModal, setAuthModal, modal, openModal, closeModal,
-    toast, showToast, register, login, logout, update, mutate, toggleFav, pushRecent, requireAuth,
+    toast, showToast, register, login, logout, update, mutate, setLimit, cancelPending, toggleFav, pushRecent, requireAuth,
   }), [page, lobbyView, root, authModal, modal, toast])
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>
