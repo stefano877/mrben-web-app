@@ -8,3 +8,4 @@ smoke.cjs
 mount.cjs
 migrate.cjs
 httpcheck.cjs
+authcheck.cjs
