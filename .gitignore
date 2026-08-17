@@ -9,3 +9,4 @@ mount.cjs
 migrate.cjs
 httpcheck.cjs
 authcheck.cjs
+backendcheck.cjs

@@ -425,3 +425,9 @@ footer .rg span{ border:1px solid var(--line); padding:5px 12px; border-radius:8
 .btn.busy{ position:relative; color:transparent !important; pointer-events:none; opacity:.9 }
 .btn.busy::after{ content:''; position:absolute; top:50%; left:50%; width:18px; height:18px; margin:-9px 0 0 -9px; border:2px solid rgba(255,255,255,.45); border-top-color:#fff; border-radius:50%; animation:roll .6s linear infinite }
 .btn.sec.busy::after{ border-color:rgba(20,25,45,.25); border-top-color:#141a2d }
+
+/* Wallet gated until the provider wallet is provisioned (walletReady:false) */
+.wallet-wait{ text-align:center; padding:22px 16px; background:#F6F8FF; border:1px solid #E4E9F7; border-radius:16px; margin:6px 0 4px }
+.wallet-wait .ww-ic{ font-size:30px; margin-bottom:6px }
+.wallet-wait .ww-t{ font-weight:900; font-size:16px; color:#101A45; margin-bottom:6px }
+.wallet-wait .ww-s{ font-size:13px; color:#5A6379; line-height:1.5 }

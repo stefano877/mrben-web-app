@@ -163,18 +163,26 @@ function WalletModal() {
         <div className="modal-head"><h3>Wallet</h3><button className="x" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <div className="balcard"><div className="l">Available balance</div><div className="a">{fmt(u.balance)}</div><div className="b">🎁 Bonus wallet: {fmt(u.bonus)}</div></div>
-          <div className="seg"><button className={mode === 'deposit' ? 'on' : ''} onClick={() => setMode('deposit')}>Deposit</button><button className={mode === 'withdraw' ? 'on' : ''} onClick={() => setMode('withdraw')}>Withdraw</button></div>
-          <div className="amtin"><span>€</span><input type="number" value={amount} onChange={e => setAmount(e.target.value)} /></div>
-          <div className="quick">{[20, 50, 100, 250].map(v => <button key={v} onClick={() => setAmount(String(v))}>€{v}</button>)}</div>
-          <div>
-            {methods.map(m => (
-              <div key={m.k} className={'method' + (method === m.k ? ' sel' : '')} onClick={() => setMethod(m.k)}>
-                <div className="mic" style={{ background: m.c }}>{m.ic}</div>
-                <div><div className="mt">{m.t}</div><div className="ms">{m.s}</div></div>
-              </div>
-            ))}
-          </div>
-          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={confirm}>{mode === 'deposit' ? 'Deposit ' : 'Withdraw '}{fmt(parseFloat(amount || '0'))}</button>
+          {u.walletReady === false ? (
+            <div className="wallet-wait">
+              <div className="ww-ic">🔒</div>
+              <div className="ww-t">Wallet almost ready</div>
+              <div className="ww-s">We are finishing setting up your payment wallet. Deposits and withdrawals open as soon as it is provisioned. You can still explore the games in demo.</div>
+            </div>
+          ) : (<>
+            <div className="seg"><button className={mode === 'deposit' ? 'on' : ''} onClick={() => setMode('deposit')}>Deposit</button><button className={mode === 'withdraw' ? 'on' : ''} onClick={() => setMode('withdraw')}>Withdraw</button></div>
+            <div className="amtin"><span>€</span><input type="number" value={amount} onChange={e => setAmount(e.target.value)} /></div>
+            <div className="quick">{[20, 50, 100, 250].map(v => <button key={v} onClick={() => setAmount(String(v))}>€{v}</button>)}</div>
+            <div>
+              {methods.map(m => (
+                <div key={m.k} className={'method' + (method === m.k ? ' sel' : '')} onClick={() => setMethod(m.k)}>
+                  <div className="mic" style={{ background: m.c }}>{m.ic}</div>
+                  <div><div className="mt">{m.t}</div><div className="ms">{m.s}</div></div>
+                </div>
+              ))}
+            </div>
+            <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={confirm}>{mode === 'deposit' ? 'Deposit ' : 'Withdraw '}{fmt(parseFloat(amount || '0'))}</button>
+          </>)}
           {u.txns.length > 0 && (
             <div className="txns">
               <div className="txns-h">Recent transactions</div>

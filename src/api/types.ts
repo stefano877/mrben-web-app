@@ -2,6 +2,8 @@
 // These DTOs are the boundary between the front end and Willmer's backend.
 // In mock mode they are produced locally; in HTTP mode the backend returns them.
 
+import type { UserStatus, UserRole } from './auth/types'
+
 export type TxnKind = 'deposit' | 'withdraw' | 'bet' | 'win' | 'bonus'
 export interface Txn { id: number; kind: TxnKind; amount: number; label: string; at: number }
 
@@ -44,6 +46,17 @@ export interface Account {
   firstDepositDone: boolean
   limits: Limits
   pending: PendingLimits    // increases scheduled 24h out, cancellable
+  // Identity fields present only when authenticated against the real backend.
+  // Undefined in local mock/demo mode (treated as a fully-enabled demo player).
+  id?: string
+  status?: UserStatus
+  role?: UserRole
+  emailVerified?: boolean
+  /**
+   * False while the provider wallet is being provisioned (waiting on the PAM
+   * deal). Gate deposits and real-money play on this. Undefined = demo, allowed.
+   */
+  walletReady?: boolean
 }
 
 export interface Session { token: string; account: Account }
