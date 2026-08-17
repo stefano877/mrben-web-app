@@ -1,13 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useApp } from '../store'
-import type { Txn, LimitKind } from '../store'
+import type { LimitKind } from '../store'
 import type { Game } from '../data'
-import { fmt, CHEST, WHEEL } from '../data'
+import { fmt } from '../data'
 import { chestModalSVG, wheelSVG } from '../art'
 import { countries, byCode, flag, detectCountry } from '../countries'
-
-let txnId = 1
-const mkTxn = (kind: Txn['kind'], amount: number, label: string): Txn => ({ id: txnId++, kind, amount, label, at: Date.now() })
 
 const CONFETTI_COLORS = ['#F35100', '#FFCB57', '#2A6BE0', '#12B39A', '#E85D9A', '#7A2BD0', '#5EE6A8']
 function Confetti() {
@@ -54,13 +51,13 @@ function AuthModal() {
   const dial = byCode(country)?.dial ?? ''
   const maxDob = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().slice(0, 10) })()
 
-  const submit = () => {
+  const submit = async () => {
     if (mode === 'join') {
       const fullPhone = phone.trim() ? `+${dial} ${phone.trim()}` : ''
-      const e = app.register(email, pass, { username: username.trim(), dob, phone: fullPhone, country, dial, marketing })
+      const e = await app.register(email, pass, { username: username.trim(), dob, phone: fullPhone, country, dial, marketing })
       if (e) { setErr(e); return }
     } else {
-      const e = app.login(email, pass)
+      const e = await app.login(email, pass)
       if (e) { setErr(e); return }
     }
     app.setAuthModal(null)
@@ -135,22 +132,16 @@ function WalletModal() {
   const [method, setMethod] = useState('crypto')
   if (!app.user) return null
   const u = app.user
-  const confirm = () => {
+  const confirm = async () => {
     const v = parseFloat(amount || '0')
     if (v <= 0) { app.showToast('Enter an amount'); return }
     if (mode === 'deposit') {
-      app.mutate(user => {
-        let bonus = user.bonus
-        let firstDepositDone = user.firstDepositDone
-        let bonusAdded = 0
-        if (!firstDepositDone) { bonusAdded = Math.min(200, v); bonus += bonusAdded; firstDepositDone = true }
-        const txns = [mkTxn('deposit', v, `Deposit (${method})`), ...(bonusAdded ? [mkTxn('bonus', bonusAdded, 'Welcome bonus 100%')] : []), ...user.txns].slice(0, 60)
-        return { balance: user.balance + v, bonus, firstDepositDone, txns }
-      })
-      app.showToast(u.firstDepositDone ? `✓ Deposited ${fmt(v)}` : `✓ Deposited ${fmt(v)} + ${fmt(Math.min(200, v))} bonus`)
+      const r = await app.deposit(v, method)
+      if (!r.ok) { app.showToast(r.error); return }
+      app.showToast(r.bonusAdded > 0 ? `✓ Deposited ${fmt(v)} + ${fmt(r.bonusAdded)} bonus` : `✓ Deposited ${fmt(v)}`)
     } else {
-      if (v > u.balance) { app.showToast('Amount exceeds balance'); return }
-      app.mutate(user => ({ balance: user.balance - v, txns: [mkTxn('withdraw', v, `Withdrawal (${method})`), ...user.txns].slice(0, 60) }))
+      const r = await app.withdraw(v, method)
+      if (!r.ok) { app.showToast(r.error); return }
       app.showToast(`✓ Withdrawal ${fmt(v)} sent`)
     }
   }
@@ -200,22 +191,17 @@ function GameModal({ game }: { game: Game }) {
   const [lastBet, setLastBet] = useState(0)
   if (!app.user) return null
   const u = app.user
-  const spin = () => {
-    if (u.excluded) { app.showToast('🚫 Self-excluded. Play is blocked.'); return }
-    if (u.balance < bet) { app.showToast('Insufficient funds. Top up your wallet.'); return }
-    const r = [0, 1, 2].map(() => SYMS[Math.floor(Math.random() * SYMS.length)])
-    setReels(r)
-    const w = Math.random() < 0.42 ? +(bet * (Math.random() * 4 + 1.5)).toFixed(2) : 0
+  const spin = async () => {
+    const r = await app.placeBet(game, bet)
+    if (!r.ok) { app.showToast(r.error); return }
+    setReels([0, 1, 2].map(() => SYMS[Math.floor(Math.random() * SYMS.length)]))
     setLastBet(bet)
-    app.mutate(user => {
-      const txns = [mkTxn('bet', bet, `Bet · ${game.name}`), ...(w > 0 ? [mkTxn('win', w, `Win · ${game.name}`)] : []), ...user.txns].slice(0, 60)
-      return { balance: user.balance - bet + w, points: user.points + Math.round(bet), txns }
-    })
-    if (w > 0) { setWin('WIN ' + fmt(w) + '!'); setBurst(b => b + 1); setTimeout(() => setWin(''), 900) } else setWin('')
+    if (r.win > 0) { setWin('WIN ' + fmt(r.win) + '!'); setBurst(b => b + 1); setTimeout(() => setWin(''), 900) } else setWin('')
   }
-  const rollback = () => {
+  const rollback = async () => {
     if (lastBet === 0) { app.showToast('Nothing to roll back'); return }
-    app.mutate(user => ({ balance: user.balance + lastBet, txns: [mkTxn('bonus', lastBet, 'Rollback'), ...user.txns].slice(0, 60) }))
+    const r = await app.rollback(lastBet)
+    if (!r.ok) { app.showToast(r.error); return }
     setLastBet(0); app.showToast('↩ Last round rolled back')
   }
   const adj = (d: number) => { const i = BET_STEPS.indexOf(bet); setBet(BET_STEPS[Math.max(0, Math.min(BET_STEPS.length - 1, i + d))]) }
@@ -261,16 +247,18 @@ function AccountModal() {
 
   const showVal = (k: LimitKind) => (LIMIT_ROWS.find(r => r.k === k)!.money ? fmt(u.limits[k]) : `${u.limits[k]} min`)
   const startEdit = (k: LimitKind) => { setEditKind(k); setEditVal(String(u.limits[k])) }
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editKind) return
     const v = parseFloat(editVal)
     if (!v || v <= 0) { app.showToast('Enter a valid amount'); return }
-    const res = app.setLimit(editKind, v)
-    app.showToast(res === 'lowered' ? 'Limit lowered, effective now' : 'Increase requested, effective in 24 hours')
+    const r = await app.setLimit(editKind, v)
+    if (!r.ok) { app.showToast(r.error); return }
+    app.showToast(r.outcome === 'lowered' ? 'Limit lowered, effective now' : 'Increase requested, effective in 24 hours')
     setEditKind(null)
   }
-  const confirmExcl = () => {
-    app.update({ excluded: true })
+  const confirmExcl = async () => {
+    const r = await app.selfExclude(exclPeriod)
+    if (!r.ok) { app.showToast(r.error); return }
     app.showToast(`🚫 Self-exclusion active for ${exclPeriod}`)
     setExclOpen(false); setExclType('')
   }
@@ -317,7 +305,7 @@ function AccountModal() {
                 {u.pending[r.k] && (
                   <div className="pending-row">
                     ⏳ Increase to {r.money ? fmt(u.pending[r.k]!.value) : `${u.pending[r.k]!.value} min`} pending, effective in {hrsLeft(u.pending[r.k]!.at)}h
-                    <span className="cancel" onClick={() => { app.cancelPending(r.k); app.showToast('Pending increase cancelled') }}>Cancel</span>
+                    <span className="cancel" onClick={() => { void app.cancelPending(r.k); app.showToast('Pending increase cancelled') }}>Cancel</span>
                   </div>
                 )}
               </div>
@@ -325,7 +313,7 @@ function AccountModal() {
           </div>
 
           <div className="card2">
-            <div className="lrow"><div><div className="lt">Reality checks</div><div className="ls">Pop-up with time and spend</div></div><div className={'toggle' + (u.rc ? ' on' : '')} onClick={() => { app.update({ rc: !u.rc }); app.showToast('Reality checks ' + (!u.rc ? 'on' : 'off')) }} /></div>
+            <div className="lrow"><div><div className="lt">Reality checks</div><div className="ls">Pop-up with time and spend</div></div><div className={'toggle' + (u.rc ? ' on' : '')} onClick={() => { void app.setRealityChecks(!u.rc); app.showToast('Reality checks ' + (!u.rc ? 'on' : 'off')) }} /></div>
             <div className="lrow" style={{ display: 'block' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div><div className="lt" style={{ color: '#E23B3B' }}>Self-exclusion</div><div className="ls">Blocks all play for the chosen period</div></div>
@@ -333,7 +321,7 @@ function AccountModal() {
                   ? <span className="pill" style={{ background: '#FDE7E7', color: '#E23B3B' }}>Active</span>
                   : <span className="pill" onClick={() => setExclOpen(o => !o)}>Start ›</span>}
               </div>
-              {u.excluded && <div style={{ marginTop: 8 }}><span className="demoreset" onClick={() => { app.update({ excluded: false }); app.showToast('Self-exclusion lifted (demo)') }}>Lift (demo only)</span></div>}
+              {u.excluded && <div style={{ marginTop: 8 }}><span className="demoreset" onClick={() => { void app.liftExclusion(); app.showToast('Self-exclusion lifted (demo)') }}>Lift (demo only)</span></div>}
               {!u.excluded && exclOpen && (
                 <div className="excl">
                   <select value={exclPeriod} onChange={e => setExclPeriod(e.target.value)}>
@@ -347,7 +335,7 @@ function AccountModal() {
             </div>
           </div>
 
-          <button className="btn sec" onClick={() => { app.logout(); app.closeModal(); app.showToast('Logged out') }}>Log out</button>
+          <button className="btn sec" onClick={() => { void app.logout(); app.closeModal(); app.showToast('Logged out') }}>Log out</button>
         </div>
       </div>
     </div>
@@ -361,12 +349,12 @@ function ChestModal() {
   const [reward, setReward] = useState('')
   if (!app.user) return null
   const claimed = app.user.chestClaimed
-  const open = () => {
+  const open = async () => {
     if (claimed || opened) return
     setOpened(true)
-    const prize = CHEST[Math.floor(Math.random() * CHEST.length)]
-    app.mutate(user => ({ chestClaimed: true, bonus: prize[0] === '€' ? user.bonus + parseFloat(prize.slice(1)) : user.bonus }))
-    setTimeout(() => { setReward(prize); app.showToast('🎉 Mystery Chest: ' + prize) }, 560)
+    const r = await app.openChest()
+    if (!r.ok) { setOpened(false); app.showToast(r.error); return }
+    setTimeout(() => { setReward(r.prize); app.showToast('🎉 Mystery Chest: ' + r.prize) }, 560)
   }
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
@@ -389,22 +377,17 @@ function WheelModal() {
   const [result, setResult] = useState('')
   if (!app.user) return null
   const claimed = app.user.wheelClaimed
-  const spin = () => {
+  const spin = async () => {
     if (claimed || spun) return
     setSpun(true)
-    const idx = Math.floor(Math.random() * 8), seg = 45, target = 360 * 6 - (idx * seg + seg / 2)
+    const r = await app.spinWheel()
+    if (!r.ok) { setSpun(false); app.showToast(r.error); return }
+    const seg = 45, target = 360 * 6 - (r.index * seg + seg / 2)
     const el = document.getElementById('wheelSpin')
     if (el) { el.style.transition = 'transform 4.2s cubic-bezier(.15,.7,.15,1)'; el.style.transform = `rotate(${target}deg)` }
     window.setTimeout(() => {
-      const p = WHEEL[idx]
-      const euro = p.t[0] === '€' ? parseFloat(p.t.slice(1)) : 0
-      app.mutate(u => ({
-        wheelClaimed: true,
-        bonus: u.bonus + euro,
-        txns: euro ? [mkTxn('bonus', euro, 'Daily wheel'), ...u.txns].slice(0, 60) : u.txns,
-      }))
-      setResult(p.t === 'Try again' ? 'Better luck tomorrow!' : `You won ${p.t}`)
-      app.showToast(p.t === 'Try again' ? 'So close! Try again tomorrow.' : '🎉 Daily wheel: ' + p.t)
+      setResult(r.prize === 'Try again' ? 'Better luck tomorrow!' : `You won ${r.prize}`)
+      app.showToast(r.prize === 'Try again' ? 'So close! Try again tomorrow.' : '🎉 Daily wheel: ' + r.prize)
     }, 4300)
   }
   return (

@@ -1,35 +1,13 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Game } from './data'
+import { api, ApiError } from './api'
+import type { Account, Profile, LimitKind } from './api'
+
+// Re-exported so existing imports (`from '../store'`) keep working.
+export type { Txn, Profile, LimitKind, Account } from './api'
 
 export type Page = 'lobby' | 'offers' | 'sports' | 'vip'
-export interface Txn { id: number; kind: 'deposit' | 'withdraw' | 'bet' | 'win' | 'bonus'; amount: number; label: string; at: number }
-export interface Profile { username: string; dob: string; phone: string; country: string; dial: string; marketing: boolean }
-export interface User {
-  email: string
-  username: string
-  pass: string
-  dob: string
-  phone: string
-  country: string
-  dial: string
-  marketing: boolean
-  balance: number
-  bonus: number
-  points: number
-  favs: string[]
-  recent: string[]
-  txns: Txn[]
-  rc: boolean
-  excluded: boolean
-  wheelClaimed: boolean
-  chestClaimed: boolean
-  firstDepositDone: boolean
-  limits: { deposit: number; loss: number; session: number }
-  pending: { deposit?: { value: number; at: number }; loss?: { value: number; at: number }; session?: { value: number; at: number } }
-}
-export type LimitKind = 'deposit' | 'loss' | 'session'
-interface Root { users: Record<string, User>; session: string | null }
 
 export type Modal =
   | { type: 'wallet' }
@@ -40,86 +18,37 @@ export type Modal =
   | { type: 'game'; game: Game }
   | null
 
-const KEY = 'mrben.v1'
-
-// Fill in any fields missing from a stored user so accounts saved by older builds still load.
-function normalizeUser(email: string, raw: unknown): User {
-  const u = (raw && typeof raw === 'object' ? raw : {}) as Record<string, any>
-  const lim = (u.limits && typeof u.limits === 'object' ? u.limits : {}) as Record<string, any>
-  return {
-    email: typeof u.email === 'string' ? u.email : email,
-    username: typeof u.username === 'string' ? u.username : (typeof u.email === 'string' ? u.email : email).split('@')[0],
-    pass: typeof u.pass === 'string' ? u.pass : '',
-    dob: typeof u.dob === 'string' ? u.dob : '',
-    phone: typeof u.phone === 'string' ? u.phone : '',
-    country: typeof u.country === 'string' ? u.country : '',
-    dial: typeof u.dial === 'string' ? u.dial : '',
-    marketing: !!u.marketing,
-    balance: Number.isFinite(u.balance) ? u.balance : 0,
-    bonus: Number.isFinite(u.bonus) ? u.bonus : 0,
-    points: Number.isFinite(u.points) ? u.points : 0,
-    favs: Array.isArray(u.favs) ? u.favs : [],
-    recent: Array.isArray(u.recent) ? u.recent : [],
-    txns: Array.isArray(u.txns) ? u.txns : [],
-    rc: u.rc === undefined ? true : !!u.rc,
-    excluded: !!u.excluded,
-    wheelClaimed: !!u.wheelClaimed,
-    chestClaimed: !!u.chestClaimed,
-    firstDepositDone: !!u.firstDepositDone,
-    limits: {
-      deposit: Number.isFinite(lim.deposit) ? lim.deposit : 500,
-      loss: Number.isFinite(lim.loss) ? lim.loss : 1000,
-      session: Number.isFinite(lim.session) ? lim.session : 60,
-    },
-    pending: (u.pending && typeof u.pending === 'object') ? u.pending : {},
-  }
-}
-
-function load(): Root {
-  try {
-    const raw = localStorage.getItem(KEY)
-    if (!raw) return { users: {}, session: null }
-    const r = JSON.parse(raw)
-    if (!r || typeof r !== 'object' || typeof r.users !== 'object' || !r.users) return { users: {}, session: null }
-    const users: Record<string, User> = {}
-    for (const [email, u] of Object.entries(r.users)) users[email] = normalizeUser(email, u)
-    const session = typeof r.session === 'string' && users[r.session] ? r.session : null
-    return { users, session }
-  } catch {
-    // Corrupt storage: start clean rather than crash.
-    try { localStorage.removeItem(KEY) } catch { /* ignore */ }
-    return { users: {}, session: null }
-  }
-}
-const enc = (s: string) => { try { return btoa(unescape(encodeURIComponent(s))) } catch { return s } }
-
-function newUser(email: string, pass: string, profile?: Profile): User {
-  return {
-    email, username: profile?.username ?? email.split('@')[0], pass: enc(pass), dob: profile?.dob ?? '',
-    phone: profile?.phone ?? '', country: profile?.country ?? '', dial: profile?.dial ?? '', marketing: profile?.marketing ?? false,
-    balance: 0, bonus: 0, points: 0,
-    favs: [], recent: [], txns: [],
-    rc: true, excluded: false, wheelClaimed: false, chestClaimed: false, firstDepositDone: false,
-    limits: { deposit: 500, loss: 1000, session: 60 }, pending: {},
-  }
-}
-
 export interface LobbyView { mode: 'all' | 'cat' | 'favs'; cat: string }
+
+// Result helper: every action resolves to a success payload or a user-facing error.
+type Ok<T> = { ok: true } & T
+type Err = { ok: false; error: string }
+export type Res<T = unknown> = Ok<T> | Err
+const errText = (e: unknown) => (e instanceof ApiError ? e.message : 'Something went wrong. Please try again.')
+
 interface Ctx {
+  ready: boolean
   page: Page; setPage: (p: Page) => void
   lobbyView: LobbyView; setLobbyView: (v: LobbyView) => void
   goLobby: (v?: LobbyView) => void
-  user: User | null
+  user: Account | null
   authModal: 'join' | 'login' | null; setAuthModal: (m: 'join' | 'login' | null) => void
   modal: Modal; openModal: (m: Modal) => void; closeModal: () => void
   toast: string; showToast: (m: string) => void
-  register: (email: string, pass: string, profile?: Profile) => string | null
-  login: (email: string, pass: string) => string | null
-  logout: () => void
-  update: (patch: Partial<User>) => void
-  mutate: (fn: (u: User) => Partial<User>) => void
-  setLimit: (kind: LimitKind, value: number) => 'lowered' | 'scheduled'
-  cancelPending: (kind: LimitKind) => void
+  register: (email: string, pass: string, profile: Profile) => Promise<string | null>
+  login: (email: string, pass: string) => Promise<string | null>
+  logout: () => Promise<void>
+  deposit: (amount: number, method: string) => Promise<Res<{ bonusAdded: number; firstBefore: boolean }>>
+  withdraw: (amount: number, method: string) => Promise<Res>
+  placeBet: (game: Game, bet: number) => Promise<Res<{ win: number }>>
+  rollback: (amount: number) => Promise<Res>
+  spinWheel: () => Promise<Res<{ index: number; prize: string }>>
+  openChest: () => Promise<Res<{ prize: string }>>
+  setLimit: (kind: LimitKind, value: number) => Promise<Res<{ outcome: 'lowered' | 'scheduled' }>>
+  cancelPending: (kind: LimitKind) => Promise<Res>
+  selfExclude: (period: string) => Promise<Res>
+  liftExclusion: () => Promise<Res>
+  setRealityChecks: (on: boolean) => Promise<Res>
   toggleFav: (name: string) => void
   pushRecent: (name: string) => void
   requireAuth: () => boolean
@@ -133,7 +62,8 @@ export const useApp = () => {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [root, setRoot] = useState<Root>(() => load())
+  const [account, setAccount] = useState<Account | null>(null)
+  const [ready, setReady] = useState(false)
   const [page, setPage] = useState<Page>('lobby')
   const [lobbyView, setLobbyView] = useState<LobbyView>({ mode: 'all', cat: '' })
   const goLobby = (v: LobbyView = { mode: 'all', cat: '' }) => { setLobbyView(v); setPage('lobby'); window.scrollTo({ top: 0, behavior: 'smooth' }) }
@@ -142,109 +72,103 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState('')
   const timer = useRef<number | undefined>(undefined)
 
-  useEffect(() => { try { localStorage.setItem(KEY, JSON.stringify(root)) } catch { /* ignore */ } }, [root])
+  // Restore the session on load (mock: localStorage, http: token + /session).
+  useEffect(() => {
+    let alive = true
+    api.getSession()
+      .then(s => { if (alive) setAccount(s?.account ?? null) })
+      .catch(() => { /* start logged out */ })
+      .finally(() => { if (alive) setReady(true) })
+    return () => { alive = false }
+  }, [])
   useEffect(() => () => window.clearTimeout(timer.current), [])
-
-  const user = root.session ? root.users[root.session] ?? null : null
 
   const showToast = (m: string) => {
     setToast(m); window.clearTimeout(timer.current)
     timer.current = window.setTimeout(() => setToast(''), 2400)
   }
 
-  const register = (email: string, pass: string, profile?: Profile): string | null => {
-    email = email.trim().toLowerCase()
-    if (!email || !/.+@.+\..+/.test(email)) return 'Enter a valid email'
-    if (pass.length < 4) return 'Password must be at least 4 characters'
-    if (profile) {
-      if (!/^[a-zA-Z0-9_]{3,16}$/.test(profile.username)) return 'Username: 3 to 16 letters, numbers or underscores'
-      const taken = Object.values(root.users).some(u => u.username.toLowerCase() === profile.username.toLowerCase())
-      if (taken) return 'That username is already taken'
-      if (!profile.dob) return 'Enter your date of birth'
-      const d = new Date(profile.dob), now = new Date()
-      let age = now.getFullYear() - d.getFullYear()
-      const m = now.getMonth() - d.getMonth()
-      if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--
-      if (isNaN(age)) return 'Enter a valid date of birth'
-      if (age < 18) return 'You must be 18 or older to register'
-      if (!profile.country) return 'Please pick your country'
-      if (profile.phone.replace(/\D/g, '').length < 6) return 'Enter a valid phone number'
-    }
-    if (root.users[email]) return 'An account with that email already exists'
-    const u = newUser(email, pass, profile)
-    setRoot(r => ({ users: { ...r.users, [email]: u }, session: email }))
-    return null
+  const register = async (email: string, pass: string, profile: Profile): Promise<string | null> => {
+    try { const s = await api.register({ email, pass, profile }); setAccount(s.account); return null }
+    catch (e) { return errText(e) }
   }
-  const login = (email: string, pass: string): string | null => {
-    email = email.trim().toLowerCase()
-    const u = root.users[email]
-    if (!u) return 'No account with that email'
-    if (u.pass !== enc(pass)) return 'Wrong password'
-    setRoot(r => ({ ...r, session: email }))
-    return null
+  const login = async (email: string, pass: string): Promise<string | null> => {
+    try { const s = await api.login(email, pass); setAccount(s.account); return null }
+    catch (e) { return errText(e) }
   }
-  const logout = () => setRoot(r => ({ ...r, session: null }))
+  const logout = async () => { try { await api.logout() } finally { setAccount(null) } }
 
-  const update = (patch: Partial<User>) => {
-    setRoot(r => {
-      if (!r.session) return r
-      const cur = r.users[r.session]; if (!cur) return r
-      return { ...r, users: { ...r.users, [r.session]: { ...cur, ...patch } } }
-    })
+  const deposit = async (amount: number, method: string): Promise<Res<{ bonusAdded: number; firstBefore: boolean }>> => {
+    const firstBefore = !!account?.firstDepositDone
+    try { const r = await api.deposit(amount, method); setAccount(r.account); return { ok: true, bonusAdded: r.bonusAdded, firstBefore } }
+    catch (e) { return { ok: false, error: errText(e) } }
   }
-  const mutate = (fn: (u: User) => Partial<User>) => {
-    setRoot(r => {
-      if (!r.session) return r
-      const cur = r.users[r.session]; if (!cur) return r
-      return { ...r, users: { ...r.users, [r.session]: { ...cur, ...fn(cur) } } }
-    })
+  const withdraw = async (amount: number, method: string): Promise<Res> => {
+    try { const a = await api.withdraw(amount, method); setAccount(a); return { ok: true } }
+    catch (e) { return { ok: false, error: errText(e) } }
   }
-  // RG limits: a decrease takes effect immediately; an increase is delayed 24h and shown as pending (cancellable).
-  const setLimit = (kind: LimitKind, value: number): 'lowered' | 'scheduled' => {
-    let outcome: 'lowered' | 'scheduled' = 'lowered'
-    mutate(u => {
-      if (value <= u.limits[kind]) {
-        const pending = { ...u.pending }; delete pending[kind]
-        outcome = 'lowered'
-        return { limits: { ...u.limits, [kind]: value }, pending }
-      }
-      outcome = 'scheduled'
-      return { pending: { ...u.pending, [kind]: { value, at: Date.now() + 24 * 3600 * 1000 } } }
-    })
-    return outcome
+  const placeBet = async (game: Game, bet: number): Promise<Res<{ win: number }>> => {
+    try { const r = await api.placeBet(game.name, game.name, bet); setAccount(r.account); return { ok: true, win: r.win } }
+    catch (e) { return { ok: false, error: errText(e) } }
   }
-  const cancelPending = (kind: LimitKind) => mutate(u => { const pending = { ...u.pending }; delete pending[kind]; return { pending } })
+  const rollback = async (amount: number): Promise<Res> => {
+    try { const a = await api.rollback(amount); setAccount(a); return { ok: true } }
+    catch (e) { return { ok: false, error: errText(e) } }
+  }
+  const spinWheel = async (): Promise<Res<{ index: number; prize: string }>> => {
+    try { const r = await api.spinWheel(); setAccount(r.account); return { ok: true, index: r.index, prize: r.prize } }
+    catch (e) { return { ok: false, error: errText(e) } }
+  }
+  const openChest = async (): Promise<Res<{ prize: string }>> => {
+    try { const r = await api.openChest(); setAccount(r.account); return { ok: true, prize: r.prize } }
+    catch (e) { return { ok: false, error: errText(e) } }
+  }
+  const setLimit = async (kind: LimitKind, value: number): Promise<Res<{ outcome: 'lowered' | 'scheduled' }>> => {
+    try { const r = await api.setLimit(kind, value); setAccount(r.account); return { ok: true, outcome: r.outcome } }
+    catch (e) { return { ok: false, error: errText(e) } }
+  }
+  const cancelPending = async (kind: LimitKind): Promise<Res> => {
+    try { const a = await api.cancelPendingLimit(kind); setAccount(a); return { ok: true } }
+    catch (e) { return { ok: false, error: errText(e) } }
+  }
+  const selfExclude = async (period: string): Promise<Res> => {
+    try { const a = await api.selfExclude(period); setAccount(a); return { ok: true } }
+    catch (e) { return { ok: false, error: errText(e) } }
+  }
+  const liftExclusion = async (): Promise<Res> => {
+    try { const a = await api.liftExclusion(); setAccount(a); return { ok: true } }
+    catch (e) { return { ok: false, error: errText(e) } }
+  }
+  const setRealityChecks = async (on: boolean): Promise<Res> => {
+    try { const a = await api.setRealityChecks(on); setAccount(a); return { ok: true } }
+    catch (e) { return { ok: false, error: errText(e) } }
+  }
 
-  // Apply any scheduled increase whose effective time has passed.
-  useEffect(() => {
-    if (!user) return
-    const kinds: LimitKind[] = ['deposit', 'loss', 'session']
-    const due = kinds.filter(k => { const p = user.pending[k]; return p && p.at <= Date.now() })
-    if (due.length) mutate(u => {
-      const limits = { ...u.limits }; const pending = { ...u.pending }
-      due.forEach(k => { const p = pending[k]; if (p) { limits[k] = p.value; delete pending[k] } })
-      return { limits, pending }
-    })
-  }, [user])
-
+  // Personalization — optimistic locally, synced through the seam.
   const toggleFav = (name: string) => {
-    if (!user) { setAuthModal('join'); return }
-    const has = user.favs.includes(name)
-    update({ favs: has ? user.favs.filter(n => n !== name) : [...user.favs, name] })
+    if (!account) { setAuthModal('join'); return }
+    const favs = account.favs.includes(name) ? account.favs.filter(n => n !== name) : [...account.favs, name]
+    setAccount({ ...account, favs })
+    api.setFavourites(favs).then(setAccount).catch(() => { /* keep optimistic */ })
   }
   const pushRecent = (name: string) => {
-    if (!user) return
-    update({ recent: [name, ...user.recent.filter(n => n !== name)].slice(0, 12) })
+    if (!account) return
+    const recent = [name, ...account.recent.filter(n => n !== name)].slice(0, 12)
+    setAccount({ ...account, recent })
+    api.setRecent(recent).then(setAccount).catch(() => { /* keep optimistic */ })
   }
-  const requireAuth = () => { if (!user) { setAuthModal('join'); return false } return true }
+  const requireAuth = () => { if (!account) { setAuthModal('join'); return false } return true }
 
   const openModal = (m: Modal) => setModal(m)
   const closeModal = () => setModal(null)
 
   const value = useMemo<Ctx>(() => ({
-    page, setPage, lobbyView, setLobbyView, goLobby, user, authModal, setAuthModal, modal, openModal, closeModal,
-    toast, showToast, register, login, logout, update, mutate, setLimit, cancelPending, toggleFav, pushRecent, requireAuth,
-  }), [page, lobbyView, root, authModal, modal, toast])
+    ready, page, setPage, lobbyView, setLobbyView, goLobby, user: account, authModal, setAuthModal,
+    modal, openModal, closeModal, toast, showToast, register, login, logout,
+    deposit, withdraw, placeBet, rollback, spinWheel, openChest,
+    setLimit, cancelPending, selfExclude, liftExclusion, setRealityChecks,
+    toggleFav, pushRecent, requireAuth,
+  }), [ready, page, lobbyView, account, authModal, modal, toast])
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>
 }
