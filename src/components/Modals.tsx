@@ -37,6 +37,7 @@ function AuthModal() {
   const [marketing, setMarketing] = useState(true)
   const [detecting, setDetecting] = useState(false)
   const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
 
   // Geo-locate the player and pre-pick their country + dial code when the Join form opens.
   useEffect(() => {
@@ -52,16 +53,20 @@ function AuthModal() {
   const maxDob = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().slice(0, 10) })()
 
   const submit = async () => {
-    if (mode === 'join') {
-      const fullPhone = phone.trim() ? `+${dial} ${phone.trim()}` : ''
-      const e = await app.register(email, pass, { username: username.trim(), dob, phone: fullPhone, country, dial, marketing })
-      if (e) { setErr(e); return }
-    } else {
-      const e = await app.login(email, pass)
-      if (e) { setErr(e); return }
-    }
-    app.setAuthModal(null)
-    app.showToast(mode === 'join' ? '🎉 Account created. Welcome to MrBen!' : '✓ Logged in')
+    if (busy) return
+    setErr(''); setBusy(true)
+    try {
+      if (mode === 'join') {
+        const fullPhone = phone.trim() ? `+${dial} ${phone.trim()}` : ''
+        const e = await app.register(email, pass, { username: username.trim(), dob, phone: fullPhone, country, dial, marketing })
+        if (e) { setErr(e); return }
+      } else {
+        const e = await app.login(email, pass)
+        if (e) { setErr(e); return }
+      }
+      app.setAuthModal(null)
+      app.showToast(mode === 'join' ? '🎉 Account created. Welcome to MrBen!' : '✓ Logged in')
+    } finally { setBusy(false) }
   }
 
   return (
@@ -101,7 +106,7 @@ function AuthModal() {
           </>}
 
           {err && <p className="err">{err}</p>}
-          <button className="btn orange" onClick={submit}>{mode === 'join' ? 'Create account' : 'Log in'}</button>
+          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={submit}>{mode === 'join' ? 'Create account' : 'Log in'}</button>
           <div className="switchline">
             {mode === 'join'
               ? <>Already have an account? <a onClick={() => { setErr(''); app.setAuthModal('login') }}>Login</a></>
@@ -130,20 +135,25 @@ function WalletModal() {
   const [mode, setMode] = useState<'deposit' | 'withdraw'>('deposit')
   const [amount, setAmount] = useState('50')
   const [method, setMethod] = useState('crypto')
+  const [busy, setBusy] = useState(false)
   if (!app.user) return null
   const u = app.user
   const confirm = async () => {
+    if (busy) return
     const v = parseFloat(amount || '0')
     if (v <= 0) { app.showToast('Enter an amount'); return }
-    if (mode === 'deposit') {
-      const r = await app.deposit(v, method)
-      if (!r.ok) { app.showToast(r.error); return }
-      app.showToast(r.bonusAdded > 0 ? `✓ Deposited ${fmt(v)} + ${fmt(r.bonusAdded)} bonus` : `✓ Deposited ${fmt(v)}`)
-    } else {
-      const r = await app.withdraw(v, method)
-      if (!r.ok) { app.showToast(r.error); return }
-      app.showToast(`✓ Withdrawal ${fmt(v)} sent`)
-    }
+    setBusy(true)
+    try {
+      if (mode === 'deposit') {
+        const r = await app.deposit(v, method)
+        if (!r.ok) { app.showToast(r.error); return }
+        app.showToast(r.bonusAdded > 0 ? `✓ Deposited ${fmt(v)} + ${fmt(r.bonusAdded)} bonus` : `✓ Deposited ${fmt(v)}`)
+      } else {
+        const r = await app.withdraw(v, method)
+        if (!r.ok) { app.showToast(r.error); return }
+        app.showToast(`✓ Withdrawal ${fmt(v)} sent`)
+      }
+    } finally { setBusy(false) }
   }
   const methods = METHODS[mode]
   if (!methods.some(m => m.k === method)) setMethod(methods[0].k)
@@ -164,7 +174,7 @@ function WalletModal() {
               </div>
             ))}
           </div>
-          <button className="btn orange" onClick={confirm}>{mode === 'deposit' ? 'Deposit ' : 'Withdraw '}{fmt(parseFloat(amount || '0'))}</button>
+          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={confirm}>{mode === 'deposit' ? 'Deposit ' : 'Withdraw '}{fmt(parseFloat(amount || '0'))}</button>
           {u.txns.length > 0 && (
             <div className="txns">
               <div className="txns-h">Recent transactions</div>
@@ -189,20 +199,29 @@ function GameModal({ game }: { game: Game }) {
   const [win, setWin] = useState('')
   const [burst, setBurst] = useState(0)
   const [lastBet, setLastBet] = useState(0)
+  const [busy, setBusy] = useState(false)
   if (!app.user) return null
   const u = app.user
   const spin = async () => {
-    const r = await app.placeBet(game, bet)
-    if (!r.ok) { app.showToast(r.error); return }
-    setReels([0, 1, 2].map(() => SYMS[Math.floor(Math.random() * SYMS.length)]))
-    setLastBet(bet)
-    if (r.win > 0) { setWin('WIN ' + fmt(r.win) + '!'); setBurst(b => b + 1); setTimeout(() => setWin(''), 900) } else setWin('')
+    if (busy) return
+    setBusy(true)
+    try {
+      const r = await app.placeBet(game, bet)
+      if (!r.ok) { app.showToast(r.error); return }
+      setReels([0, 1, 2].map(() => SYMS[Math.floor(Math.random() * SYMS.length)]))
+      setLastBet(bet)
+      if (r.win > 0) { setWin('WIN ' + fmt(r.win) + '!'); setBurst(b => b + 1); setTimeout(() => setWin(''), 900) } else setWin('')
+    } finally { setBusy(false) }
   }
   const rollback = async () => {
+    if (busy) return
     if (lastBet === 0) { app.showToast('Nothing to roll back'); return }
-    const r = await app.rollback(lastBet)
-    if (!r.ok) { app.showToast(r.error); return }
-    setLastBet(0); app.showToast('↩ Last round rolled back')
+    setBusy(true)
+    try {
+      const r = await app.rollback(lastBet)
+      if (!r.ok) { app.showToast(r.error); return }
+      setLastBet(0); app.showToast('↩ Last round rolled back')
+    } finally { setBusy(false) }
   }
   const adj = (d: number) => { const i = BET_STEPS.indexOf(bet); setBet(BET_STEPS[Math.max(0, Math.min(BET_STEPS.length - 1, i + d))]) }
   return (
@@ -219,8 +238,8 @@ function GameModal({ game }: { game: Game }) {
           <div style={{ fontSize: 12, color: '#7A8290', marginBottom: 11 }}>{game.studio} · real money + demo</div>
           <div className="betbar"><span className="muted" style={{ fontWeight: 800 }}>Bet per spin</span><span className="pill">{fmt(bet)}</span></div>
           <div className="row2" style={{ marginBottom: 10 }}><button className="btn sec" onClick={() => adj(-1)}>– Bet</button><button className="btn sec" onClick={() => adj(1)}>+ Bet</button></div>
-          <button className="btn orange" onClick={spin}>Spin 🎰</button>
-          <button className="btn ghost" style={{ marginTop: 8 }} onClick={rollback}>↩ Rollback last round</button>
+          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={spin}>Spin 🎰</button>
+          <button className="btn ghost" style={{ marginTop: 8 }} disabled={busy} onClick={rollback}>↩ Rollback last round</button>
         </div>
       </div>
     </div>
@@ -242,25 +261,33 @@ function AccountModal() {
   const [exclOpen, setExclOpen] = useState(false)
   const [exclPeriod, setExclPeriod] = useState('6 months')
   const [exclType, setExclType] = useState('')
+  const [busy, setBusy] = useState(false)
   if (!app.user) return null
   const u = app.user
 
   const showVal = (k: LimitKind) => (LIMIT_ROWS.find(r => r.k === k)!.money ? fmt(u.limits[k]) : `${u.limits[k]} min`)
   const startEdit = (k: LimitKind) => { setEditKind(k); setEditVal(String(u.limits[k])) }
   const saveEdit = async () => {
-    if (!editKind) return
+    if (busy || !editKind) return
     const v = parseFloat(editVal)
     if (!v || v <= 0) { app.showToast('Enter a valid amount'); return }
-    const r = await app.setLimit(editKind, v)
-    if (!r.ok) { app.showToast(r.error); return }
-    app.showToast(r.outcome === 'lowered' ? 'Limit lowered, effective now' : 'Increase requested, effective in 24 hours')
-    setEditKind(null)
+    setBusy(true)
+    try {
+      const r = await app.setLimit(editKind, v)
+      if (!r.ok) { app.showToast(r.error); return }
+      app.showToast(r.outcome === 'lowered' ? 'Limit lowered, effective now' : 'Increase requested, effective in 24 hours')
+      setEditKind(null)
+    } finally { setBusy(false) }
   }
   const confirmExcl = async () => {
-    const r = await app.selfExclude(exclPeriod)
-    if (!r.ok) { app.showToast(r.error); return }
-    app.showToast(`🚫 Self-exclusion active for ${exclPeriod}`)
-    setExclOpen(false); setExclType('')
+    if (busy) return
+    setBusy(true)
+    try {
+      const r = await app.selfExclude(exclPeriod)
+      if (!r.ok) { app.showToast(r.error); return }
+      app.showToast(`🚫 Self-exclusion active for ${exclPeriod}`)
+      setExclOpen(false); setExclType('')
+    } finally { setBusy(false) }
   }
 
   return (
@@ -298,7 +325,7 @@ function AccountModal() {
                 {editKind === r.k && (
                   <div className="lim-edit">
                     <input type="number" value={editVal} onChange={e => setEditVal(e.target.value)} />
-                    <button className="btn orange" onClick={saveEdit}>Save</button>
+                    <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={saveEdit}>Save</button>
                     <button className="btn sec" onClick={() => setEditKind(null)}>Cancel</button>
                   </div>
                 )}
@@ -329,7 +356,7 @@ function AccountModal() {
                   </select>
                   <p>This blocks all play and login for {exclPeriod}. It cannot be undone early. To confirm, type CONFIRM below.</p>
                   <input type="text" value={exclType} placeholder="Type CONFIRM" onChange={e => setExclType(e.target.value)} />
-                  <button className="btn" disabled={exclType.trim().toUpperCase() !== 'CONFIRM'} onClick={confirmExcl}>Confirm self-exclusion</button>
+                  <button className={'btn' + (busy ? ' busy' : '')} disabled={busy || exclType.trim().toUpperCase() !== 'CONFIRM'} onClick={confirmExcl}>Confirm self-exclusion</button>
                 </div>
               )}
             </div>

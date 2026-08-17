@@ -7,3 +7,4 @@ smoke.cjs
 .vite/
 mount.cjs
 migrate.cjs
+httpcheck.cjs
