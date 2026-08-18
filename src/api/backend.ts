@@ -94,9 +94,16 @@ export function createBackendApi(apiBase: string): MrBenApi {
   }
 
   // Translate the auth client's AuthError into our ApiError so messages surface.
+  // For validation failures, prefer the per-field messages over the generic one.
   async function viaAuth<T>(fn: () => Promise<T>): Promise<T> {
     try { return await fn() }
-    catch (e) { throw e instanceof AuthError ? new ApiError(e.code, e.message) : e }
+    catch (e) {
+      if (e instanceof AuthError) {
+        const msg = e.fields && e.fields.length ? e.fields.map(f => f.message).join('. ') : e.message
+        throw new ApiError(e.code, msg)
+      }
+      throw e
+    }
   }
 
   const toE164 = (phone: string) => '+' + phone.replace(/[^\d]/g, '')

@@ -57,7 +57,10 @@ function AuthModal() {
     setErr(''); setBusy(true)
     try {
       if (mode === 'join') {
-        const fullPhone = phone.trim() ? `+${dial} ${phone.trim()}` : ''
+        if (pass.length < 12) { setErr('Password must be at least 12 characters'); return }
+        // Drop the national leading zero so the number is valid E.164 (e.g. 07700 -> +447700).
+        const nat = phone.trim().replace(/\s+/g, '').replace(/^0+/, '')
+        const fullPhone = nat ? `+${dial} ${nat}` : ''
         const e = await app.register(email, pass, { username: username.trim(), dob, phone: fullPhone, country, dial, marketing })
         if (e) { setErr(e); return }
       } else {
@@ -77,12 +80,12 @@ function AuthModal() {
           {mode === 'join' && <p className="muted center" style={{ marginTop: 0 }}>🎩 100% up to €200 on your first deposit</p>}
           <div className="field"><label>Email</label><input type="email" value={email} placeholder="you@email.com" onChange={e => setEmail(e.target.value)} /></div>
           {mode === 'join' && (
-            <div className="field"><label>Username</label><input type="text" value={username} placeholder="choose a username" maxLength={16} onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))} /></div>
+            <div className="field"><label>Username <span className="hint">3 to 20 characters</span></label><input type="text" value={username} placeholder="choose a username" maxLength={20} onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))} /></div>
           )}
           {mode === 'join' && (
             <div className="field"><label>Date of birth <span className="hint">you must be 18+</span></label><input type="date" value={dob} max={maxDob} onChange={e => setDob(e.target.value)} /></div>
           )}
-          <div className="field"><label>Password</label><input type="password" value={pass} placeholder="••••••••" onChange={e => setPass(e.target.value)} onKeyDown={e => mode === 'login' && e.key === 'Enter' && submit()} /></div>
+          <div className="field"><label>Password {mode === 'join' && <span className="hint">at least 12 characters</span>}</label><input type="password" value={pass} placeholder="••••••••" onChange={e => setPass(e.target.value)} onKeyDown={e => mode === 'login' && e.key === 'Enter' && submit()} /></div>
 
           {mode === 'join' && <>
             <div className="field">
@@ -93,10 +96,10 @@ function AuthModal() {
               </select>
             </div>
             <div className="field">
-              <label>Phone number</label>
+              <label>Phone number <span className="hint">no leading 0</span></label>
               <div className="phone">
                 <span className="dial">{country ? `${flag(country)} +${dial}` : '+'}</span>
-                <input type="tel" value={phone} placeholder="phone number" onChange={e => setPhone(e.target.value.replace(/[^\d ]/g, ''))} />
+                <input type="tel" value={phone} placeholder="7700 900123" onChange={e => setPhone(e.target.value.replace(/[^\d ]/g, ''))} />
               </div>
             </div>
             <label className="check">
