@@ -7,6 +7,7 @@ import Providers from './Providers'
 import GameRow from './GameRow'
 import GameCard from './GameCard'
 import CategoryBar from './CategoryBar'
+import Hero from './Hero'
 
 export default function Lobby() {
   const app = useApp()
@@ -40,6 +41,7 @@ export default function Lobby() {
 
   return (
     <>
+      {!filtering && !app.user && <Hero />}
       {!filtering && recent.length > 0 && <div className="wrap"><GameRow title="Continue playing" games={recent} /></div>}
       {!filtering && <div className="wrap"><Promos /></div>}
       {!filtering && <div className="wrap"><GameRow title="Best Games — Ben’s Picks" games={bens} marquee dur={48} /></div>}
