@@ -10,3 +10,4 @@ migrate.cjs
 httpcheck.cjs
 authcheck.cjs
 backendcheck.cjs
+attrcheck.cjs

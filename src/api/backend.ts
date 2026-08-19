@@ -18,6 +18,7 @@ import {
 } from './types'
 import { createAuthClient, AuthError } from './auth/client'
 import type { AuthenticatedUser } from './auth/types'
+import { getAttribution } from '../attribution'
 import { WHEEL, CHEST } from '../data'
 
 // ---------------------------------------------------------------------------
@@ -130,6 +131,7 @@ export function createBackendApi(apiBase: string): MrBenApi {
         dob: input.profile.dob,
         phone: toE164(input.profile.phone),
         marketing: input.profile.marketing,
+        attribution: getAttribution(),
       }))
       play.ensure(who.email)
       return { token: auth.getAccessToken() ?? '', account: account() }
