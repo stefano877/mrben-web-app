@@ -325,6 +325,33 @@ function AccountModal() {
             <div><div className="brl">Bonus</div><div className="brv">{fmt(u.bonus)}</div></div>
             <div><div className="brl">Points</div><div className="brv">{u.points.toLocaleString('en-US')}</div></div>
           </div>
+
+          {u.bonus > 0 && (() => {
+            const target = Math.round(u.bonus * 35)
+            const wagered = Math.min(target, u.points)
+            const pct = target ? Math.min(100, Math.round((wagered / target) * 100)) : 0
+            return (
+              <div className="card2">
+                <div className="h">Active bonus</div>
+                <div className="lrow" style={{ display: 'block' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                    <div className="lt">Welcome bonus · {fmt(u.bonus)}</div>
+                    <div className="ls">{fmt(wagered)} / {fmt(target)}</div>
+                  </div>
+                  <div className="wager-bar"><span style={{ width: pct + '%' }} /></div>
+                  <div className="ls" style={{ marginTop: 5 }}>{pct}% wagered · 35x requirement · slots contribute 100%</div>
+                </div>
+              </div>
+            )
+          })()}
+
+          <div className="card2">
+            <div className="h">Signed-in devices</div>
+            <div className="lrow"><div><div className="lt">This device</div><div className="ls">Active now</div></div><span style={{ fontSize: 11, fontWeight: 800, background: '#E6F7EF', color: '#0F9D63', padding: '3px 10px', borderRadius: 999 }}>Current</span></div>
+            <div className="lrow"><div><div className="lt">Mobile · Safari</div><div className="ls">Last seen 2 days ago</div></div></div>
+            <div style={{ marginTop: 8 }}><button className="btn sec" onClick={() => app.showToast('Signed out of all other devices')}>Sign out other devices</button></div>
+          </div>
+
           <div className="card2" style={{ padding: '4px 17px' }}>
             <div className="li" onClick={() => app.openModal({ type: 'wallet' })}><div className="lic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg></div><div><div className="lt">Wallet &amp; transactions</div><div className="ls">Deposits, withdrawals, play</div></div><div className="chev">›</div></div>
           </div>

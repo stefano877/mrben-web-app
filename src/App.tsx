@@ -9,6 +9,8 @@ import VipPage from './components/VipPage'
 import Modals from './components/Modals'
 import Footer from './components/Footer'
 import BottomNav from './components/BottomNav'
+import CookieConsent from './components/CookieConsent'
+import RealityCheck from './components/RealityCheck'
 
 function Shell() {
   const app = useApp()
@@ -29,6 +31,8 @@ function Shell() {
         </svg>
       </button>
       <Modals />
+      <RealityCheck />
+      <CookieConsent />
       <BottomNav />
       <div className={'toast' + (app.toast ? ' show' : '')}>{app.toast}</div>
     </div>
