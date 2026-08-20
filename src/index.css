@@ -8,7 +8,8 @@
   --dark:#0C0E1A; --dark2:#141726; --dark3:#1E2236;
   --white:#fff; --line:rgba(255,255,255,.12);
   --card-sh:0 14px 34px rgba(60,20,0,.20);
-  --font:'Poppins',system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --font:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --font-head:'Sora','Inter',system-ui,sans-serif;
 }
 *{ -webkit-tap-highlight-color:transparent }
 html{ scroll-behavior:smooth }
@@ -140,9 +141,9 @@ section{ padding:18px 0 2px }
 /* Providers (light blue) */
 .dark-sec{ background:linear-gradient(180deg,#B6D9F5,#8FC2EE); max-width:1216px; margin:22px auto; padding:16px 0 20px; border-radius:22px; box-shadow:0 18px 40px rgba(40,10,0,.18) }
 .dark-sec .sec-head h2{ color:var(--navy); text-shadow:none } .dark-sec .seeall{ color:var(--navy) }
-.prov{ min-width:140px; width:140px; height:60px; background:#fff; border-radius:10px; display:grid; place-items:center; font-weight:800; font-size:13px; letter-spacing:1.5px; color:var(--navy); cursor:pointer; border:1px solid #B7D8ef; transition:.15s; text-align:center; box-shadow:0 4px 12px rgba(40,80,120,.1) }
-.prov:hover{ border-color:var(--orange); transform:translateY(-2px) }
-.prov small{ letter-spacing:2px; font-size:8px; opacity:.55; display:block; margin-top:2px }
+.prov{ min-width:158px; width:158px; height:66px; background:#fff; border-radius:14px; display:grid; place-items:center; font-family:var(--font-head); font-weight:800; font-size:15px; letter-spacing:.3px; color:var(--navy); cursor:pointer; border:1px solid rgba(255,255,255,.9); transition:.18s ease; text-align:center; text-transform:uppercase; box-shadow:0 6px 18px rgba(40,80,120,.14) }
+.prov:hover{ transform:translateY(-3px); box-shadow:0 12px 26px rgba(40,80,120,.22); color:var(--orange) }
+.prov small{ letter-spacing:1px; font-size:9px; font-weight:600; opacity:.5; display:block; margin-top:2px }
 
 /* Category bar */
 .catbar{ max-width:1216px; margin:14px auto 2px; padding:0 22px; display:flex; align-items:center; gap:12px }
@@ -457,3 +458,13 @@ footer .rg span{ border:1px solid var(--line); padding:5px 12px; border-radius:8
   .hero-art{ width:auto }
   .hero-img,.hero-video{ width:170px; max-width:58vw }
 }
+
+/* ---- Premium type system ---- */
+h1, h2, h3, h4, .hero-copy h1, .sec-head h2, .vip-hero h2, .offers-head h2 { font-family:var(--font-head); letter-spacing:-.02em }
+body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-rendering:optimizeLegibility }
+
+/* ---- Payment / trust logos (footer) ---- */
+.pay-row { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; margin:2px 0 18px }
+.pay-logo { height:34px; min-width:52px; padding:0 12px; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:9px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:rgba(238,241,255,.85) }
+.pay-logo .pw { font-family:var(--font-head); font-weight:800; font-size:13px; letter-spacing:.06em }
+.pay-logo svg { display:block }

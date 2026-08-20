@@ -62,7 +62,7 @@ export const sectionDefs: Section[] = [
   { id: 'new', title: 'New Games', games: fresh },
 ]
 
-export const providers = ['METAWIN', 'GLADIATOR', 'PRAGMATIC', 'EVOLUTION', 'B|GAMING', 'NOLIMIT|CITY', 'HACKSAW', 'BULLSHARK', 'NETENT', 'PLAY’N GO']
+export const providers = ['Pragmatic Play', 'Evolution', 'NetEnt', 'Play’n GO', 'Hacksaw Gaming', 'Nolimit City', 'BGaming', 'Push Gaming', 'Relax Gaming', 'Big Time Gaming']
 
 export interface Category { n: string; icon: string }
 export const categories: Category[] = [

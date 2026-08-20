@@ -37,6 +37,15 @@ export default function Footer() {
           <div className="foot-col"><h4>Company</h4>{col3.map(([t, fn]) => <a key={t} onClick={fn}>{t}</a>)}</div>
         </div>
 
+        <div className="pay-row">
+          <span className="pay-logo"><span className="pw" style={{ fontStyle: 'italic' }}>VISA</span></span>
+          <span className="pay-logo" aria-label="Mastercard"><svg width="30" height="20" viewBox="0 0 30 20"><circle cx="12" cy="10" r="8" fill="currentColor" opacity="0.5" /><circle cx="19" cy="10" r="8" fill="currentColor" opacity="0.85" /></svg></span>
+          <span className="pay-logo"><span className="pw">₿ BTC</span></span>
+          <span className="pay-logo"><svg width="13" height="20" viewBox="0 0 14 22" fill="currentColor" aria-label="Ethereum"><path d="M7 0 0 11l7 4 7-4zM0 12.4 7 22l7-9.6-7 4z" /></svg><span className="pw">ETH</span></span>
+          <span className="pay-logo"><span className="pw">₮ USDT</span></span>
+          <span className="pay-logo" aria-label="Local bank transfer"><svg width="22" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 10l9-6 9 6M4 10v9M20 10v9M4 20h16M8 13v4M12 13v4M16 13v4" /></svg></span>
+        </div>
+
         <div className="foot-badges">
           <span className="foot-badge"><span className="circ18">18+</span></span>
           <span className="foot-badge">ANJOUAN LICENSED</span>
