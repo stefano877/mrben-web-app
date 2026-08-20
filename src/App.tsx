@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { AppProvider, useApp } from './store'
+import { track } from './analytics'
 import Header from './components/Header'
 import SideDots from './components/SideDots'
 import Ticker from './components/Ticker'
@@ -14,6 +16,7 @@ import RealityCheck from './components/RealityCheck'
 
 function Shell() {
   const app = useApp()
+  useEffect(() => { track('landing') }, [])
   return (
     <div className="app">
       <SideDots />

@@ -3,6 +3,8 @@
 interface ImportMetaEnv {
   /** Base URL of the MrBen backend. Unset = local mock mode. */
   readonly VITE_API_BASE?: string
+  /** Analytics collection endpoint. Unset = funnel events are a no-op (dev logs only). */
+  readonly VITE_ANALYTICS_URL?: string
 }
 
 interface ImportMeta {
