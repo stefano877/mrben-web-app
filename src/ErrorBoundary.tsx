@@ -20,7 +20,7 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, St
     return (
       <div className="crash">
         <div className="crash-card">
-          <div className="crash-logo">🎩</div>
+          <div className="crash-logo">MrBen</div>
           <h2>Something went wrong</h2>
           <p>We hit a snag loading the page. Try reloading. If it keeps happening, reset your local data.</p>
           <div className="crash-btns">

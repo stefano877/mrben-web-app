@@ -27,8 +27,8 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="wrap">
         <div className="foot-top">
-          <button className="foot-pill" onClick={() => app.showToast('Language / region')}>🌐 English</button>
-          <button className="foot-pill" onClick={toTop}>↑ Back to top</button>
+          <button className="foot-pill" onClick={() => app.showToast('Language / region')}>English</button>
+          <button className="foot-pill" onClick={toTop}>Back to top</button>
         </div>
 
         <div className="foot-cols">
@@ -39,9 +39,9 @@ export default function Footer() {
 
         <div className="foot-badges">
           <span className="foot-badge"><span className="circ18">18+</span></span>
-          <span className="foot-badge">🛡️ ANJOUAN LICENSED</span>
-          <span className="foot-badge" onClick={() => open('rg-policy')} style={{ cursor: 'pointer' }}>💚 RESPONSIBLE GAMING</span>
-          <span className="foot-badge">🔒 SSL SECURE</span>
+          <span className="foot-badge">ANJOUAN LICENSED</span>
+          <span className="foot-badge" onClick={() => open('rg-policy')} style={{ cursor: 'pointer' }}>RESPONSIBLE GAMING</span>
+          <span className="foot-badge">SSL SECURE</span>
         </div>
 
         <div className="foot-legal">

@@ -68,7 +68,7 @@ function AuthModal() {
         if (e) { setErr(e); return }
       }
       app.setAuthModal(null)
-      app.showToast(mode === 'join' ? '🎉 Account created. Welcome to MrBen!' : '✓ Logged in')
+      app.showToast(mode === 'join' ? 'Account created. Welcome to MrBen!' : 'Logged in')
     } finally { setBusy(false) }
   }
 
@@ -77,7 +77,7 @@ function AuthModal() {
       <div className="modal">
         <div className="modal-head"><h3>{mode === 'join' ? 'Join MrBen' : 'Welcome back'}</h3><button className="x" onClick={() => app.setAuthModal(null)}>✕</button></div>
         <div className="modal-body">
-          {mode === 'join' && <p className="muted center" style={{ marginTop: 0 }}>🎩 100% up to €200 on your first deposit</p>}
+          {mode === 'join' && <p className="muted center" style={{ marginTop: 0 }}> 100% up to €200 on your first deposit</p>}
           <div className="field"><label>Email</label><input type="email" value={email} placeholder="you@email.com" onChange={e => setEmail(e.target.value)} /></div>
           {mode === 'join' && (
             <div className="field"><label>Username <span className="hint">3 to 20 characters</span></label><input type="text" value={username} placeholder="choose a username" maxLength={20} onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))} /></div>
@@ -125,13 +125,18 @@ function AuthModal() {
 const METHODS = {
   deposit: [
     { k: 'crypto', ic: '₿', c: '#F7931A', t: 'Crypto', s: 'BTC · ETH · USDT · instant' },
-    { k: 'local', ic: '🌎', c: '#0FA36B', t: 'Local rails (D24)', s: 'LATAM · Africa · Asia' },
-    { k: 'card', ic: '💳', c: '#2E6FDE', t: 'Card', s: 'Visa · Mastercard' },
+    { k: 'local', ic: '', c: '#0FA36B', t: 'Local rails (D24)', s: 'LATAM · Africa · Asia' },
+    { k: 'card', ic: '', c: '#2E6FDE', t: 'Card', s: 'Visa · Mastercard' },
   ],
   withdraw: [
     { k: 'crypto', ic: '₿', c: '#F7931A', t: 'Crypto payout', s: 'To your wallet address' },
-    { k: 'local', ic: '🏦', c: '#0FA36B', t: 'Local bank (D24)', s: '1–2 business days' },
+    { k: 'local', ic: '', c: '#0FA36B', t: 'Local bank (D24)', s: '1–2 business days' },
   ],
+}
+function MethodIcon({ k }: { k: string }) {
+  if (k === 'crypto') return <span style={{ color: '#fff', fontWeight: 900 }}>₿</span>
+  if (k === 'card') return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg>
+  return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" /></svg>
 }
 function WalletModal() {
   const app = useApp()
@@ -150,11 +155,11 @@ function WalletModal() {
       if (mode === 'deposit') {
         const r = await app.deposit(v, method)
         if (!r.ok) { app.showToast(r.error); return }
-        app.showToast(r.bonusAdded > 0 ? `✓ Deposited ${fmt(v)} + ${fmt(r.bonusAdded)} bonus` : `✓ Deposited ${fmt(v)}`)
+        app.showToast(r.bonusAdded > 0 ? `Deposited ${fmt(v)} + ${fmt(r.bonusAdded)} bonus` : `Deposited ${fmt(v)}`)
       } else {
         const r = await app.withdraw(v, method)
         if (!r.ok) { app.showToast(r.error); return }
-        app.showToast(`✓ Withdrawal ${fmt(v)} sent`)
+        app.showToast(`Withdrawal ${fmt(v)} sent`)
       }
     } finally { setBusy(false) }
   }
@@ -165,10 +170,10 @@ function WalletModal() {
       <div className="modal">
         <div className="modal-head"><h3>Wallet</h3><button className="x" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
-          <div className="balcard"><div className="l">Available balance</div><div className="a">{fmt(u.balance)}</div><div className="b">🎁 Bonus wallet: {fmt(u.bonus)}</div></div>
+          <div className="balcard"><div className="l">Available balance</div><div className="a">{fmt(u.balance)}</div><div className="b">Bonus wallet: {fmt(u.bonus)}</div></div>
           {u.walletReady === false ? (
             <div className="wallet-wait">
-              <div className="ww-ic">🔒</div>
+              <div className="ww-ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></div>
               <div className="ww-t">Wallet almost ready</div>
               <div className="ww-s">We are finishing setting up your payment wallet. Deposits and withdrawals open as soon as it is provisioned. You can still explore the games in demo.</div>
             </div>
@@ -179,7 +184,7 @@ function WalletModal() {
             <div>
               {methods.map(m => (
                 <div key={m.k} className={'method' + (method === m.k ? ' sel' : '')} onClick={() => setMethod(m.k)}>
-                  <div className="mic" style={{ background: m.c }}>{m.ic}</div>
+                  <div className="mic" style={{ background: m.c }}><MethodIcon k={m.k} /></div>
                   <div><div className="mt">{m.t}</div><div className="ms">{m.s}</div></div>
                 </div>
               ))}
@@ -201,12 +206,12 @@ function WalletModal() {
 }
 
 /* ---------------- Game ---------------- */
-const SYMS = ['🍒', '🔔', '⭐', '💎', '7️⃣', '🍋', '👑', '🍀']
+const SYMS = ['A', 'K', 'Q', 'J', '10', '7']
 const BET_STEPS = [0.5, 1, 2, 5, 10, 20]
 function GameModal({ game }: { game: Game }) {
   const app = useApp()
   const [bet, setBet] = useState(2)
-  const [reels, setReels] = useState<string[]>([game.ic, '🔔', '⭐'])
+  const [reels, setReels] = useState<string[]>(['A', 'K', 'Q'])
   const [win, setWin] = useState('')
   const [burst, setBurst] = useState(0)
   const [lastBet, setLastBet] = useState(0)
@@ -231,7 +236,7 @@ function GameModal({ game }: { game: Game }) {
     try {
       const r = await app.rollback(lastBet)
       if (!r.ok) { app.showToast(r.error); return }
-      setLastBet(0); app.showToast('↩ Last round rolled back')
+      setLastBet(0); app.showToast('Last round rolled back')
     } finally { setBusy(false) }
   }
   const adj = (d: number) => { const i = BET_STEPS.indexOf(bet); setBet(BET_STEPS[Math.max(0, Math.min(BET_STEPS.length - 1, i + d))]) }
@@ -249,8 +254,8 @@ function GameModal({ game }: { game: Game }) {
           <div style={{ fontSize: 12, color: '#7A8290', marginBottom: 11 }}>{game.studio} · real money + demo</div>
           <div className="betbar"><span className="muted" style={{ fontWeight: 800 }}>Bet per spin</span><span className="pill">{fmt(bet)}</span></div>
           <div className="row2" style={{ marginBottom: 10 }}><button className="btn sec" onClick={() => adj(-1)}>– Bet</button><button className="btn sec" onClick={() => adj(1)}>+ Bet</button></div>
-          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={spin}>Spin 🎰</button>
-          <button className="btn ghost" style={{ marginTop: 8 }} disabled={busy} onClick={rollback}>↩ Rollback last round</button>
+          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={spin}>Spin</button>
+          <button className="btn ghost" style={{ marginTop: 8 }} disabled={busy} onClick={rollback}>Rollback last round</button>
         </div>
       </div>
     </div>
@@ -296,7 +301,7 @@ function AccountModal() {
     try {
       const r = await app.selfExclude(exclPeriod)
       if (!r.ok) { app.showToast(r.error); return }
-      app.showToast(`🚫 Self-exclusion active for ${exclPeriod}`)
+      app.showToast(`Self-exclusion active for ${exclPeriod}`)
       setExclOpen(false); setExclType('')
     } finally { setBusy(false) }
   }
@@ -307,12 +312,12 @@ function AccountModal() {
         <div className="modal-head"><h3>Account</h3><button className="x" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <div className="prof">
-            <div className="avatar">🙂</div>
+            <div className="avatar">{(u.username || u.email)[0].toUpperCase()}</div>
             <div>
               <div style={{ fontWeight: 900, fontSize: 18 }}>{u.username || u.email.split('@')[0]}</div>
               <div className="muted" style={{ fontSize: 13 }}>{u.email}</div>
               {(u.country || u.phone) && <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>{u.country ? `${flag(u.country)} ${byCode(u.country)?.name ?? u.country}` : ''}{u.phone ? ` · ${u.phone}` : ''}</div>}
-              <div className="kyc" style={{ marginTop: 6 }}>✓ KYC verified{u.marketing ? ' · 📣 promos on' : ''}</div>
+              <div className="kyc" style={{ marginTop: 6 }}>KYC verified{u.marketing ? ' · promos on' : ''}</div>
             </div>
           </div>
           <div className="balrow">
@@ -321,9 +326,9 @@ function AccountModal() {
             <div><div className="brl">Points</div><div className="brv">{u.points.toLocaleString('en-US')}</div></div>
           </div>
           <div className="card2" style={{ padding: '4px 17px' }}>
-            <div className="li" onClick={() => app.openModal({ type: 'wallet' })}><div className="lic">💳</div><div><div className="lt">Wallet &amp; transactions</div><div className="ls">Deposits, withdrawals, play</div></div><div className="chev">›</div></div>
+            <div className="li" onClick={() => app.openModal({ type: 'wallet' })}><div className="lic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg></div><div><div className="lt">Wallet &amp; transactions</div><div className="ls">Deposits, withdrawals, play</div></div><div className="chev">›</div></div>
           </div>
-          <div className="rgbanner"><div style={{ fontSize: 22 }}>💚</div><div><div style={{ fontWeight: 900, fontSize: 15 }}>Responsible Gambling</div><div className="muted" style={{ fontSize: 12 }}>Decreases apply now. Increases wait 24 hours and can be cancelled.</div></div></div>
+          <div className="rgbanner"><div><div style={{ fontWeight: 900, fontSize: 15 }}>Responsible Gambling</div><div className="muted" style={{ fontSize: 12 }}>Decreases apply now. Increases wait 24 hours and can be cancelled.</div></div></div>
 
           <div className="card2">
             <div className="h">Limits</div>
@@ -392,16 +397,16 @@ function ChestModal() {
     setOpened(true)
     const r = await app.openChest()
     if (!r.ok) { setOpened(false); app.showToast(r.error); return }
-    setTimeout(() => { setReward(r.prize); app.showToast('🎉 Mystery Chest: ' + r.prize) }, 560)
+    setTimeout(() => { setReward(r.prize); app.showToast('Mystery Chest: ' + r.prize) }, 560)
   }
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
       <div className="modal">
-        <div className="modal-head"><h3>🎁 Mystery Chest</h3><button className="x" onClick={app.closeModal}>✕</button></div>
+        <div className="modal-head"><h3>Mystery Chest</h3><button className="x" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <div className={'chestwrap' + (opened || claimed ? ' chestopen' : ' shake')} dangerouslySetInnerHTML={{ __html: chestModalSVG() }} />
-          <div className="wresult">{reward ? <>🎉 You found <b>{reward}</b>!</> : claimed ? 'Come back tomorrow for another chest.' : 'Tap to reveal your reward!'}</div>
-          <button className="btn orange" disabled={claimed || opened} onClick={open}>{claimed || opened ? 'Claimed ✓' : 'Open chest'}</button>
+          <div className="wresult">{reward ? <>You found <b>{reward}</b>!</> : claimed ? 'Come back tomorrow for another chest.' : 'Tap to reveal your reward!'}</div>
+          <button className="btn orange" disabled={claimed || opened} onClick={open}>{claimed || opened ? 'Claimed' : 'Open chest'}</button>
         </div>
       </div>
     </div>
@@ -425,13 +430,13 @@ function WheelModal() {
     if (el) { el.style.transition = 'transform 4.2s cubic-bezier(.15,.7,.15,1)'; el.style.transform = `rotate(${target}deg)` }
     window.setTimeout(() => {
       setResult(r.prize === 'Try again' ? 'Better luck tomorrow!' : `You won ${r.prize}`)
-      app.showToast(r.prize === 'Try again' ? 'So close! Try again tomorrow.' : '🎉 Daily wheel: ' + r.prize)
+      app.showToast(r.prize === 'Try again' ? 'So close! Try again tomorrow.' : 'Daily wheel: ' + r.prize)
     }, 4300)
   }
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
       <div className="modal">
-        <div className="modal-head"><h3>🎁 Daily Bonus Wheel</h3><button className="x" onClick={app.closeModal}>✕</button></div>
+        <div className="modal-head"><h3>Daily Bonus Wheel</h3><button className="x" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <p className="muted center" style={{ marginTop: 0 }}>Spin once a day for a free bonus. Good luck!</p>
           <div className="wheelwrap"><div className="pointer" /><div dangerouslySetInnerHTML={{ __html: wheelSVG() }} /></div>
@@ -466,13 +471,13 @@ const INFO_DOCS: Record<string, { title: string; html: string }> = {
   support: {
     title: 'Support',
     html: `<p>Need a hand? Our team is here around the clock.</p>
-    <p>📧 <b>support@mrben.com</b><br>💬 Live chat (coming soon)</p>
+    <p><b>support@mrben.com</b><br>Live chat (coming soon)</p>
     <p>We can help with your account, deposits and withdrawals, bonuses, games and responsible gambling. For account security we may ask you to verify your identity.</p>`,
   },
   contact: {
     title: 'Contact Us',
     html: `<p>Get in touch any time.</p>
-    <p>📧 <b>support@mrben.com</b><br>🏢 Mr iGaming Group (registered office to be confirmed)</p>
+    <p><b>support@mrben.com</b><br>Mr iGaming Group (registered office to be confirmed)</p>
     <p>For complaints, please see our Complaints &amp; procedures page first.</p>`,
   },
   'betting-rules': {

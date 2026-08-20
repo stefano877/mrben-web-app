@@ -33,7 +33,7 @@ export default function GameCard({ game }: { game: Game }) {
         </button>
         {game.jackBase ? <JackpotRibbon base={game.jackBase} /> : null}
         {game.pick
-          ? <span className="badge" style={{ background: 'linear-gradient(180deg,#FF7A1A,#F35100)' }}>★ BEN</span>
+          ? <span className="badge" style={{ background: 'linear-gradient(180deg,#FF7A1A,#F35100)' }}>BEN</span>
           : game.badge ? <span className="badge" style={{ background: game.badgeC }}>{game.badge}</span> : null}
         <div className="play"><span>▶ Play</span></div>
       </div>

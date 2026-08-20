@@ -33,8 +33,9 @@ export const countries: Country[] = [
 ].sort((a, b) => a.name.localeCompare(b.name))
 
 export const byCode = (code: string) => countries.find(c => c.code === code)
-export const flag = (code: string) =>
-  code.toUpperCase().replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt(0)))
+// Country flags are emoji, so they are intentionally not rendered. Kept as a
+// no-op so call sites (country select, account) don't need to change.
+export const flag = (_code: string) => ''
 
 const DEFAULT = 'GB'
 

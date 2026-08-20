@@ -56,7 +56,7 @@ export default function Lobby() {
             {results.length ? (
               <div className="results-grid">{results.map(g => <GameCard key={g.name} game={g} />)}</div>
             ) : (
-              <p className="empty">{lv.mode === 'favs' ? 'No favourites yet. Tap the ♥ on any game to save it here.' : 'No games match. Try another search.'}</p>
+              <p className="empty">{lv.mode === 'favs' ? 'No favourites yet. Tap the heart on any game to save it here.' : 'No games match. Try another search.'}</p>
             )}
           </section>
         ) : (

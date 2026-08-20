@@ -13,7 +13,7 @@ export default function Hero() {
     <section className="hero" aria-label="Welcome to MrBen">
       <div className="hero-inner">
         <div className="hero-copy">
-          <span className="hero-badge">🎩 Welcome to MrBen</span>
+          <span className="hero-badge">Welcome to MrBen</span>
           <h1>Play like a <span>gentleman</span>.<br />Win like a legend.</h1>
           <p>100% up to €200 plus 50 free spins on your first deposit. Crypto-fast payouts, thousands of games, one dapper host.</p>
           <div className="hero-cta">

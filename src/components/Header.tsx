@@ -49,7 +49,7 @@ export default function Header() {
               <span className="login" onClick={() => app.setAuthModal('login')}>Login</span>
               <button className="btn-join" onClick={() => app.setAuthModal('join')}>Join</button>
             </>}
-          {app.user && <div className="acct-btn" onClick={() => app.openModal({ type: 'account' })} title="Account">🙂</div>}
+          {app.user && <div className="acct-btn" onClick={() => app.openModal({ type: 'account' })} title="Account">{(app.user.username || app.user.email)[0].toUpperCase()}</div>}
           <div className="globe" onClick={() => app.showToast('Language / region')}>
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#16244A" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" /></svg>
           </div>

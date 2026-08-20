@@ -25,20 +25,20 @@ export default function VipPage() {
         <h2>Ben’s VIP Club</h2>
         <div className="vsub">Every spin and every hand earns points toward better rewards.</div>
         <div className="vip-tier">
-          <div className="vip-badge" style={{ background: cur.c }}>{cur.ic}</div>
+          <div className="vip-badge" style={{ background: cur.c }}>{cur.n[0]}</div>
           <div><div className="vt">{cur.n} tier</div><div className="vp">{points.toLocaleString('en-US')} loyalty points</div></div>
         </div>
         <div className="vbar"><span ref={barRef} /></div>
-        <div className="vnext">{next ? <>{(next.pts - points).toLocaleString('en-US')} points to <b>{next.n}</b></> : 'You’ve reached the top tier. Legend! 🎩'}</div>
+        <div className="vnext">{next ? <>{(next.pts - points).toLocaleString('en-US')} points to <b>{next.n}</b></> : 'You’ve reached the top tier. Legend!'}</div>
       </div>
 
       <div className="vladder">
         {vipTiers.map((t, k) => (
           <div key={t.n} className={'vstep' + (k < idx ? ' done' : '') + (k === idx ? ' cur' : '')}>
-            <div className="vs-ic">{t.ic}</div>
+            <div className="vs-ic">{t.n[0]}</div>
             <div className="vs-n">{t.n}</div>
             <div className="vs-p">{t.pts.toLocaleString('en-US')} pts</div>
-            {k < idx ? <span className="vs-chk">✓</span> : null}
+            {k < idx ? <span className="vs-chk"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L20 6" /></svg></span> : null}
           </div>
         ))}
       </div>
@@ -46,7 +46,7 @@ export default function VipPage() {
       <div className="offers-head" style={{ marginBottom: 10 }}><h2 style={{ fontSize: 20 }}>Your perks</h2></div>
       <div className="perks">
         {vipPerks.map((p, i) => (
-          <div className="perk" key={i}><div className="pk-ic">{p[0]}</div><div><div className="pk-t">{p[1]}</div><div className="pk-s">{p[2]}</div></div></div>
+          <div className="perk" key={i}><div className="pk-ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L20 6" /></svg></div><div><div className="pk-t">{p[1]}</div><div className="pk-s">{p[2]}</div></div></div>
         ))}
       </div>
 

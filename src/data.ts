@@ -33,7 +33,7 @@ const grads: [string, string][] = [
   ['#11998E', '#38EF7D'], ['#FC466B', '#3F5EFB'], ['#F00000', '#DC281E'], ['#654EA3', '#EAAFC8'],
   ['#0F2027', '#2C5364'], ['#8E2DE2', '#4A00E0'], ['#FFB75E', '#ED8F03'], ['#1D976C', '#93F9B9'],
 ]
-const icons = ['🍒', '🐺', '🍬', '⚡', '📖', '💎', '🐟', '👑', '🔥', '🐉', '⭐', '🎯', '🍀', '🦁', '🌈', '🍭']
+const icons = ['A', 'K', 'Q', 'J', '10', '7', '9', '8', 'A', 'K', 'Q', 'J', '10', '7', '9', '8']
 
 function mk(names: string[]): Game[] {
   return names.map((n, i) => ({
@@ -93,7 +93,7 @@ export const OHERO: Record<string, [string, string]> = {
 }
 export const offers: Offer[] = [
   { tag: 'Sports', key: 'sports', title: 'Bet €10, Get €50 Free Bet', short: 'Bet €10 on any Mr Ben Sport market and get a €50 Free Bet once your bet settles, win or lose.', details: '<p><b>How it works</b></p><p>Place a qualifying €10 bet at Mr Ben Sport. Once it settles, win or lose, a €50 Free Bet lands in your account. Use it on any market in a single transaction.</p>', terms: '18+. New players only. Opt-in required. Min dep €10.' },
-  { tag: 'Casino', key: 'trophy', title: 'MrBen Welcome Offer 2026', short: 'Your first three deposits get supercharged, up to €1,300 in bonuses plus 150 bonus spins.', details: '<p>🔥 <b>1st deposit:</b> 300% match up to €300 + 50 spins</p><p>💫 <b>2nd deposit:</b> 40% match up to €500 + 50 spins</p><p>🚀 <b>3rd deposit:</b> 60% match up to €500 + 50 spins</p><p>🏆 <b>Total:</b> €1,300 bonus money + 150 bonus spins</p>', terms: '18+. New players only. Terms apply.' },
+  { tag: 'Casino', key: 'trophy', title: 'MrBen Welcome Offer 2026', short: 'Your first three deposits get supercharged, up to €1,300 in bonuses plus 150 bonus spins.', details: '<p> <b>1st deposit:</b> 300% match up to €300 + 50 spins</p><p> <b>2nd deposit:</b> 40% match up to €500 + 50 spins</p><p> <b>3rd deposit:</b> 60% match up to €500 + 50 spins</p><p> <b>Total:</b> €1,300 bonus money + 150 bonus spins</p>', terms: '18+. New players only. Terms apply.' },
   { tag: 'VIP', key: 'coin', title: 'Ben’s Loyalty Program', short: 'Every spin and every hand earns loyalty points that unlock seriously rewarding perks.', details: '<p>Join the Mr Ben Loyalty Club. Rack up points on slots and table games, climb the tiers and unlock cashback, faster withdrawals and a personal host.</p>', terms: '18+. Funded players only. Terms apply.' },
   { tag: 'Casino', key: 'casino', title: 'Monday Spin Boost', short: 'Every Monday, deposit up to €100 and receive triple the spins.', details: '<p><b>How it works</b></p><p>Deposit €100 on a Monday and get 300 bonus spins, triple the fun to start your week.</p>', terms: '18+. Existing players only.' },
   { tag: 'Casino', key: 'chest', title: 'Tuesday Spin Boost', short: 'Get up to 300 free spins on Book of Dead every Tuesday.', details: '<p><b>How it works</b></p><p>Deposit €100 for 100 spins, or €300 for 300 spins, all on Book of Dead.</p>', terms: '18+. Existing players only.' },
@@ -105,32 +105,32 @@ export const offerTabs = ['All', 'Casino', 'Sports', 'VIP']
 /* ---- Sportsbook ---- */
 export interface Match { league: string; time?: string; live?: boolean; a: string; b: string; o: [string, string, string] }
 export const sportsData: Match[] = [
-  { league: '⚽ Premier League', time: 'Today 20:45', a: 'Arsenal', b: 'Chelsea', o: ['2.10', '3.40', '3.25'] },
-  { league: '⚽ La Liga', time: 'Today 21:00', a: 'Real Madrid', b: 'Sevilla', o: ['1.55', '4.20', '5.50'] },
-  { league: '⚽ Champions League', time: 'Wed 21:00', a: 'Man City', b: 'Bayern', o: ['2.05', '3.60', '3.30'] },
-  { league: '🎾 ATP Finals', live: true, a: 'Alcaraz', b: 'Sinner', o: ['1.72', '—', '2.05'] },
-  { league: '🏀 NBA', time: 'Tonight 01:30', a: 'Lakers', b: 'Celtics', o: ['1.90', '—', '1.95'] },
-  { league: '⚽ Serie A', time: 'Tomorrow 18:00', a: 'Juventus', b: 'Napoli', o: ['2.45', '3.10', '2.90'] },
-  { league: '⚽ Bundesliga', time: 'Sat 15:30', a: 'Dortmund', b: 'Leipzig', o: ['2.20', '3.50', '2.95'] },
-  { league: '🏈 NFL', time: 'Sun 22:00', a: 'Chiefs', b: 'Bills', o: ['1.80', '—', '2.05'] },
+  { league: 'Premier League', time: 'Today 20:45', a: 'Arsenal', b: 'Chelsea', o: ['2.10', '3.40', '3.25'] },
+  { league: 'La Liga', time: 'Today 21:00', a: 'Real Madrid', b: 'Sevilla', o: ['1.55', '4.20', '5.50'] },
+  { league: 'Champions League', time: 'Wed 21:00', a: 'Man City', b: 'Bayern', o: ['2.05', '3.60', '3.30'] },
+  { league: 'ATP Finals', live: true, a: 'Alcaraz', b: 'Sinner', o: ['1.72', '—', '2.05'] },
+  { league: 'NBA', time: 'Tonight 01:30', a: 'Lakers', b: 'Celtics', o: ['1.90', '—', '1.95'] },
+  { league: 'Serie A', time: 'Tomorrow 18:00', a: 'Juventus', b: 'Napoli', o: ['2.45', '3.10', '2.90'] },
+  { league: 'Bundesliga', time: 'Sat 15:30', a: 'Dortmund', b: 'Leipzig', o: ['2.20', '3.50', '2.95'] },
+  { league: 'NFL', time: 'Sun 22:00', a: 'Chiefs', b: 'Bills', o: ['1.80', '—', '2.05'] },
 ]
 
 /* ---- VIP ---- */
 export interface Tier { n: string; pts: number; ic: string; c: string }
 export const vipTiers: Tier[] = [
-  { n: 'Bronze', pts: 0, ic: '🥉', c: '#B87333' },
-  { n: 'Silver', pts: 1000, ic: '🥈', c: '#9AA6B2' },
-  { n: 'Gold', pts: 2500, ic: '🥇', c: '#E9A82E' },
-  { n: 'Platinum', pts: 6000, ic: '💠', c: '#5E8FB0' },
-  { n: 'Ben’s Circle', pts: 12000, ic: '🎩', c: '#7A2BD0' },
+  { n: 'Bronze', pts: 0, ic: '', c: '#B87333' },
+  { n: 'Silver', pts: 1000, ic: '', c: '#9AA6B2' },
+  { n: 'Gold', pts: 2500, ic: '', c: '#E9A82E' },
+  { n: 'Platinum', pts: 6000, ic: '', c: '#5E8FB0' },
+  { n: 'Ben’s Circle', pts: 12000, ic: '', c: '#7A2BD0' },
 ]
 export const vipPerks: [string, string, string][] = [
-  ['💸', 'Weekly cashback', 'Up to 15% back on net losses'],
-  ['⚡', 'Faster withdrawals', 'Priority payout queue'],
-  ['🎁', 'Birthday bonus', 'A gift on your special day'],
-  ['👤', 'Personal host', 'Dedicated VIP manager'],
-  ['🎟️', 'Exclusive tournaments', 'VIP-only prize pools'],
-  ['📈', 'Higher limits', 'Raised deposit and bet limits'],
+  ['', 'Weekly cashback', 'Up to 15% back on net losses'],
+  ['', 'Faster withdrawals', 'Priority payout queue'],
+  ['', 'Birthday bonus', 'A gift on your special day'],
+  ['', 'Personal host', 'Dedicated VIP manager'],
+  ['', 'Exclusive tournaments', 'VIP-only prize pools'],
+  ['', 'Higher limits', 'Raised deposit and bet limits'],
 ]
 export const CHEST = ['€15 bonus', '25 free spins', '€40 bonus', '100 free spins', '€10 bonus']
 
