@@ -97,9 +97,17 @@ section{ padding:18px 0 2px }
 .fav.on svg{ fill:#FF4D6D; stroke:#FF4D6D } .fav:hover{ background:rgba(8,10,22,.66); transform:scale(1.08) }
 .tile .badge{ position:absolute; top:8px; left:8px; color:#fff; font-size:9px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:.4px; z-index:4; box-shadow:0 3px 8px rgba(0,0,0,.4) }
 .tile .jrib{ position:absolute; top:8px; left:8px; z-index:4; background:linear-gradient(180deg,#FFE9A8,#F4C24B); color:#5a3a06; font-weight:900; font-size:9.5px; padding:3px 7px; border-radius:6px; box-shadow:0 3px 8px rgba(0,0,0,.4); font-variant-numeric:tabular-nums }
-.tile .play{ position:absolute; inset:0; background:rgba(6,8,20,.4); display:grid; place-items:center; opacity:0; transition:.18s; z-index:2 }
+.tile .cover, .tile .cover-host{ transition:transform .32s cubic-bezier(.2,.8,.2,1) }
+.tile:hover .cover, .tile:hover .cover-host{ transform:scale(1.07) }
+.tile .play{ position:absolute; inset:0; background:linear-gradient(to top,rgba(6,8,20,.5),rgba(6,8,20,.05) 45%,transparent 70%); display:grid; place-items:center; opacity:0; transition:.2s; z-index:2 }
 .tile:hover .play{ opacity:1 }
-.tile .play span{ background:linear-gradient(180deg,var(--orange-hi),var(--orange)); color:#fff; font-weight:900; padding:9px 18px; border-radius:999px; font-size:12.5px; box-shadow:0 8px 18px rgba(0,0,0,.45) }
+.play-btn{ width:46px; height:46px; border-radius:50%; background:linear-gradient(180deg,var(--orange-hi),var(--orange)); color:#fff; display:grid; place-items:center; transform:scale(.6); transition:transform .22s cubic-bezier(.2,.8,.2,1); box-shadow:0 10px 22px rgba(0,0,0,.5) }
+.play-btn svg{ width:20px; height:20px; margin-left:2px }
+.tile:hover .play-btn{ transform:scale(1) }
+.tmeta{ position:absolute; left:0; right:0; bottom:0; z-index:3; padding:20px 9px 8px; background:linear-gradient(to top,rgba(6,8,20,.94),transparent); opacity:0; transform:translateY(6px); transition:.2s; pointer-events:none }
+.tile:hover .tmeta{ opacity:1; transform:none }
+.tmeta-n{ font-family:var(--font-head); font-weight:800; font-size:12px; color:#fff; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.tmeta-s{ font-size:10px; color:rgba(255,255,255,.62); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 .results-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(132px,1fr)); gap:11px }
 .empty{ color:#fff; font-weight:700 }
 
@@ -468,3 +476,15 @@ body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; te
 .pay-logo { height:34px; min-width:52px; padding:0 12px; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:9px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:rgba(238,241,255,.85) }
 .pay-logo .pw { font-family:var(--font-head); font-weight:800; font-size:13px; letter-spacing:.06em }
 .pay-logo svg { display:block }
+
+/* ---- Refined motion ---- */
+.btn.orange{ transition:transform .16s cubic-bezier(.2,.8,.2,1), filter .16s, box-shadow .16s }
+.btn.orange:hover:not(.busy):not(:disabled){ transform:translateY(-1px); filter:brightness(1.04) }
+.overlay.open .modal{ animation:modalIn .22s cubic-bezier(.2,.8,.2,1) }
+@keyframes modalIn{ from{ opacity:0; transform:translateY(10px) scale(.985) } to{ opacity:1; transform:none } }
+
+/* ---- Skeleton shimmer (async content) ---- */
+@keyframes shimmer{ 100%{ background-position:-200% 0 } }
+.skel{ background:linear-gradient(90deg,#eef1f7 25%,#e2e7f0 37%,#eef1f7 63%); background-size:200% 100%; animation:shimmer 1.3s linear infinite; border-radius:8px }
+.skel-tile{ width:100%; aspect-ratio:132/180; border-radius:12px }
+@media(prefers-reduced-motion:reduce){ .skel{ animation:none } .overlay.open .modal{ animation:none } .btn.orange:hover{ transform:none } .tile:hover .cover,.tile:hover .cover-host,.tile:hover .play-btn{ transform:none } }

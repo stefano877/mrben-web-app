@@ -35,7 +35,8 @@ export default function GameCard({ game }: { game: Game }) {
         {game.pick
           ? <span className="badge" style={{ background: 'linear-gradient(180deg,#FF7A1A,#F35100)' }}>BEN</span>
           : game.badge ? <span className="badge" style={{ background: game.badgeC }}>{game.badge}</span> : null}
-        <div className="play"><span>▶ Play</span></div>
+        <div className="play"><span className="play-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></span></div>
+        <div className="tmeta"><div className="tmeta-n">{game.name}</div><div className="tmeta-s">{game.studio}</div></div>
       </div>
     </div>
   )
