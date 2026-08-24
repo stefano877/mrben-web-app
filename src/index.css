@@ -505,3 +505,11 @@ body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; te
 /* ---- Bonus wagering bar ---- */
 .wager-bar{ height:8px; border-radius:99px; background:#EDF0F7; overflow:hidden; margin-top:8px }
 .wager-bar span{ display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,var(--orange-hi),var(--orange)); transition:width .6s cubic-bezier(.2,.8,.2,1) }
+
+/* ---- Video welcome banners (hero) ---- */
+.vbanners{ display:flex; gap:14px; margin-top:4px }
+.vbanner{ flex:1; min-width:0; border:none; padding:0; border-radius:16px; overflow:hidden; position:relative; cursor:pointer; box-shadow:var(--card-sh); aspect-ratio:854/480; background:#1a0e00; transition:transform .18s, box-shadow .18s }
+.vbanner:hover{ transform:translateY(-3px); box-shadow:0 22px 44px rgba(40,10,0,.42) }
+.vbanner video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block }
+.vbanner::after{ content:""; position:absolute; inset:0; border-radius:16px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); pointer-events:none }
+@media(max-width:760px){ .vbanners{ flex-direction:column } }

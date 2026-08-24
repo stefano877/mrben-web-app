@@ -1,38 +1,26 @@
-import { useRef } from 'react'
-import { promos } from '../data'
-import { promoArt } from '../art'
 import { useApp } from '../store'
+import { track } from '../analytics'
+
+// The two welcome-offer hero banners. Full video creatives (casino + sports)
+// with the offer and CTA baked in, so the whole banner is the click target.
+const BANNERS = [
+  { key: 'casino', src: '/casino-offer.mp4', poster: '/casino-poster.jpg', label: 'Casino welcome offer, 300% up to 1500 bonus' },
+  { key: 'sports', src: '/sports-offer.mp4', poster: '/sports-poster.jpg', label: 'Sportsbook welcome offer, bet 10 get 50 free bet' },
+]
 
 export default function Promos() {
   const app = useApp()
-  const rowRef = useRef<HTMLDivElement>(null)
-  const nudge = (d: number) => {
-    const el = rowRef.current
-    if (el) el.scrollBy({ left: d * el.clientWidth * 0.85, behavior: 'smooth' })
+  const go = (key: string) => {
+    track('banner_click', { banner: key })
+    if (app.user) app.setPage('offers'); else app.setAuthModal('join')
   }
-  const go = () => app.setPage('offers')
   return (
-    <section id="promos">
-      <div className="sec-head">
-        <h2>Promotions</h2>
-        <div className="arrows">
-          <button onClick={() => nudge(-1)}>‹</button>
-          <button className="dark" onClick={() => nudge(1)}>›</button>
-        </div>
-      </div>
-      <div className="scrollx" ref={rowRef}>
-        {promos.map((p, i) => (
-          <div key={i} className="promo" style={{ backgroundImage: `linear-gradient(120deg,${p.g[0]},${p.g[1]})` }} onClick={go}>
-            <span className="sheen" />
-            <span className="tag">{p.tag}</span>
-            <div className="p-copy">
-              <h3>{p.h}</h3>
-              <div className="big">{p.big}</div>
-              <p>{p.p}</p>
-              <span className="cta" onClick={(e) => { e.stopPropagation(); go() }}>{p.cta} →</span>
-            </div>
-            <div className="p-art" dangerouslySetInnerHTML={{ __html: promoArt(p.key) }} />
-          </div>
+    <section id="promos" aria-label="Welcome offers">
+      <div className="vbanners">
+        {BANNERS.map(b => (
+          <button key={b.key} type="button" className="vbanner" onClick={() => go(b.key)} aria-label={b.label}>
+            <video src={b.src} poster={b.poster} autoPlay muted loop playsInline preload="metadata" />
+          </button>
         ))}
       </div>
     </section>
