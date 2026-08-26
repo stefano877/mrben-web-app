@@ -555,3 +555,7 @@ body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; te
 .legal-content .doc .wtable th { background: #f6f7f9; color: #101A45; font-weight: 800; white-space: nowrap; }
 .legal-content .doc .wtable td:nth-child(2), .legal-content .doc .wtable td:nth-child(3) { white-space: nowrap; font-weight: 700; color: #101A45; text-align: center; width: 90px; }
 .legal-content .doc .muted-sm { color: #8a93a3; font-size: 12px; }
+
+/* Policy links inside the registration acceptance checkboxes (MRB-95) */
+.modal .check a { color: #F35100; font-weight: 600; text-decoration: underline; }
+.modal .check a:hover { filter: brightness(1.05); }

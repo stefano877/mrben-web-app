@@ -5,7 +5,7 @@ import type { Game } from '../data'
 import { fmt } from '../data'
 import { chestModalSVG, wheelSVG } from '../art'
 import { countries, byCode, flag, detectCountry } from '../countries'
-import { LEGAL } from '../data/legal'
+import { LEGAL, POLICY_VERSION } from '../data/legal'
 import { track } from '../analytics'
 
 const CONFETTI_COLORS = ['#F35100', '#FFCB57', '#2A6BE0', '#12B39A', '#E85D9A', '#7A2BD0', '#5EE6A8']
@@ -37,6 +37,8 @@ function AuthModal() {
   const [country, setCountry] = useState('')
   const [phone, setPhone] = useState('')
   const [marketing, setMarketing] = useState(true)
+  const [over18, setOver18] = useState(false)
+  const [acceptTerms, setAcceptTerms] = useState(false)
   const [detecting, setDetecting] = useState(false)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
@@ -65,11 +67,17 @@ function AuthModal() {
     try {
       if (mode === 'join') {
         if (pass.length < 12) { setErr('Password must be at least 12 characters'); track('registration_failed', { reason: 'password_too_short' }); return }
+        // Age and policy acceptance are mandatory and must be explicit (MRB-95).
+        if (!over18) { setErr('Please confirm you are at least 18 years old.'); track('registration_failed', { reason: 'age_not_confirmed' }); return }
+        if (!acceptTerms) { setErr('Please accept the Terms and Privacy Policy to continue.'); track('registration_failed', { reason: 'terms_not_accepted' }); return }
         // Drop the national leading zero so the number is valid E.164 (e.g. 07700 -> +447700).
         const nat = phone.trim().replace(/\s+/g, '').replace(/^0+/, '')
         const fullPhone = nat ? `+${dial} ${nat}` : ''
         track('registration_submitted')
-        const e = await app.register(email, pass, { username: username.trim(), dob, phone: fullPhone, country, dial, marketing })
+        const e = await app.register(email, pass, {
+          username: username.trim(), dob, phone: fullPhone, country, dial, marketing,
+          ageConfirmed: true, termsAcceptedAt: new Date().toISOString(), policyVersion: POLICY_VERSION,
+        })
         if (e) { setErr(e); track('registration_failed', { reason: e }); return }
       } else {
         const e = await app.login(email, pass)
@@ -111,13 +119,21 @@ function AuthModal() {
               </div>
             </div>
             <label className="check">
+              <input type="checkbox" checked={over18} onChange={e => setOver18(e.target.checked)} />
+              <span>I confirm I am at least 18 years old</span>
+            </label>
+            <label className="check">
+              <input type="checkbox" checked={acceptTerms} onChange={e => setAcceptTerms(e.target.checked)} />
+              <span>I accept the <a href="?legal=terms" target="_blank" rel="noopener">Terms and Conditions</a> and <a href="?legal=privacy" target="_blank" rel="noopener">Privacy Policy</a></span>
+            </label>
+            <label className="check">
               <input type="checkbox" checked={marketing} onChange={e => setMarketing(e.target.checked)} />
               <span>Yes, send me promotions, bonuses and free spins</span>
             </label>
           </>}
 
           {err && <p className="err">{err}</p>}
-          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={submit}>{mode === 'join' ? 'Create account' : 'Log in'}</button>
+          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy || (mode === 'join' && (!over18 || !acceptTerms))} onClick={submit}>{mode === 'join' ? 'Create account' : 'Log in'}</button>
           {mode === 'login' && <div className="switchline" style={{ marginTop: 6 }}><a onClick={() => { setErr(''); app.setAuthModal('forgot') }}>Forgot password?</a></div>}
           <div className="switchline">
             {mode === 'join'

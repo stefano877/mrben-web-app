@@ -6,6 +6,11 @@
 
 export interface LegalDoc { title: string; html: string }
 
+// Version stamp for the currently published Terms and Privacy Policy. Recorded
+// against each player when they accept at registration (MRB-95). Bump this when
+// the policies change materially so re-acceptance can be prompted.
+export const POLICY_VERSION = '2026-08-01'
+
 export const LEGAL: Record<string, LegalDoc> = {
   about: {
     title: 'About Us',

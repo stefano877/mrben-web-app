@@ -14,6 +14,11 @@ export interface Profile {
   country: string    // ISO-3166 alpha-2
   dial: string       // dial code without +
   marketing: boolean
+  // Age and policy acceptance captured at registration (MRB-95). Recorded on the
+  // player so the operator can prove what was agreed and when.
+  ageConfirmed?: boolean
+  termsAcceptedAt?: string   // ISO timestamp of acceptance
+  policyVersion?: string     // version of the Terms/Privacy accepted
 }
 
 export type LimitKind = 'deposit' | 'loss' | 'session'
