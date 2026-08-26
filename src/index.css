@@ -548,3 +548,10 @@ body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; te
   .legal-content { padding: 20px 18px; }
   .legal-title { font-size: 23px; }
 }
+
+/* Wagering table inside legal docs */
+.legal-content .doc .wtable { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 12px 0 14px; }
+.legal-content .doc .wtable th, .legal-content .doc .wtable td { border: 1px solid #e5e8ee; padding: 7px 9px; text-align: left; vertical-align: top; line-height: 1.5; }
+.legal-content .doc .wtable th { background: #f6f7f9; color: #101A45; font-weight: 800; white-space: nowrap; }
+.legal-content .doc .wtable td:nth-child(2), .legal-content .doc .wtable td:nth-child(3) { white-space: nowrap; font-weight: 700; color: #101A45; text-align: center; width: 90px; }
+.legal-content .doc .muted-sm { color: #8a93a3; font-size: 12px; }
