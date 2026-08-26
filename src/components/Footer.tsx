@@ -2,7 +2,7 @@ import { useApp } from '../store'
 
 export default function Footer() {
   const app = useApp()
-  const open = (key: string) => app.openModal({ type: 'info', key })
+  const open = (key: string) => app.openLegal(key)
   const toTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
   const col1: [string, () => void][] = [

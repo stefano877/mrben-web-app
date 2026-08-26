@@ -7,7 +7,7 @@ import type { Account, Profile, LimitKind } from './api'
 // Re-exported so existing imports (`from '../store'`) keep working.
 export type { Txn, Profile, LimitKind, Account } from './api'
 
-export type Page = 'lobby' | 'offers' | 'sports' | 'vip'
+export type Page = 'lobby' | 'offers' | 'sports' | 'vip' | 'legal'
 
 export type Modal =
   | { type: 'wallet' }
@@ -31,6 +31,7 @@ type AuthMode = 'join' | 'login' | 'forgot' | 'reset' | null
 interface Ctx {
   ready: boolean
   page: Page; setPage: (p: Page) => void
+  legalKey: string; openLegal: (key: string) => void
   lobbyView: LobbyView; setLobbyView: (v: LobbyView) => void
   goLobby: (v?: LobbyView) => void
   user: Account | null
@@ -70,8 +71,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<Account | null>(null)
   const [ready, setReady] = useState(false)
   const [page, setPage] = useState<Page>('lobby')
+  const [legalKey, setLegalKey] = useState('')
   const [lobbyView, setLobbyView] = useState<LobbyView>({ mode: 'all', cat: '' })
-  const goLobby = (v: LobbyView = { mode: 'all', cat: '' }) => { setLobbyView(v); setPage('lobby'); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+  const goLobby = (v: LobbyView = { mode: 'all', cat: '' }) => { setLobbyView(v); setPage('lobby'); try { window.history.replaceState({}, '', window.location.pathname) } catch { /* ignore */ }; window.scrollTo({ top: 0, behavior: 'smooth' }) }
+  // Legal/policy landing pages get their own shareable URL (?legal=<key>).
+  const openLegal = (key: string) => { setLegalKey(key); setPage('legal'); try { window.history.pushState({}, '', '?legal=' + key) } catch { /* ignore */ }; window.scrollTo({ top: 0, behavior: 'auto' }) }
   const [authModal, setAuthModal] = useState<AuthMode>(null)
   const [resetToken, setResetToken] = useState<string | null>(null)
   const [modal, setModal] = useState<Modal>(null)
@@ -94,12 +98,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // analytics. The token is only ever held in memory and sent to the backend.
   useEffect(() => {
     try {
-      const t = new URLSearchParams(window.location.search).get('reset')
+      const params = new URLSearchParams(window.location.search)
+      const t = params.get('reset')
       if (t) {
         setResetToken(t)
         setAuthModal('reset')
         window.history.replaceState({}, '', window.location.pathname + window.location.hash)
       }
+      const lk = params.get('legal')
+      if (lk) { setLegalKey(lk); setPage('legal') }
     } catch { /* ignore */ }
   }, [])
 
@@ -195,12 +202,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const closeModal = () => setModal(null)
 
   const value = useMemo<Ctx>(() => ({
-    ready, page, setPage, lobbyView, setLobbyView, goLobby, user: account, authModal, setAuthModal, resetToken,
+    ready, page, setPage, legalKey, openLegal, lobbyView, setLobbyView, goLobby, user: account, authModal, setAuthModal, resetToken,
     modal, openModal, closeModal, toast, showToast, register, login, logout, requestPasswordReset, resetPassword,
     deposit, withdraw, placeBet, rollback, spinWheel, openChest,
     setLimit, cancelPending, selfExclude, liftExclusion, setRealityChecks,
     toggleFav, pushRecent, requireAuth,
-  }), [ready, page, lobbyView, account, authModal, resetToken, modal, toast])
+  }), [ready, page, legalKey, lobbyView, account, authModal, resetToken, modal, toast])
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>
 }

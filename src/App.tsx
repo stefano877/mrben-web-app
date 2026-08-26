@@ -14,6 +14,7 @@ import BottomNav from './components/BottomNav'
 import CookieConsent from './components/CookieConsent'
 import RealityCheck from './components/RealityCheck'
 import RegionBlock, { previewBlockedRegion } from './components/RegionBlock'
+import LegalPage from './components/LegalPage'
 
 function Shell() {
   const app = useApp()
@@ -31,6 +32,7 @@ function Shell() {
       {app.page === 'offers' && <OffersPage />}
       {app.page === 'sports' && <Sportsbook />}
       {app.page === 'vip' && <VipPage />}
+      {app.page === 'legal' && <LegalPage />}
       <Footer />
       <button className="wheel-fab" onClick={() => { if (app.requireAuth()) app.openModal({ type: 'wheel' }) }} aria-label="Daily bonus wheel">
         <span className="tagn">1</span>
