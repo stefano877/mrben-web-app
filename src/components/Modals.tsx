@@ -298,15 +298,27 @@ function GameModal({ game }: { game: Game }) {
   const [burst, setBurst] = useState(0)
   const [lastBet, setLastBet] = useState(0)
   const [busy, setBusy] = useState(false)
+  const [mode, setMode] = useState<'real' | 'demo'>('real')
+  const [demoBal, setDemoBal] = useState(1000)
   if (!app.user) return null
   const u = app.user
+  const rollReels = () => setReels([0, 1, 2].map(() => SYMS[Math.floor(Math.random() * SYMS.length)]))
   const spin = async () => {
     if (busy) return
+    if (mode === 'demo') {
+      // Demo play never touches the wallet or the backend: pure local fun credits.
+      if (demoBal < bet) { app.showToast('Out of demo credits — reset to keep playing'); return }
+      rollReels()
+      const w = Math.random() < 0.42 ? +(bet * (Math.random() * 4 + 1.5)).toFixed(2) : 0
+      setDemoBal(b => +(b - bet + w).toFixed(2)); setLastBet(0)
+      if (w > 0) { setWin('WIN ' + fmt(w) + '!'); setBurst(b => b + 1); setTimeout(() => setWin(''), 900) } else setWin('')
+      return
+    }
     setBusy(true)
     try {
       const r = await app.placeBet(game, bet)
       if (!r.ok) { app.showToast(r.error); return }
-      setReels([0, 1, 2].map(() => SYMS[Math.floor(Math.random() * SYMS.length)]))
+      rollReels()
       setLastBet(bet)
       if (r.win > 0) { setWin('WIN ' + fmt(r.win) + '!'); setBurst(b => b + 1); setTimeout(() => setWin(''), 900) } else setWin('')
     } finally { setBusy(false) }
@@ -328,16 +340,19 @@ function GameModal({ game }: { game: Game }) {
       <div className="modal">
         <div className="modal-head"><h3 style={{ fontSize: 16 }}>{game.name}</h3><button className="x" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
+          <div className="seg" style={{ marginBottom: 10 }}><button className={mode === 'real' ? 'on' : ''} onClick={() => { setMode('real'); setWin('') }}>Real money</button><button className={mode === 'demo' ? 'on' : ''} onClick={() => { setMode('demo'); setWin('') }}>Demo</button></div>
           <div className="stage" style={{ background: `linear-gradient(140deg,${game.grad[0]},${game.grad[1]})` }}>
-            <div className="sbal">Balance {fmt(u.balance)}</div>
+            <div className="sbal">{mode === 'demo' ? 'Demo credits' : 'Balance'} {fmt(mode === 'demo' ? demoBal : u.balance)}</div>
             <div className="reel">{reels.map((s, i) => <span key={i}>{s}</span>)}</div>
             {win && <div className="winflash show">{win}</div>}
           </div>
-          <div style={{ fontSize: 12, color: '#7A8290', marginBottom: 11 }}>{game.studio} · real money + demo</div>
+          <div style={{ fontSize: 12, color: '#7A8290', marginBottom: 11 }}>{game.studio} · {mode === 'demo' ? 'demo play, no real money' : 'real money'}</div>
           <div className="betbar"><span className="muted" style={{ fontWeight: 800 }}>Bet per spin</span><span className="pill">{fmt(bet)}</span></div>
           <div className="row2" style={{ marginBottom: 10 }}><button className="btn sec" onClick={() => adj(-1)}>– Bet</button><button className="btn sec" onClick={() => adj(1)}>+ Bet</button></div>
-          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={spin}>Spin</button>
-          <button className="btn ghost" style={{ marginTop: 8 }} disabled={busy} onClick={rollback}>Rollback last round</button>
+          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={spin}>{mode === 'demo' ? 'Spin · demo' : 'Spin'}</button>
+          {mode === 'real'
+            ? <button className="btn ghost" style={{ marginTop: 8 }} disabled={busy} onClick={rollback}>Rollback last round</button>
+            : <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => { setDemoBal(1000); app.showToast('Demo credits reset') }}>Reset demo credits</button>}
         </div>
       </div>
     </div>
