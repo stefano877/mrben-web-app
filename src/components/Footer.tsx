@@ -8,11 +8,13 @@ export default function Footer() {
   const col1: [string, () => void][] = [
     ['Casino', () => app.goLobby()],
     ['Responsible Gambling', () => open('rg-policy')],
-    ['Betting Rules', () => open('betting-rules')],
+    ['Self-exclusion', () => open('self-exclusion')],
+    ['Game Rules', () => open('betting-rules')],
     ['Complaints & procedures', () => open('complaints')],
   ]
   const col2: [string, () => void][] = [
-    ['Promotional Terms & Conditions', () => open('promo-terms')],
+    ['Terms & Conditions', () => open('terms')],
+    ['Promotional Terms', () => open('promo-terms')],
     ['Privacy Policy', () => open('privacy')],
     ['Support', () => open('support')],
     ['Cookie Settings', () => open('cookies')],
