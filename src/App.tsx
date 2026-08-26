@@ -13,10 +13,15 @@ import Footer from './components/Footer'
 import BottomNav from './components/BottomNav'
 import CookieConsent from './components/CookieConsent'
 import RealityCheck from './components/RealityCheck'
+import RegionBlock, { previewBlockedRegion } from './components/RegionBlock'
 
 function Shell() {
   const app = useApp()
   useEffect(() => { track('landing') }, [])
+  // Region-unavailable screen. Preview only here (?geoblock=US); real geo-blocking
+  // is enforced at the edge and backend, which will pass the decision in.
+  const blockedRegion = previewBlockedRegion()
+  if (blockedRegion) return <RegionBlock country={blockedRegion} />
   return (
     <div className="app">
       <SideDots />
