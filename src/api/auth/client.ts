@@ -34,6 +34,10 @@ export interface AuthClient {
   register(input: RegisterRequest): Promise<AuthenticatedUser>
   login(email: string, password: string): Promise<AuthenticatedUser>
   logout(): Promise<void>
+  /** Ask for a reset link. Never throws on unknown email (no account enumeration). */
+  requestPasswordReset(email: string): Promise<void>
+  /** Complete a reset with the single-use token from the email link. */
+  resetPassword(token: string, password: string): Promise<void>
   me(): Promise<AuthenticatedUser>
   /** Restore a session from the refresh cookie on app boot. Returns null if signed out. */
   bootstrap(): Promise<AuthenticatedUser | null>
@@ -139,6 +143,15 @@ export function createAuthClient(apiBase: string): AuthClient {
     },
     async logout() {
       try { await callAuthed<{ success: true }>('POST', '/logout') } finally { signOut() }
+    },
+    async requestPasswordReset(email: string) {
+      // Public endpoint. Fire and forget: swallow network and HTTP errors so the
+      // caller can never infer whether the address is registered.
+      try { await rawFetch('POST', auth('/forgot-password'), { body: { email } }) } catch { /* intentionally ignored */ }
+    },
+    async resetPassword(token: string, password: string) {
+      const res = await rawFetch('POST', auth('/reset-password'), { body: { token, password } })
+      if (!res.ok) throw await toError(res)
     },
     me() { return callAuthed<AuthenticatedUser>('GET', '/me') },
     async bootstrap() {

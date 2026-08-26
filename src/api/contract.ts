@@ -7,6 +7,8 @@
 //   register            POST   /auth/register
 //   login               POST   /auth/login
 //   logout              POST   /auth/logout
+//   requestPasswordReset POST  /auth/forgot-password   (always 204, no enumeration)
+//   resetPassword       POST   /auth/reset-password    (single-use token, invalidates sessions)
 //   deposit             POST   /wallet/deposit
 //   withdraw            POST   /wallet/withdraw
 //   placeBet            POST   /game/bet
@@ -32,6 +34,10 @@ export interface MrBenApi {
   register(input: RegisterInput): Promise<Session>
   login(email: string, pass: string): Promise<Session>
   logout(): Promise<void>
+  /** Request a reset link. Resolves the same way whether or not the email exists (no account enumeration). */
+  requestPasswordReset(email: string): Promise<void>
+  /** Set a new password using a single-use token from the email link. */
+  resetPassword(token: string, newPass: string): Promise<void>
 
   // ---- wallet ----
   deposit(amount: number, method: string): Promise<DepositResult>

@@ -145,6 +145,12 @@ export function createBackendApi(apiBase: string): MrBenApi {
 
     async logout(): Promise<void> { try { await auth.logout() } finally { who = null } },
 
+    // Password reset is a pre-auth flow handled entirely by the backend: it
+    // generates the token, emails the link, validates and invalidates it, and
+    // kills existing sessions on success. Nothing here touches local state.
+    async requestPasswordReset(email: string): Promise<void> { await auth.requestPasswordReset(email) },
+    async resetPassword(token: string, newPass: string): Promise<void> { await viaAuth(() => auth.resetPassword(token, newPass)) },
+
     async deposit(amount: number, method: string): Promise<DepositResult> {
       walletGate()
       const p = play.ensure(requireUser().email)

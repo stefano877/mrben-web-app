@@ -71,6 +71,11 @@ export function createHttpApi(baseUrl: string): MrBenApi {
     register: (input: RegisterInput) => auth('/auth/register', input),
     login: (email: string, pass: string) => auth('/auth/login', { email, pass }),
     async logout() { try { await call<void>('POST', '/auth/logout') } finally { setToken(null) } },
+    async requestPasswordReset(email: string) {
+      // Never reveal whether the address exists: swallow errors from this call.
+      try { await call<void>('POST', '/auth/forgot-password', { email }) } catch { /* intentionally ignored */ }
+    },
+    resetPassword: (token: string, newPass: string) => call<void>('POST', '/auth/reset-password', { token, password: newPass }),
 
     deposit: (amount: number, method: string) => call<DepositResult>('POST', '/wallet/deposit', { amount, method }),
     withdraw: (amount: number, method: string) => call<Account>('POST', '/wallet/withdraw', { amount, method }),

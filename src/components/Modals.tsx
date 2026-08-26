@@ -52,6 +52,8 @@ function AuthModal() {
   useEffect(() => { if (mode === 'join') track('registration_started') }, [mode])
 
   if (!mode) return null
+  if (mode === 'forgot') return <ForgotModal />
+  if (mode === 'reset') return <ResetModal />
   const dial = byCode(country)?.dial ?? ''
   const maxDob = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().slice(0, 10) })()
   const fieldDone = (f: string) => track('registration_field_completed', { field: f })
@@ -115,6 +117,7 @@ function AuthModal() {
 
           {err && <p className="err">{err}</p>}
           <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={submit}>{mode === 'join' ? 'Create account' : 'Log in'}</button>
+          {mode === 'login' && <div className="switchline" style={{ marginTop: 6 }}><a onClick={() => { setErr(''); app.setAuthModal('forgot') }}>Forgot password?</a></div>}
           <div className="switchline">
             {mode === 'join'
               ? <>Already have an account? <a onClick={() => { setErr(''); app.setAuthModal('login') }}>Login</a></>
@@ -138,6 +141,80 @@ const METHODS = {
     { k: 'local', ic: '', c: '#0FA36B', t: 'Local bank (D24)', s: '1–2 business days' },
   ],
 }
+// Forgot password: ask for the email, always show the same confirmation so no
+// one can learn whether an address is registered (no account enumeration).
+function ForgotModal() {
+  const app = useApp()
+  const [email, setEmail] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [sent, setSent] = useState(false)
+  const submit = async () => {
+    if (busy || !email.trim()) return
+    setBusy(true)
+    await app.requestPasswordReset(email.trim())
+    setBusy(false); setSent(true)
+  }
+  return (
+    <div className="overlay open" onClick={ev => { if (ev.target === ev.currentTarget) app.setAuthModal(null) }}>
+      <div className="modal">
+        <div className="modal-head"><h3>Reset your password</h3><button className="x" onClick={() => app.setAuthModal(null)}>✕</button></div>
+        <div className="modal-body">
+          {sent ? <>
+            <p className="muted" style={{ marginTop: 0 }}>If an account exists for <b>{email.trim()}</b>, we have sent a link to reset your password. Check your inbox and spam folder.</p>
+            <button className="btn orange" onClick={() => app.setAuthModal('login')}>Back to login</button>
+          </> : <>
+            <p className="muted" style={{ marginTop: 0 }}>Enter your email and we will send you a link to set a new password.</p>
+            <div className="field"><label>Email</label><input type="email" value={email} placeholder="you@email.com" onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && submit()} /></div>
+            <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy || !email.trim()} onClick={submit}>Send reset link</button>
+            <div className="switchline"><a onClick={() => app.setAuthModal('login')}>Back to login</a></div>
+          </>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Reset: set a new password using the single-use token captured from the link.
+// The token itself lives only in memory (store.resetToken) and was stripped from
+// the URL on load. Generic errors only, so invalid vs expired is indistinguishable.
+function ResetModal() {
+  const app = useApp()
+  const [pass, setPass] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [done, setDone] = useState(false)
+  const submit = async () => {
+    if (busy) return
+    setErr('')
+    if (pass.length < 12) { setErr('Password must be at least 12 characters'); return }
+    if (pass !== confirm) { setErr('Passwords do not match'); return }
+    setBusy(true)
+    const e = await app.resetPassword(pass)
+    setBusy(false)
+    if (e) { setErr(e); return }
+    setDone(true)
+  }
+  return (
+    <div className="overlay open" onClick={ev => { if (ev.target === ev.currentTarget) app.setAuthModal(null) }}>
+      <div className="modal">
+        <div className="modal-head"><h3>Set a new password</h3><button className="x" onClick={() => app.setAuthModal(null)}>✕</button></div>
+        <div className="modal-body">
+          {done ? <>
+            <p className="muted" style={{ marginTop: 0 }}>Your password has been updated and you have been signed out on all devices. Please log in with your new password.</p>
+            <button className="btn orange" onClick={() => app.setAuthModal('login')}>Go to login</button>
+          </> : <>
+            <div className="field"><label>New password <span className="hint">at least 12 characters</span></label><input type="password" value={pass} placeholder="••••••••" onChange={e => setPass(e.target.value)} /></div>
+            <div className="field"><label>Confirm password</label><input type="password" value={confirm} placeholder="••••••••" onChange={e => setConfirm(e.target.value)} onKeyDown={e => e.key === 'Enter' && submit()} /></div>
+            {err && <p className="err">{err}</p>}
+            <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={submit}>Update password</button>
+          </>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function MethodIcon({ k }: { k: string }) {
   if (k === 'crypto') return <span style={{ color: '#fff', fontWeight: 900 }}>₿</span>
   if (k === 'card') return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg>

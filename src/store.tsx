@@ -26,18 +26,23 @@ type Err = { ok: false; error: string }
 export type Res<T = unknown> = Ok<T> | Err
 const errText = (e: unknown) => (e instanceof ApiError ? e.message : 'Something went wrong. Please try again.')
 
+type AuthMode = 'join' | 'login' | 'forgot' | 'reset' | null
+
 interface Ctx {
   ready: boolean
   page: Page; setPage: (p: Page) => void
   lobbyView: LobbyView; setLobbyView: (v: LobbyView) => void
   goLobby: (v?: LobbyView) => void
   user: Account | null
-  authModal: 'join' | 'login' | null; setAuthModal: (m: 'join' | 'login' | null) => void
+  authModal: AuthMode; setAuthModal: (m: AuthMode) => void
+  resetToken: string | null
   modal: Modal; openModal: (m: Modal) => void; closeModal: () => void
   toast: string; showToast: (m: string) => void
   register: (email: string, pass: string, profile: Profile) => Promise<string | null>
   login: (email: string, pass: string) => Promise<string | null>
   logout: () => Promise<void>
+  requestPasswordReset: (email: string) => Promise<void>
+  resetPassword: (newPass: string) => Promise<string | null>
   deposit: (amount: number, method: string) => Promise<Res<{ bonusAdded: number; firstBefore: boolean }>>
   withdraw: (amount: number, method: string) => Promise<Res>
   placeBet: (game: Game, bet: number) => Promise<Res<{ win: number }>>
@@ -67,7 +72,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [page, setPage] = useState<Page>('lobby')
   const [lobbyView, setLobbyView] = useState<LobbyView>({ mode: 'all', cat: '' })
   const goLobby = (v: LobbyView = { mode: 'all', cat: '' }) => { setLobbyView(v); setPage('lobby'); window.scrollTo({ top: 0, behavior: 'smooth' }) }
-  const [authModal, setAuthModal] = useState<'join' | 'login' | null>(null)
+  const [authModal, setAuthModal] = useState<AuthMode>(null)
+  const [resetToken, setResetToken] = useState<string | null>(null)
   const [modal, setModal] = useState<Modal>(null)
   const [toast, setToast] = useState('')
   const timer = useRef<number | undefined>(undefined)
@@ -83,6 +89,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [])
   useEffect(() => () => window.clearTimeout(timer.current), [])
 
+  // A reset link (?reset=<token>) opens the reset form. Strip the token from the
+  // URL immediately so it never lingers in browser history, referrer headers or
+  // analytics. The token is only ever held in memory and sent to the backend.
+  useEffect(() => {
+    try {
+      const t = new URLSearchParams(window.location.search).get('reset')
+      if (t) {
+        setResetToken(t)
+        setAuthModal('reset')
+        window.history.replaceState({}, '', window.location.pathname + window.location.hash)
+      }
+    } catch { /* ignore */ }
+  }, [])
+
   const showToast = (m: string) => {
     setToast(m); window.clearTimeout(timer.current)
     timer.current = window.setTimeout(() => setToast(''), 2400)
@@ -97,6 +117,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     catch (e) { return errText(e) }
   }
   const logout = async () => { try { await api.logout() } finally { setAccount(null) } }
+  // Always resolves the same way. The UI shows a generic confirmation so nobody
+  // can learn from this whether an email is registered (no account enumeration).
+  const requestPasswordReset = async (email: string): Promise<void> => {
+    try { await api.requestPasswordReset(email) } catch { /* ignore */ }
+  }
+  // Generic failure message regardless of the server's reason, so an invalid vs
+  // expired vs unknown token is indistinguishable.
+  const resetPassword = async (newPass: string): Promise<string | null> => {
+    if (!resetToken) return 'This link is invalid or has expired. Request a new one.'
+    try { await api.resetPassword(resetToken, newPass); setResetToken(null); return null }
+    catch { return 'This link is invalid or has expired. Request a new one.' }
+  }
 
   const deposit = async (amount: number, method: string): Promise<Res<{ bonusAdded: number; firstBefore: boolean }>> => {
     const firstBefore = !!account?.firstDepositDone
@@ -163,12 +195,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const closeModal = () => setModal(null)
 
   const value = useMemo<Ctx>(() => ({
-    ready, page, setPage, lobbyView, setLobbyView, goLobby, user: account, authModal, setAuthModal,
-    modal, openModal, closeModal, toast, showToast, register, login, logout,
+    ready, page, setPage, lobbyView, setLobbyView, goLobby, user: account, authModal, setAuthModal, resetToken,
+    modal, openModal, closeModal, toast, showToast, register, login, logout, requestPasswordReset, resetPassword,
     deposit, withdraw, placeBet, rollback, spinWheel, openChest,
     setLimit, cancelPending, selfExclude, liftExclusion, setRealityChecks,
     toggleFav, pushRecent, requireAuth,
-  }), [ready, page, lobbyView, account, authModal, modal, toast])
+  }), [ready, page, lobbyView, account, authModal, resetToken, modal, toast])
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>
 }

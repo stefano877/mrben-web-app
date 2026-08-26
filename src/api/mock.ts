@@ -80,6 +80,8 @@ export function createMockApi(): MrBenApi {
   const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(root)) } catch { /* ignore */ } }
   const mkTxn = (kind: TxnKind, amount: number, label: string): Txn => ({ id: txnSeq++, kind, amount, label, at: Date.now() })
   const token = (email: string) => `mock.${enc(email)}`
+  // In-memory reset tokens for the offline demo (no email transport exists).
+  const resets: Record<string, string> = {}
 
   // Apply any scheduled RG increase whose effective time has passed.
   const applyDue = (u: StoredUser) => {
@@ -156,6 +158,28 @@ export function createMockApi(): MrBenApi {
 
     async logout(): Promise<void> {
       root.session = null
+      persist()
+    },
+
+    async requestPasswordReset(email: string): Promise<void> {
+      // No email transport offline. If the account exists, mint a demo token and
+      // log the link to the console so the flow can be walked through. Resolve
+      // the same way regardless, so existence is never revealed to the caller.
+      email = email.trim().toLowerCase()
+      if (root.users[email]) {
+        const t = 'demo-' + enc(email + ':' + Date.now()).slice(0, 20)
+        resets[t] = email
+        try { console.info('[mock] password reset link:', location.origin + '/?reset=' + t) } catch { /* ignore */ }
+      }
+    },
+
+    async resetPassword(token: string, newPass: string): Promise<void> {
+      if (newPass.length < 12) throw new ApiError('weak_password', 'Password must be at least 12 characters')
+      const email = resets[token]
+      if (!email || !root.users[email]) throw new ApiError('invalid_reset', 'This link is invalid or has expired')
+      root.users[email].pass = enc(newPass)
+      delete resets[token]
+      root.session = null // a reset invalidates existing sessions
       persist()
     },
 
