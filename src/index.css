@@ -607,3 +607,11 @@ body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; te
   .affil-steps, .affil-deal-grid { grid-template-columns: 1fr; }
   .affil-hero-txt h1 { font-size: 27px; }
 }
+
+/* Top-right "more" dropdown in the header */
+.more-wrap { position: relative; display: flex; }
+.more-btn { display: grid; place-items: center; height: 36px; width: 36px; border-radius: 10px; background: transparent; border: 0; cursor: pointer; }
+.more-btn:hover { background: rgba(16, 26, 69, 0.06); }
+.more-menu { position: absolute; right: 0; top: 44px; background: #fff; border: 1px solid #e6e9f0; border-radius: 12px; box-shadow: 0 12px 34px rgba(16, 26, 69, 0.16); padding: 6px; min-width: 210px; z-index: 70; }
+.more-menu button { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 9px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; color: #101A45; cursor: pointer; }
+.more-menu button:hover { background: #f4f6fb; color: #F35100; }

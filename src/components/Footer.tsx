@@ -21,7 +21,6 @@ export default function Footer() {
   ]
   const col3: [string, () => void][] = [
     ['About Us', () => open('about')],
-    ['Affiliate Program', () => { app.setPage('affiliates'); window.scrollTo({ top: 0, behavior: 'smooth' }) }],
     ['Terms of Use', () => open('terms')],
     ['Contact Us', () => open('contact')],
   ]
