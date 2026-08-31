@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../store'
+import { loadMarketingTags } from '../marketing'
 
 const KEY = 'mrben.cookie.v1'
 
@@ -11,6 +12,7 @@ export default function CookieConsent() {
   const choose = (v: 'all' | 'essential') => {
     try { localStorage.setItem(KEY, v) } catch { /* ignore */ }
     setDone(true)
+    if (v === 'all') loadMarketingTags()  // arm analytics/marketing tags only on full consent (MRB-96)
     app.showToast(v === 'all' ? 'All cookies accepted' : 'Essential cookies only')
   }
 

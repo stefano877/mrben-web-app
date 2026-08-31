@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://mrben.com/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://mrben.com/?legal=terms</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://mrben.com/?legal=promo-terms</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://mrben.com/?legal=privacy</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://mrben.com/?legal=rg-policy</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://mrben.com/?legal=self-exclusion</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://mrben.com/?legal=cookies</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://mrben.com/?legal=betting-rules</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://mrben.com/?legal=complaints</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://mrben.com/?legal=support</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://mrben.com/?legal=contact</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://mrben.com/?legal=about</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+</urlset>

@@ -1,6 +1,9 @@
 import { useEffect } from 'react'
 import { AppProvider, useApp } from './store'
 import { track } from './analytics'
+import { applySeo } from './seo'
+import { loadMarketingTags } from './marketing'
+import { LEGAL } from './data/legal'
 import Header from './components/Header'
 import SideDots from './components/SideDots'
 import Ticker from './components/Ticker'
@@ -19,6 +22,13 @@ import LegalPage from './components/LegalPage'
 function Shell() {
   const app = useApp()
   useEffect(() => { track('landing') }, [])
+  // Load marketing tags on boot if the player already accepted all cookies (MRB-96).
+  useEffect(() => { loadMarketingTags() }, [])
+  // Keep title, description and canonical accurate as the SPA navigates (MRB-96).
+  useEffect(() => {
+    const legalTitle = app.page === 'legal' ? LEGAL[app.legalKey]?.title : undefined
+    applySeo(app.page, { legalTitle, legalKey: app.legalKey })
+  }, [app.page, app.legalKey])
   // Region-unavailable screen. Preview only here (?geoblock=US); real geo-blocking
   // is enforced at the edge and backend, which will pass the decision in.
   const blockedRegion = previewBlockedRegion()
