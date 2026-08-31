@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import type { ReactNode } from 'react'
 import type { Game } from './data'
 import { api, ApiError } from './api'
+import { affiliateConversion } from './affiliate'
 import type { Account, Profile, LimitKind } from './api'
 
 // Re-exported so existing imports (`from '../store'`) keep working.
@@ -116,7 +117,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   const register = async (email: string, pass: string, profile: Profile): Promise<string | null> => {
-    try { const s = await api.register({ email, pass, profile }); setAccount(s.account); return null }
+    try { const s = await api.register({ email, pass, profile }); setAccount(s.account); affiliateConversion('registration'); return null }
     catch (e) { return errText(e) }
   }
   const login = async (email: string, pass: string): Promise<string | null> => {
@@ -139,7 +140,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const deposit = async (amount: number, method: string): Promise<Res<{ bonusAdded: number; firstBefore: boolean }>> => {
     const firstBefore = !!account?.firstDepositDone
-    try { const r = await api.deposit(amount, method); setAccount(r.account); return { ok: true, bonusAdded: r.bonusAdded, firstBefore } }
+    try { const r = await api.deposit(amount, method); setAccount(r.account); affiliateConversion(firstBefore ? 'deposit' : 'ftd', { amount, method }); return { ok: true, bonusAdded: r.bonusAdded, firstBefore } }
     catch (e) { return { ok: false, error: errText(e) } }
   }
   const withdraw = async (amount: number, method: string): Promise<Res> => {

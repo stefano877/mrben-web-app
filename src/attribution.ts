@@ -12,6 +12,11 @@ export interface Attribution {
   content?: string
   referrer?: string
   landingPage?: string
+  // Affiliate tracking (MRB-10). btag is the raw affiliate tag from the link
+  // (e.g. "1042_welcome-1300"); we also split out the affiliate id and campaign.
+  btag?: string
+  affiliateId?: string
+  affiliateCampaign?: string
 }
 
 const KEY = 'mrben.attribution.v1'
@@ -24,6 +29,9 @@ export function captureAttribution(): void {
     const p = new URLSearchParams(window.location.search)
     const firstOf = (...keys: string[]) => { for (const k of keys) { const v = p.get(k); if (v) return v } return null }
 
+    const btag = cap(firstOf('btag', 'aff', 'affid', 'aff_id', 'a'), 255)
+    // Links are minted as "<affiliateId>_<campaign>"; split defensively.
+    const us = btag ? btag.indexOf('_') : -1
     const a: Attribution = {
       clickId: cap(firstOf('clickid', 'click_id', 'gclid', 'fbclid', 'msclkid', 'ttclid'), 255),
       source: cap(p.get('utm_source'), 255),
@@ -33,6 +41,9 @@ export function captureAttribution(): void {
       content: cap(p.get('utm_content'), 255),
       referrer: cap(document.referrer, 2048),
       landingPage: cap(window.location.href, 2048),
+      btag,
+      affiliateId: btag ? (us > 0 ? btag.slice(0, us) : btag) : undefined,
+      affiliateCampaign: btag && us > 0 ? btag.slice(us + 1) : undefined,
     }
     localStorage.setItem(KEY, JSON.stringify(a))
   } catch { /* ignore */ }
@@ -45,7 +56,7 @@ export function getAttribution(): Attribution | undefined {
     if (!raw) return undefined
     const parsed = JSON.parse(raw) as Record<string, unknown>
     const out: Attribution = {}
-    for (const k of ['clickId', 'source', 'medium', 'campaign', 'term', 'content', 'referrer', 'landingPage'] as const) {
+    for (const k of ['clickId', 'source', 'medium', 'campaign', 'term', 'content', 'referrer', 'landingPage', 'btag', 'affiliateId', 'affiliateCampaign'] as const) {
       const v = parsed[k]
       if (typeof v === 'string' && v.trim()) out[k] = v
     }

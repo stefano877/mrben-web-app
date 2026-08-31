@@ -43,6 +43,7 @@ export interface AuthSessionResponse {
 export interface Attribution {
   clickId?: string; source?: string; medium?: string; campaign?: string
   term?: string; content?: string; referrer?: string; landingPage?: string
+  btag?: string; affiliateId?: string; affiliateCampaign?: string   // affiliate tracking (MRB-10)
 }
 
 export interface RegisterRequest {
