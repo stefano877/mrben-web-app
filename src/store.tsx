@@ -8,7 +8,7 @@ import type { Account, Profile, LimitKind } from './api'
 // Re-exported so existing imports (`from '../store'`) keep working.
 export type { Txn, Profile, LimitKind, Account } from './api'
 
-export type Page = 'lobby' | 'offers' | 'sports' | 'vip' | 'legal'
+export type Page = 'lobby' | 'offers' | 'sports' | 'vip' | 'legal' | 'affiliates'
 
 export type Modal =
   | { type: 'wallet' }

@@ -18,6 +18,7 @@ import CookieConsent from './components/CookieConsent'
 import RealityCheck from './components/RealityCheck'
 import RegionBlock, { previewBlockedRegion } from './components/RegionBlock'
 import LegalPage from './components/LegalPage'
+import AffiliatePromo from './components/AffiliatePromo'
 
 function Shell() {
   const app = useApp()
@@ -43,6 +44,7 @@ function Shell() {
       {app.page === 'sports' && <Sportsbook />}
       {app.page === 'vip' && <VipPage />}
       {app.page === 'legal' && <LegalPage />}
+      {app.page === 'affiliates' && <AffiliatePromo />}
       <Footer />
       <button className="wheel-fab" onClick={() => { if (app.requireAuth()) app.openModal({ type: 'wheel' }) }} aria-label="Daily bonus wheel">
         <span className="tagn">1</span>
