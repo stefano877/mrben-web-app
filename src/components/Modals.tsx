@@ -7,6 +7,18 @@ import { chestModalSVG, wheelSVG } from '../art'
 import { countries, byCode, flag, detectCountry } from '../countries'
 import { LEGAL, POLICY_VERSION } from '../data/legal'
 import { track } from '../analytics'
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
+
+// Makes a non-<button> element operable by keyboard: focusable, and activated by
+// Enter or Space just like a real button (WCAG 2.1.1 Keyboard, MRB-98).
+function clickable(handler: () => void) {
+  return {
+    role: 'button' as const,
+    tabIndex: 0,
+    onClick: handler,
+    onKeyDown: (e: ReactKeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler() } },
+  }
+}
 
 const CONFETTI_COLORS = ['#F35100', '#FFCB57', '#2A6BE0', '#12B39A', '#E85D9A', '#7A2BD0', '#5EE6A8']
 function Confetti() {
@@ -90,8 +102,8 @@ function AuthModal() {
 
   return (
     <div className="overlay open" onClick={(ev) => { if (ev.target === ev.currentTarget) app.setAuthModal(null) }}>
-      <div className="modal">
-        <div className="modal-head"><h3>{mode === 'join' ? 'Join MrBen' : 'Welcome back'}</h3><button className="x" onClick={() => app.setAuthModal(null)}>✕</button></div>
+      <div className="modal" role="dialog" aria-modal="true">
+        <div className="modal-head"><h3>{mode === 'join' ? 'Join MrBen' : 'Welcome back'}</h3><button className="x" aria-label="Close" onClick={() => app.setAuthModal(null)}>✕</button></div>
         <div className="modal-body">
           {mode === 'join' && <p className="muted center" style={{ marginTop: 0 }}>100% up to €200 on your first deposit</p>}
           <div className="field"><label>Email</label><input type="email" value={email} placeholder="you@email.com" onChange={e => setEmail(e.target.value)} onBlur={() => mode === 'join' && email.trim() && fieldDone('email')} /></div>
@@ -173,8 +185,8 @@ function ForgotModal() {
   }
   return (
     <div className="overlay open" onClick={ev => { if (ev.target === ev.currentTarget) app.setAuthModal(null) }}>
-      <div className="modal">
-        <div className="modal-head"><h3>Reset your password</h3><button className="x" onClick={() => app.setAuthModal(null)}>✕</button></div>
+      <div className="modal" role="dialog" aria-modal="true">
+        <div className="modal-head"><h3>Reset your password</h3><button className="x" aria-label="Close" onClick={() => app.setAuthModal(null)}>✕</button></div>
         <div className="modal-body">
           {sent ? <>
             <p className="muted" style={{ marginTop: 0 }}>If an account exists for <b>{email.trim()}</b>, we have sent a link to reset your password. Check your inbox and spam folder.</p>
@@ -214,8 +226,8 @@ function ResetModal() {
   }
   return (
     <div className="overlay open" onClick={ev => { if (ev.target === ev.currentTarget) app.setAuthModal(null) }}>
-      <div className="modal">
-        <div className="modal-head"><h3>Set a new password</h3><button className="x" onClick={() => app.setAuthModal(null)}>✕</button></div>
+      <div className="modal" role="dialog" aria-modal="true">
+        <div className="modal-head"><h3>Set a new password</h3><button className="x" aria-label="Close" onClick={() => app.setAuthModal(null)}>✕</button></div>
         <div className="modal-body">
           {done ? <>
             <p className="muted" style={{ marginTop: 0 }}>Your password has been updated and you have been signed out on all devices. Please log in with your new password.</p>
@@ -266,8 +278,8 @@ function WalletModal() {
   if (!methods.some(m => m.k === method)) setMethod(methods[0].k)
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
-      <div className="modal">
-        <div className="modal-head"><h3>Wallet</h3><button className="x" onClick={app.closeModal}>✕</button></div>
+      <div className="modal" role="dialog" aria-modal="true">
+        <div className="modal-head"><h3>Wallet</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <div className="balcard"><div className="l">Available balance</div><div className="a">{fmt(u.balance)}</div><div className="b">Bonus wallet: {fmt(u.bonus)}</div></div>
           {u.walletReady === false ? (
@@ -354,8 +366,8 @@ function GameModal({ game }: { game: Game }) {
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
       {burst > 0 && <Confetti key={burst} />}
-      <div className="modal">
-        <div className="modal-head"><h3 style={{ fontSize: 16 }}>{game.name}</h3><button className="x" onClick={app.closeModal}>✕</button></div>
+      <div className="modal" role="dialog" aria-modal="true">
+        <div className="modal-head"><h3 style={{ fontSize: 16 }}>{game.name}</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <div className="seg" style={{ marginBottom: 10 }}><button className={mode === 'real' ? 'on' : ''} onClick={() => { setMode('real'); setWin('') }}>Real money</button><button className={mode === 'demo' ? 'on' : ''} onClick={() => { setMode('demo'); setWin('') }}>Demo</button></div>
           <div className="stage" style={{ background: `linear-gradient(140deg,${game.grad[0]},${game.grad[1]})` }}>
@@ -422,8 +434,8 @@ function AccountModal() {
 
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
-      <div className="modal">
-        <div className="modal-head"><h3>Account</h3><button className="x" onClick={app.closeModal}>✕</button></div>
+      <div className="modal" role="dialog" aria-modal="true">
+        <div className="modal-head"><h3>Account</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <div className="prof">
             <div className="avatar">{(u.username || u.email)[0].toUpperCase()}</div>
@@ -467,7 +479,7 @@ function AccountModal() {
           </div>
 
           <div className="card2" style={{ padding: '4px 17px' }}>
-            <div className="li" onClick={() => app.openModal({ type: 'wallet' })}><div className="lic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg></div><div><div className="lt">Wallet &amp; transactions</div><div className="ls">Deposits, withdrawals, play</div></div><div className="chev">›</div></div>
+            <div className="li" aria-label="Open wallet and transactions" {...clickable(() => app.openModal({ type: 'wallet' }))}><div className="lic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg></div><div><div className="lt">Wallet &amp; transactions</div><div className="ls">Deposits, withdrawals, play</div></div><div className="chev">›</div></div>
           </div>
           <div className="rgbanner"><div><div style={{ fontWeight: 900, fontSize: 15 }}>Responsible Gambling</div><div className="muted" style={{ fontSize: 12 }}>Decreases apply now. Increases wait 24 hours and can be cancelled.</div></div></div>
 
@@ -477,7 +489,7 @@ function AccountModal() {
               <div className="lrow" key={r.k} style={{ display: 'block' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div><div className="lt">{r.label}</div><div className="ls">{r.sub}</div></div>
-                  <span className="pill" onClick={() => (editKind === r.k ? setEditKind(null) : startEdit(r.k))}>{showVal(r.k)} ›</span>
+                  <span className="pill" aria-label={'Change ' + r.label} {...clickable(() => (editKind === r.k ? setEditKind(null) : startEdit(r.k)))}>{showVal(r.k)} ›</span>
                 </div>
                 {editKind === r.k && (
                   <div className="lim-edit">
@@ -489,7 +501,7 @@ function AccountModal() {
                 {u.pending[r.k] && (
                   <div className="pending-row">
                     ⏳ Increase to {r.money ? fmt(u.pending[r.k]!.value) : `${u.pending[r.k]!.value} min`} pending, effective in {hrsLeft(u.pending[r.k]!.at)}h
-                    <span className="cancel" onClick={() => { void app.cancelPending(r.k); app.showToast('Pending increase cancelled') }}>Cancel</span>
+                    <span className="cancel" {...clickable(() => { void app.cancelPending(r.k); app.showToast('Pending increase cancelled') })}>Cancel</span>
                   </div>
                 )}
               </div>
@@ -497,15 +509,15 @@ function AccountModal() {
           </div>
 
           <div className="card2">
-            <div className="lrow"><div><div className="lt">Reality checks</div><div className="ls">Pop-up with time and spend</div></div><div className={'toggle' + (u.rc ? ' on' : '')} onClick={() => { void app.setRealityChecks(!u.rc); app.showToast('Reality checks ' + (!u.rc ? 'on' : 'off')) }} /></div>
+            <div className="lrow"><div><div className="lt" id="rc-label">Reality checks</div><div className="ls">Pop-up with time and spend</div></div><div role="switch" aria-checked={u.rc} aria-labelledby="rc-label" tabIndex={0} className={'toggle' + (u.rc ? ' on' : '')} onClick={() => { void app.setRealityChecks(!u.rc); app.showToast('Reality checks ' + (!u.rc ? 'on' : 'off')) }} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); void app.setRealityChecks(!u.rc); app.showToast('Reality checks ' + (!u.rc ? 'on' : 'off')) } }} /></div>
             <div className="lrow" style={{ display: 'block' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div><div className="lt" style={{ color: '#E23B3B' }}>Self-exclusion</div><div className="ls">Blocks all play for the chosen period</div></div>
                 {u.excluded
                   ? <span className="pill" style={{ background: '#FDE7E7', color: '#E23B3B' }}>Active</span>
-                  : <span className="pill" onClick={() => setExclOpen(o => !o)}>Start ›</span>}
+                  : <span className="pill" aria-label="Start self-exclusion" {...clickable(() => setExclOpen(o => !o))}>Start ›</span>}
               </div>
-              {u.excluded && <div style={{ marginTop: 8 }}><span className="demoreset" onClick={() => { void app.liftExclusion(); app.showToast('Self-exclusion lifted (demo)') }}>Lift (demo only)</span></div>}
+              {u.excluded && <div style={{ marginTop: 8 }}><span className="demoreset" {...clickable(() => { void app.liftExclusion(); app.showToast('Self-exclusion lifted (demo)') })}>Lift (demo only)</span></div>}
               {!u.excluded && exclOpen && (
                 <div className="excl">
                   <select value={exclPeriod} onChange={e => setExclPeriod(e.target.value)}>
@@ -542,8 +554,8 @@ function ChestModal() {
   }
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
-      <div className="modal">
-        <div className="modal-head"><h3>Mystery Chest</h3><button className="x" onClick={app.closeModal}>✕</button></div>
+      <div className="modal" role="dialog" aria-modal="true">
+        <div className="modal-head"><h3>Mystery Chest</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <div className={'chestwrap' + (opened || claimed ? ' chestopen' : ' shake')} dangerouslySetInnerHTML={{ __html: chestModalSVG() }} />
           <div className="wresult">{reward ? <>You found <b>{reward}</b>!</> : claimed ? 'Come back tomorrow for another chest.' : 'Tap to reveal your reward!'}</div>
@@ -576,8 +588,8 @@ function WheelModal() {
   }
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
-      <div className="modal">
-        <div className="modal-head"><h3>Daily Bonus Wheel</h3><button className="x" onClick={app.closeModal}>✕</button></div>
+      <div className="modal" role="dialog" aria-modal="true">
+        <div className="modal-head"><h3>Daily Bonus Wheel</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <p className="muted center" style={{ marginTop: 0 }}>Spin once a day for a free bonus. Good luck!</p>
           <div className="wheelwrap"><div className="pointer" /><div dangerouslySetInnerHTML={{ __html: wheelSVG() }} /></div>
@@ -597,8 +609,8 @@ function InfoModal({ infoKey }: { infoKey: string }) {
   const doc = INFO_DOCS[infoKey] ?? { title: 'MrBen', html: '<p>Coming soon.</p>' }
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
-      <div className="modal">
-        <div className="modal-head"><h3>{doc.title}</h3><button className="x" onClick={app.closeModal}>✕</button></div>
+      <div className="modal" role="dialog" aria-modal="true">
+        <div className="modal-head"><h3>{doc.title}</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <div className="doc" style={{ maxHeight: '62vh', overflowY: 'auto' }} dangerouslySetInnerHTML={{ __html: doc.html }} />
           {infoKey === 'rg-policy' && (

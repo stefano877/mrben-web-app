@@ -30,21 +30,35 @@ function Shell() {
     const legalTitle = app.page === 'legal' ? LEGAL[app.legalKey]?.title : undefined
     applySeo(app.page, { legalTitle, legalKey: app.legalKey })
   }, [app.page, app.legalKey])
+  // Escape dismisses whichever dialog is open — keyboard users must be able to
+  // leave a modal without a mouse (WCAG 2.1.2 no keyboard trap, MRB-98).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (app.modal) app.closeModal()
+      else if (app.authModal) app.setAuthModal(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [app.modal, app.authModal])
   // Region-unavailable screen. Preview only here (?geoblock=US); real geo-blocking
   // is enforced at the edge and backend, which will pass the decision in.
   const blockedRegion = previewBlockedRegion()
   if (blockedRegion) return <RegionBlock country={blockedRegion} />
   return (
     <div className="app">
+      <a className="skip-link" href="#main-content">Skip to content</a>
       <SideDots />
       <Header />
       <Ticker />
+      <main id="main-content">
       {app.page === 'lobby' && <Lobby />}
       {app.page === 'offers' && <OffersPage />}
       {app.page === 'sports' && <Sportsbook />}
       {app.page === 'vip' && <VipPage />}
       {app.page === 'legal' && <LegalPage />}
       {app.page === 'affiliates' && <AffiliatePromo />}
+      </main>
       <Footer />
       <button className="wheel-fab" onClick={() => { if (app.requireAuth()) app.openModal({ type: 'wheel' }) }} aria-label="Daily bonus wheel">
         <span className="tagn">1</span>
@@ -56,7 +70,7 @@ function Shell() {
       <RealityCheck />
       <CookieConsent />
       <BottomNav />
-      <div className={'toast' + (app.toast ? ' show' : '')}>{app.toast}</div>
+      <div className={'toast' + (app.toast ? ' show' : '')} role="status" aria-live="polite" aria-atomic="true">{app.toast}</div>
     </div>
   )
 }
