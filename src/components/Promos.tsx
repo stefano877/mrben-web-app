@@ -11,7 +11,7 @@ const BANNERS = [
 export default function Promos() {
   const app = useApp()
   const go = (key: string) => {
-    track('banner_click', { banner: key })
+    track('promotion_viewed', { banner: key })
     if (app.user) app.setPage('offers'); else app.setAuthModal('join')
   }
   return (

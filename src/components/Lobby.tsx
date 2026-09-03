@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useApp } from '../store'
 import { allGames, sectionDefs, bens } from '../data'
 import type { Game } from '../data'
+import { track } from '../analytics'
 import Promos from './Promos'
 import Providers from './Providers'
 import GameRow from './GameRow'
@@ -12,6 +13,14 @@ export default function Lobby() {
   const app = useApp()
   const [q, setQ] = useState('')
   const lv = app.lobbyView
+
+  // Debounced game_searched (MRB-100) — fire once the query settles, not per keystroke.
+  useEffect(() => {
+    const s = q.trim()
+    if (s.length < 2) return
+    const t = setTimeout(() => track('game_searched', { query: s }), 500)
+    return () => clearTimeout(t)
+  }, [q])
   const filtering = q.trim() !== '' || lv.mode !== 'all'
 
   let results: Game[] = []

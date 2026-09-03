@@ -64,33 +64,33 @@ function AuthModal() {
     return () => { alive = false }
   }, [mode])
 
-  useEffect(() => { if (mode === 'join') track('registration_started') }, [mode])
+  useEffect(() => { if (mode === 'join') track('signup_started'); else if (mode === 'login') track('login_started') }, [mode])
 
   if (!mode) return null
   if (mode === 'forgot') return <ForgotModal />
   if (mode === 'reset') return <ResetModal />
   const dial = byCode(country)?.dial ?? ''
   const maxDob = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().slice(0, 10) })()
-  const fieldDone = (f: string) => track('registration_field_completed', { field: f })
+  const fieldDone = (_f: string) => { /* field-level funnel is outside the closed analytics taxonomy (MRB-100) */ }
 
   const submit = async () => {
     if (busy) return
     setErr(''); setBusy(true)
     try {
       if (mode === 'join') {
-        if (pass.length < 12) { setErr('Password must be at least 12 characters'); track('registration_failed', { reason: 'password_too_short' }); return }
+        if (pass.length < 12) { setErr('Password must be at least 12 characters'); return }
         // Age and policy acceptance are mandatory and must be explicit (MRB-95).
-        if (!over18) { setErr('Please confirm you are at least 18 years old.'); track('registration_failed', { reason: 'age_not_confirmed' }); return }
-        if (!acceptTerms) { setErr('Please accept the Terms and Privacy Policy to continue.'); track('registration_failed', { reason: 'terms_not_accepted' }); return }
+        if (!over18) { setErr('Please confirm you are at least 18 years old.'); return }
+        if (!acceptTerms) { setErr('Please accept the Terms and Privacy Policy to continue.'); return }
         // Drop the national leading zero so the number is valid E.164 (e.g. 07700 -> +447700).
         const nat = phone.trim().replace(/\s+/g, '').replace(/^0+/, '')
         const fullPhone = nat ? `+${dial} ${nat}` : ''
-        track('registration_submitted')
+        track('signup_submitted')
         const e = await app.register(email, pass, {
           username: username.trim(), dob, phone: fullPhone, country, dial, marketing,
           ageConfirmed: true, termsAcceptedAt: new Date().toISOString(), policyVersion: POLICY_VERSION,
         })
-        if (e) { setErr(e); track('registration_failed', { reason: e }); return }
+        if (e) { setErr(e); return }
       } else {
         const e = await app.login(email, pass)
         if (e) { setErr(e); return }
@@ -264,10 +264,12 @@ function WalletModal() {
     setBusy(true)
     try {
       if (mode === 'deposit') {
+        track('deposit_started', { method })
         const r = await app.deposit(v, method)
         if (!r.ok) { app.showToast(r.error); return }
         app.showToast(r.bonusAdded > 0 ? `Deposited ${fmt(v)} + ${fmt(r.bonusAdded)} bonus` : `Deposited ${fmt(v)}`)
       } else {
+        track('withdrawal_started', { method })
         const r = await app.withdraw(v, method)
         if (!r.ok) { app.showToast(r.error); return }
         app.showToast(`Withdrawal ${fmt(v)} sent`)
@@ -408,7 +410,7 @@ function AccountModal() {
   const u = app.user
 
   const showVal = (k: LimitKind) => (LIMIT_ROWS.find(r => r.k === k)!.money ? fmt(u.limits[k]) : `${u.limits[k]} min`)
-  const startEdit = (k: LimitKind) => { setEditKind(k); setEditVal(String(u.limits[k])) }
+  const startEdit = (k: LimitKind) => { setEditKind(k); setEditVal(String(u.limits[k])); track('rg_limit_opened', { kind: k }) }
   const saveEdit = async () => {
     if (busy || !editKind) return
     const v = parseFloat(editVal)

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { AppProvider, useApp } from './store'
-import { track } from './analytics'
+import { pageView } from './analytics'
 import { applySeo } from './seo'
 import { loadMarketingTags } from './marketing'
 import { LEGAL } from './data/legal'
@@ -22,7 +22,14 @@ import AffiliatePromo from './components/AffiliatePromo'
 
 function Shell() {
   const app = useApp()
-  useEffect(() => { track('landing') }, [])
+  // Automatic page views (MRB-100 R2) — fire page_viewed on every route change,
+  // including first load, so it can't be forgotten per-page.
+  useEffect(() => {
+    const path = app.page === 'lobby' ? '/'
+      : app.page === 'legal' ? `/legal/${app.legalKey}`
+      : `/${app.page}`
+    pageView(path)
+  }, [app.page, app.legalKey])
   // Load marketing tags on boot if the player already accepted all cookies (MRB-96).
   useEffect(() => { loadMarketingTags() }, [])
   // Keep title, description and canonical accurate as the SPA navigates (MRB-96).

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { Game } from './data'
 import { api, ApiError } from './api'
 import { affiliateConversion } from './affiliate'
+import { track, identify } from './analytics'
 import type { Account, Profile, LimitKind } from './api'
 
 // Re-exported so existing imports (`from '../store'`) keep working.
@@ -117,11 +118,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   const register = async (email: string, pass: string, profile: Profile): Promise<string | null> => {
-    try { const s = await api.register({ email, pass, profile }); setAccount(s.account); affiliateConversion('registration'); return null }
+    try { const s = await api.register({ email, pass, profile }); setAccount(s.account); affiliateConversion('registration'); void identify(); return null }
     catch (e) { return errText(e) }
   }
   const login = async (email: string, pass: string): Promise<string | null> => {
-    try { const s = await api.login(email, pass); setAccount(s.account); return null }
+    try { const s = await api.login(email, pass); setAccount(s.account); void identify(); return null }
     catch (e) { return errText(e) }
   }
   const logout = async () => { try { await api.logout() } finally { setAccount(null) } }
@@ -199,7 +200,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
   const requireAuth = () => { if (!account) { setAuthModal('join'); return false } return true }
 
-  const openModal = (m: Modal) => setModal(m)
+  const openModal = (m: Modal) => { if (m && m.type === 'game') track('game_opened', { game: m.game.name, studio: m.game.studio }); setModal(m) }
   const closeModal = () => setModal(null)
 
   const value = useMemo<Ctx>(() => ({
