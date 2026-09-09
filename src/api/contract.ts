@@ -61,4 +61,11 @@ export interface MrBenApi {
   // ---- personalization ----
   setFavourites(favs: string[]): Promise<Account>
   setRecent(recent: string[]): Promise<Account>
+
+  /**
+   * The current access token, held in memory (never persisted — project.md
+   * §11.0 v2.3). Used to attach a bearer to the analytics identify call. Optional
+   * because the mock adapter has no real session. Backend mode returns the live token.
+   */
+  getToken?(): string | null
 }

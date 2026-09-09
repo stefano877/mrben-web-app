@@ -174,6 +174,9 @@ export function createBackendApi(apiBase: string): MrBenApi {
       return account()
     },
 
+    // In-memory access token for the analytics identify call (never persisted, §11.0 v2.3).
+    getToken: () => auth.getAccessToken(),
+
     async placeBet(_gameId: string, gameName: string, bet: number): Promise<BetResult> {
       const p = play.ensure(requireUser().email)
       if (p.excluded) throw new ApiError('excluded', 'Self-excluded. Play is blocked.')

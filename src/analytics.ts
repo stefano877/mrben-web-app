@@ -15,7 +15,7 @@
 //    (where the abandonment is) still arrives.
 //  • Failure is silent. Analytics must never break a page.
 
-import { API_BASE } from './api'
+import { API_BASE, api } from './api'
 
 // ─── Closed taxonomy (vendored — keep in sync with backend shared-types) ──────
 // The browser may emit ONLY these. An unknown name fails at compile time here,
@@ -48,7 +48,6 @@ const IDENTIFY_URL = API_BASE ? `${API_BASE}/v1/analytics/identify` : ''
 const MAX_BATCH = 50            // MAX_ANALYTICS_BATCH — hard server limit
 const FLUSH_MS = 3000
 const SESSION_IDLE_MS = 30 * 60 * 1000
-const TOKEN_KEY = 'mrben.token' // same key the API client uses (api/http.ts)
 const ANON_KEY = 'mrben.anonId'
 const SID_KEY = 'mrben.analytics.sid'
 const SID_TS_KEY = 'mrben.analytics.sid.ts'
@@ -96,7 +95,7 @@ function flush(beacon = false): void {
     }
     try {
       const headers: Record<string, string> = { 'content-type': 'application/json', 'x-correlation-id': uuid() }
-      const token = get(TOKEN_KEY); if (token) headers['authorization'] = `Bearer ${token}`
+      const token = api.getToken?.() ?? null; if (token) headers['authorization'] = `Bearer ${token}`
       void fetch(EVENTS_URL, { method: 'POST', headers, body, keepalive: true })
         .then(r => { if (import.meta.env.DEV && r.status === 400) console.warn('[analytics] batch rejected (400) — taxonomy/contract mismatch') })
         .catch(() => { /* unreachable analytics must not affect the page */ })
@@ -127,7 +126,7 @@ export function pageView(path: string): void { track('page_viewed', { path }) }
 export async function identify(token?: string): Promise<void> {
   try {
     if (!IDENTIFY_URL) return
-    const bearer = token || get(TOKEN_KEY)
+    const bearer = token || api.getToken?.() || null
     if (!bearer) return
     const res = await fetch(IDENTIFY_URL, {
       method: 'POST',
