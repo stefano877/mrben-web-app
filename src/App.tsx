@@ -48,6 +48,27 @@ function Shell() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [app.modal, app.authModal])
+
+  // Trap focus inside the open dialog (MRB-98): move focus in on open, and cycle
+  // Tab / Shift+Tab within it so keyboard focus can't slip to the page behind.
+  useEffect(() => {
+    if (!app.modal && !app.authModal) return
+    const modal = document.querySelector<HTMLElement>('.modal[role="dialog"]')
+    if (!modal) return
+    const SEL = 'a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])'
+    const items = () => Array.from(modal.querySelectorAll<HTMLElement>(SEL)).filter(el => el.offsetParent !== null)
+    items()[0]?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const els = items(); if (els.length === 0) return
+      const first = els[0], last = els[els.length - 1]
+      const active = document.activeElement as HTMLElement | null
+      if (e.shiftKey && (active === first || !modal.contains(active))) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && (active === last || !modal.contains(active))) { e.preventDefault(); first.focus() }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [app.modal, app.authModal])
   // Region-unavailable screen. Preview only here (?geoblock=US); real geo-blocking
   // is enforced at the edge and backend, which will pass the decision in.
   const blockedRegion = previewBlockedRegion()

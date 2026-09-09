@@ -307,7 +307,7 @@ function WalletModal() {
           {u.txns.length > 0 && (
             <div className="txns">
               <div className="txns-h">Recent transactions</div>
-              <div style={{ fontSize: 11, color: '#8a93a6', margin: '-2px 0 8px' }}>New transactions can take a minute or two to appear.</div>
+              <div style={{ fontSize: 11, color: '#6b7280', margin: '-2px 0 8px' }}>New transactions can take a minute or two to appear.</div>
               {u.txns.slice(0, 6).map(t => (
                 <div className="txn" key={t.id}><span className={'tk tk-' + t.kind}>{t.kind}</span><span className="tl">{t.label}</span><span className="ta">{fmt(t.amount)}</span></div>
               ))}
