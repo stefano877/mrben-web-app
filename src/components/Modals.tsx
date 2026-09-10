@@ -7,6 +7,7 @@ import { chestModalSVG, wheelSVG } from '../art'
 import { countries, byCode, flag, detectCountry } from '../countries'
 import { LEGAL, POLICY_VERSION } from '../data/legal'
 import { track } from '../analytics'
+import Cashier from './Cashier'
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 
 // Makes a non-<button> element operable by keyboard: focusable, and activated by
@@ -158,18 +159,6 @@ function AuthModal() {
   )
 }
 
-/* ---------------- Wallet ---------------- */
-const METHODS = {
-  deposit: [
-    { k: 'crypto', ic: '₿', c: '#F7931A', t: 'Crypto', s: 'BTC · ETH · USDT · instant' },
-    { k: 'local', ic: '', c: '#0FA36B', t: 'Local rails (D24)', s: 'LATAM · Africa · Asia' },
-    { k: 'card', ic: '', c: '#2E6FDE', t: 'Card', s: 'Visa · Mastercard' },
-  ],
-  withdraw: [
-    { k: 'crypto', ic: '₿', c: '#F7931A', t: 'Crypto payout', s: 'To your wallet address' },
-    { k: 'local', ic: '', c: '#0FA36B', t: 'Local bank (D24)', s: '1–2 business days' },
-  ],
-}
 // Forgot password: ask for the email, always show the same confirmation so no
 // one can learn whether an address is registered (no account enumeration).
 function ForgotModal() {
@@ -244,80 +233,6 @@ function ResetModal() {
   )
 }
 
-function MethodIcon({ k }: { k: string }) {
-  if (k === 'crypto') return <span style={{ color: '#fff', fontWeight: 900 }}>₿</span>
-  if (k === 'card') return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg>
-  return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" /></svg>
-}
-function WalletModal() {
-  const app = useApp()
-  const [mode, setMode] = useState<'deposit' | 'withdraw'>('deposit')
-  const [amount, setAmount] = useState('50')
-  const [method, setMethod] = useState('crypto')
-  const [busy, setBusy] = useState(false)
-  if (!app.user) return null
-  const u = app.user
-  const confirm = async () => {
-    if (busy) return
-    const v = parseFloat(amount || '0')
-    if (v <= 0) { app.showToast('Enter an amount'); return }
-    setBusy(true)
-    try {
-      if (mode === 'deposit') {
-        track('deposit_started', { method })
-        const r = await app.deposit(v, method)
-        if (!r.ok) { app.showToast(r.error); return }
-        app.showToast(r.bonusAdded > 0 ? `Deposited ${fmt(v)} + ${fmt(r.bonusAdded)} bonus` : `Deposited ${fmt(v)}`)
-      } else {
-        track('withdrawal_started', { method })
-        const r = await app.withdraw(v, method)
-        if (!r.ok) { app.showToast(r.error); return }
-        app.showToast(`Withdrawal ${fmt(v)} sent`)
-      }
-    } finally { setBusy(false) }
-  }
-  const methods = METHODS[mode]
-  if (!methods.some(m => m.k === method)) setMethod(methods[0].k)
-  return (
-    <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
-      <div className="modal" role="dialog" aria-modal="true">
-        <div className="modal-head"><h3>Wallet</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
-        <div className="modal-body">
-          <div className="balcard"><div className="l">Available balance</div><div className="a">{fmt(u.balance)}</div><div className="b">Bonus wallet: {fmt(u.bonus)}</div></div>
-          {u.walletReady === false ? (
-            <div className="wallet-wait">
-              <div className="ww-ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></div>
-              <div className="ww-t">Wallet almost ready</div>
-              <div className="ww-s">We are finishing setting up your payment wallet. Deposits and withdrawals open as soon as it is provisioned. You can still explore the games in demo.</div>
-            </div>
-          ) : (<>
-            <div className="seg"><button className={mode === 'deposit' ? 'on' : ''} onClick={() => setMode('deposit')}>Deposit</button><button className={mode === 'withdraw' ? 'on' : ''} onClick={() => setMode('withdraw')}>Withdraw</button></div>
-            <div className="amtin"><span>€</span><input type="number" value={amount} onChange={e => setAmount(e.target.value)} /></div>
-            <div className="quick">{[20, 50, 100, 250].map(v => <button key={v} onClick={() => setAmount(String(v))}>€{v}</button>)}</div>
-            <div>
-              {methods.map(m => (
-                <div key={m.k} className={'method' + (method === m.k ? ' sel' : '')} onClick={() => setMethod(m.k)}>
-                  <div className="mic" style={{ background: m.c }}><MethodIcon k={m.k} /></div>
-                  <div><div className="mt">{m.t}</div><div className="ms">{m.s}</div></div>
-                </div>
-              ))}
-            </div>
-            <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={confirm}>{mode === 'deposit' ? 'Deposit ' : 'Withdraw '}{fmt(parseFloat(amount || '0'))}</button>
-          </>)}
-          {u.txns.length > 0 && (
-            <div className="txns">
-              <div className="txns-h">Recent transactions</div>
-              <div style={{ fontSize: 11, color: '#6b7280', margin: '-2px 0 8px' }}>New transactions can take a minute or two to appear.</div>
-              {u.txns.slice(0, 6).map(t => (
-                <div className="txn" key={t.id}><span className={'tk tk-' + t.kind}>{t.kind}</span><span className="tl">{t.label}</span><span className="ta">{fmt(t.amount)}</span></div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 /* ---------------- Game ---------------- */
 const SYMS = ['A', 'K', 'Q', 'J', '10', '7']
@@ -638,7 +553,7 @@ export default function Modals() {
   return (
     <>
       <AuthModal />
-      {app.modal?.type === 'wallet' && <WalletModal />}
+      {app.modal?.type === 'wallet' && <Cashier />}
       {app.modal?.type === 'game' && <GameModal game={app.modal.game} />}
       {app.modal?.type === 'account' && <AccountModal />}
       {app.modal?.type === 'chest' && <ChestModal />}
