@@ -17,11 +17,7 @@ export default function GameCard({ game }: { game: Game }) {
   const app = useApp()
   const cover = useMemo(() => (game.img ? '' : genCover(game)), [game.name])
   const fav = !!app.user?.favs.includes(game.name)
-  const launch = () => {
-    if (!app.requireAuth()) return
-    app.pushRecent(game.name)
-    app.openModal({ type: 'game', game })
-  }
+  const launch = () => app.launchGame(game)
   return (
     <div className="gcard">
       <div className="tile" onClick={launch}>

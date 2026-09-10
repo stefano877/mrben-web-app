@@ -8,6 +8,7 @@ import { countries, byCode, flag, detectCountry } from '../countries'
 import { LEGAL, POLICY_VERSION } from '../data/legal'
 import { track } from '../analytics'
 import Cashier from './Cashier'
+import type { LaunchBlock } from '../api/launch'
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 
 // Makes a non-<button> element operable by keyboard: focusable, and activated by
@@ -548,12 +549,45 @@ function InfoModal({ infoKey }: { infoKey: string }) {
   )
 }
 
+/* ---------------- Launch blocked (MRB-37) ---------------- */
+const BLOCK_META: Record<LaunchBlock, { title: string; icon: string }> = {
+  AUTH: { title: 'Sign in to play', icon: '🔒' },
+  GEO: { title: 'Not available in your region', icon: '🌍' },
+  WALLET_PROVISIONING: { title: 'Wallet almost ready', icon: '⏳' },
+  SELF_EXCLUDED: { title: 'Play is paused', icon: '🛡️' },
+  DEMO_UNAVAILABLE: { title: 'No demo for this game', icon: '🎬' },
+}
+function BlockModal({ reason, message }: { reason: LaunchBlock; message: string }) {
+  const app = useApp()
+  const meta = BLOCK_META[reason]
+  // A relevant next step per reason, never a dead end (MRB-37 R4/R5 spirit).
+  const cta =
+    reason === 'DEMO_UNAVAILABLE' ? { label: 'Sign in to play', act: () => { app.closeModal(); app.setAuthModal('join') } }
+    : reason === 'SELF_EXCLUDED' ? { label: 'Responsible Gambling', act: () => { app.closeModal(); app.openModal({ type: 'account' }) } }
+    : reason === 'WALLET_PROVISIONING' ? { label: 'Open cashier', act: () => { app.closeModal(); app.openModal({ type: 'wallet' }) } }
+    : null
+  return (
+    <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
+      <div className="modal" role="dialog" aria-modal="true" aria-label={meta.title} style={{ maxWidth: 400 }}>
+        <div className="modal-head"><h3>{meta.title}</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
+        <div className="modal-body">
+          <div style={{ textAlign: 'center', fontSize: 40, marginBottom: 8 }} aria-hidden="true">{meta.icon}</div>
+          <p className="muted" style={{ marginTop: 0, textAlign: 'center', lineHeight: 1.55 }}>{message}</p>
+          {cta && <button className="btn orange" onClick={cta.act}>{cta.label}</button>}
+          <button className="btn ghost" onClick={app.closeModal}>Close</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Modals() {
   const app = useApp()
   return (
     <>
       <AuthModal />
       {app.modal?.type === 'wallet' && <Cashier />}
+      {app.modal?.type === 'blocked' && <BlockModal reason={app.modal.reason} message={app.modal.message} />}
       {app.modal?.type === 'game' && <GameModal game={app.modal.game} />}
       {app.modal?.type === 'account' && <AccountModal />}
       {app.modal?.type === 'chest' && <ChestModal />}

@@ -4,6 +4,8 @@ import type { Game } from './data'
 import { api, ApiError } from './api'
 import { affiliateConversion } from './affiliate'
 import { track, identify } from './analytics'
+import { decideLaunch } from './api/launch'
+import type { LaunchMode, LaunchBlock } from './api/launch'
 import type { Account, Profile, LimitKind } from './api'
 
 // Re-exported so existing imports (`from '../store'`) keep working.
@@ -18,6 +20,7 @@ export type Modal =
   | { type: 'wheel' }
   | { type: 'info'; key: string }
   | { type: 'game'; game: Game }
+  | { type: 'blocked'; reason: LaunchBlock; message: string }
   | null
 
 export interface LobbyView { mode: 'all' | 'cat' | 'favs'; cat: string }
@@ -60,6 +63,8 @@ interface Ctx {
   toggleFav: (name: string) => void
   pushRecent: (name: string) => void
   requireAuth: () => boolean
+  /** Launch a game through the compliance/geo gate (MRB-37): opens it, or shows why it can't. */
+  launchGame: (game: Game, mode?: LaunchMode) => void
 }
 
 const AppCtx = createContext<Ctx | null>(null)
@@ -200,6 +205,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
   const requireAuth = () => { if (!account) { setAuthModal('join'); return false } return true }
 
+  // MRB-37: run the launch gate before opening a game. Always emits
+  // game_launch_attempted with the outcome — failed launches are a top signal and
+  // the provider never gives them to us. Blocked → show the reason; allowed → open.
+  const launchGame = (game: Game, mode: LaunchMode = 'real') => {
+    const res = decideLaunch(game, account, mode)
+    track('game_launch_attempted', { game: game.name, studio: game.studio, mode, outcome: res.ok ? 'allowed' : res.reason })
+    if (!res.ok) {
+      if (res.reason === 'AUTH') { setAuthModal('join'); return }
+      setModal({ type: 'blocked', reason: res.reason, message: res.message })
+      return
+    }
+    setModal({ type: 'game', game })
+    if (account) {
+      const recent = [game.name, ...account.recent.filter(n => n !== game.name)].slice(0, 12)
+      setAccount({ ...account, recent })
+      api.setRecent(recent).then(setAccount).catch(() => { /* keep optimistic */ })
+    }
+  }
+
   const openModal = (m: Modal) => { if (m && m.type === 'game') track('game_opened', { game: m.game.name, studio: m.game.studio }); setModal(m) }
   const closeModal = () => setModal(null)
 
@@ -208,7 +232,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     modal, openModal, closeModal, toast, showToast, register, login, logout, requestPasswordReset, resetPassword,
     deposit, withdraw, placeBet, rollback, spinWheel, openChest,
     setLimit, cancelPending, selfExclude, liftExclusion, setRealityChecks,
-    toggleFav, pushRecent, requireAuth,
+    toggleFav, pushRecent, requireAuth, launchGame,
   }), [ready, page, legalKey, lobbyView, account, authModal, resetToken, modal, toast])
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>

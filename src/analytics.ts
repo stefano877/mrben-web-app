@@ -26,6 +26,7 @@ export type ClientEventName =
   | 'signup_submitted'
   | 'login_started'
   | 'game_opened'
+  | 'game_launch_attempted'
   | 'game_searched'
   | 'deposit_started'
   | 'withdrawal_started'
