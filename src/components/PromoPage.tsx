@@ -16,28 +16,50 @@ export default function PromoPage() {
 
   if (!o) return (
     <div className="wrap">
-      <div className="offers-head"><h2>Promotion not found</h2><p>This offer may have ended.</p></div>
+      <div className="offers-hero"><h2>Promotion not found</h2><p>This offer may have ended.</p></div>
       <button className="btn orange" style={{ width: 'auto' }} onClick={() => app.setPage('offers')}>Back to promotions</button>
     </div>
   )
 
-  const g = OHERO[o.key] || ['#333', '#111']
+  const g = OHERO[o.key] || ['#F5A524', '#B23000']
   return (
     <div className="wrap promo-page">
-      <div className="ohero" style={{ height: 150, borderRadius: 18, marginBottom: 16, backgroundImage: `linear-gradient(120deg,${g[0]},${g[1]})` }}>
-        <span className="sheen" />
-        <span className="otag">{o.tag}</span>
-        <div className="ohead" style={{ fontSize: 26 }}>{o.title}</div>
-        <div className="p-art" dangerouslySetInnerHTML={{ __html: promoArt(o.key) }} />
-      </div>
-      <div className="promo-card">
-        <p style={{ marginTop: 0, fontSize: 15, color: '#3a4056' }}>{o.short}</p>
-        <div style={{ display: 'flex', gap: 10, margin: '4px 0 16px', flexWrap: 'wrap' }}>
-          <button className="btn orange" style={{ width: 'auto' }} onClick={claim}>Claim now</button>
-          <button className="btn sec" style={{ width: 'auto' }} onClick={() => app.setPage('offers')}>All promotions</button>
+      <button className="promo-back" onClick={() => app.setPage('offers')}>
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M15 18l-6-6 6-6" /></svg>
+        All promotions
+      </button>
+
+      <div className="jhero" style={{ ['--glow' as string]: g[0] }}>
+        <span className="jcard-glow" />
+        <div className="jhero-art" dangerouslySetInnerHTML={{ __html: promoArt(o.key) }} />
+        <div className="jhero-in">
+          <div className="jhero-badges"><span className="jribbon">{o.ribbon}</span><span className="jtag">{o.tag}</span></div>
+          <div className="jhero-title">{app.loc(o.title)}</div>
+          <div className="jhero-big">{app.loc(o.hero)}</div>
+          <div className="jhero-sub">{app.loc(o.heroSub)}</div>
         </div>
-        <div className="odetails" dangerouslySetInnerHTML={{ __html: o.details }} />
-        <p style={{ fontSize: 12, color: '#6b7280', marginTop: 16 }}>{o.terms}</p>
+      </div>
+
+      <div className="promo-facts">
+        {o.facts.map((f, j) => (
+          <div className="promo-fact" key={j}>
+            <span className="promo-fact-v">{app.loc(f.value)}</span>
+            <span className="promo-fact-l">{f.label}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="promo-card">
+        <p className="promo-lead">{app.loc(o.short)}</p>
+        <div className="promo-cta">
+          <button className="btn orange" style={{ width: 'auto' }} onClick={claim}>Claim now</button>
+          <span className="promo-ccy-note">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" /></svg>
+            Shown in {app.ccy}
+          </span>
+        </div>
+        <div className="odetails" dangerouslySetInnerHTML={{ __html: app.loc(o.details) }} />
+        <div className="promo-fine">{app.loc(o.terms)} Full Promotional and General Terms apply. 18+. Please gamble responsibly.</div>
       </div>
     </div>
   )

@@ -699,3 +699,95 @@ body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; te
 .promo-card .odetails li{ margin:5px 0; line-height:1.55 }
 .promo-card .odetails small{ color:#6b7280 }
 .btn.sec{ background:#F1F2F8; color:#101A45; box-shadow:none }
+
+/* ---------------- Currency selector (header) ---------------- */
+.ccy-wrap{ position:relative }
+.ccy-btn{ display:flex; align-items:center; gap:6px; height:40px; padding:0 12px; border-radius:999px; background:var(--sky); color:#16244A; border:0; cursor:pointer; font-family:var(--font); font-weight:800; font-size:13px; transition:.15s }
+.ccy-btn:hover{ background:var(--sky-dk) }
+.ccy-btn .ccy-code{ letter-spacing:.3px }
+.ccy-btn .ccy-caret{ opacity:.7 }
+.ccy-menu{ position:absolute; right:0; top:48px; background:#fff; border:1px solid #e6e9f0; border-radius:14px; box-shadow:0 16px 40px rgba(16,26,69,.18); padding:8px; min-width:250px; z-index:72 }
+.ccy-menu-head{ font-size:11px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:#8b90a3; padding:6px 10px 8px }
+.ccy-item{ display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:none; border:0; padding:9px 10px; border-radius:10px; cursor:pointer; font-family:var(--font); color:#101A45 }
+.ccy-item:hover{ background:#f4f6fb }
+.ccy-item.on{ background:#FFF3EC }
+.ccy-flag{ font-size:17px; line-height:1 }
+.ccy-name{ font-size:13.5px; font-weight:700 }
+.ccy-tag{ margin-left:auto; font-size:12px; font-weight:800; color:#6b7280 }
+.ccy-item.on .ccy-tag{ color:var(--orange-lo) }
+.ccy-check{ color:var(--orange); font-weight:900; margin-left:6px }
+.ccy-menu-note{ font-size:10.5px; color:#9098a8; line-height:1.4; padding:8px 10px 4px; border-top:1px solid #eef0f6; margin-top:4px }
+
+/* ---------------- Promotions page — polished ---------------- */
+.offers-wrap{ padding-bottom:44px }
+.offers-hero{ margin:8px 0 4px; color:#fff }
+.offers-eyebrow{ display:inline-block; font-size:12px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.3); padding:5px 13px; border-radius:999px; margin-bottom:12px }
+.offers-hero h2{ margin:0; font-size:34px; font-weight:900; text-shadow:0 2px 12px rgba(90,30,0,.3) }
+.offers-hero p{ margin:6px 0 0; font-size:15px; font-weight:600; opacity:.94; max-width:560px }
+.offers-hero-note{ display:inline-flex; align-items:center; gap:7px; margin-top:14px; font-size:12.5px; font-weight:700; color:#fff; background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.22); padding:7px 14px; border-radius:999px }
+.offers-hero-note svg{ opacity:.9 }
+.offers-hero-note b{ font-weight:900 }
+
+/* tabs as buttons */
+.otab{ font-family:var(--font) }
+
+/* ribbon */
+.oribbon{ position:absolute; top:12px; right:12px; z-index:3; background:#fff; color:var(--orange-lo); font-size:10.5px; font-weight:900; letter-spacing:.4px; text-transform:uppercase; padding:5px 11px; border-radius:999px; box-shadow:0 6px 16px rgba(0,0,0,.22) }
+
+/* key-facts strip on cards */
+.ofacts{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:0 0 15px }
+.ofact{ background:#F6F7FB; border:1px solid #eceef5; border-radius:11px; padding:9px 6px; text-align:center; min-width:0 }
+.ofact-v{ display:block; font-size:14px; font-weight:900; color:#101A45; line-height:1.15; letter-spacing:-.01em; word-break:break-word }
+.ofact-l{ display:block; font-size:9.5px; font-weight:700; letter-spacing:.3px; text-transform:uppercase; color:#8b90a3; margin-top:3px }
+@media(max-width:420px){ .ofacts{ grid-template-columns:repeat(2,1fr) } }
+
+/* ---------------- Promotion terms page — polished ---------------- */
+.promo-back{ display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.34); color:#fff; font-family:var(--font); font-weight:800; font-size:13px; padding:8px 15px; border-radius:999px; cursor:pointer; margin:6px 0 16px; transition:.15s }
+.promo-back:hover{ background:rgba(255,255,255,.3) }
+.promo-hero{ position:relative; overflow:hidden; height:170px; border-radius:20px; display:flex; align-items:center; padding:22px 24px; color:#fff; isolation:isolate; background-size:180% 180%; animation:promoBG 11s ease-in-out infinite; box-shadow:0 18px 40px rgba(40,10,0,.28) }
+.promo-hero::after{ content:""; position:absolute; inset:0; z-index:0; background:radial-gradient(70% 120% at 100% 40%,rgba(255,255,255,.2),transparent 60%) }
+.promo-hero .p-art{ position:absolute; right:-6px; bottom:-18px; width:180px; height:180px; z-index:1; opacity:.98; animation:floaty 5.5s ease-in-out infinite }
+.promo-hero-title{ position:relative; z-index:3; font-family:var(--font-head); font-size:30px; font-weight:900; line-height:1.03; max-width:66%; letter-spacing:-.02em; text-shadow:0 3px 16px rgba(0,0,0,.42) }
+.promo-facts{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:-30px 14px 18px; position:relative; z-index:4 }
+.promo-fact{ background:#fff; border-radius:14px; padding:15px 10px; text-align:center; box-shadow:0 12px 28px rgba(40,10,0,.16); border:1px solid rgba(255,255,255,.7) }
+.promo-fact-v{ display:block; font-family:var(--font-head); font-size:19px; font-weight:900; color:var(--orange-lo); line-height:1.1; letter-spacing:-.01em; word-break:break-word }
+.promo-fact-l{ display:block; font-size:10.5px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; color:#8b90a3; margin-top:5px }
+@media(max-width:560px){ .promo-facts{ grid-template-columns:repeat(2,1fr); margin-top:-20px } .promo-hero-title{ font-size:24px; max-width:74% } }
+.promo-lead{ margin:0 0 16px; font-size:16px; line-height:1.5; font-weight:600; color:#2a2d40 }
+.promo-cta{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; padding-bottom:18px; border-bottom:1px solid #eef0f6 }
+.promo-ccy-note{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#8b90a3 }
+.promo-fine{ font-size:11.5px; color:#8b90a3; line-height:1.5; margin-top:16px; padding-top:14px; border-top:1px solid #eef0f6 }
+
+/* ---------------- Jackpot offer cards (big-number style) ---------------- */
+.offers-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:18px; padding-bottom:6px }
+.jcard{ position:relative; overflow:hidden; background:linear-gradient(165deg,#20264A,#0E1830); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:18px 16px 16px; color:#fff; display:flex; flex-direction:column; box-shadow:0 16px 36px rgba(10,10,30,.34); transition:transform .18s,box-shadow .18s }
+.jcard:hover{ transform:translateY(-5px); box-shadow:0 26px 48px rgba(10,10,30,.46) }
+.jcard-glow{ position:absolute; top:-45%; right:-28%; width:72%; height:130%; background:radial-gradient(circle at 50% 50%,var(--glow),transparent 62%); opacity:.34; pointer-events:none; z-index:0 }
+.jcard > *{ position:relative; z-index:1 }
+.jcard-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px }
+.jribbon{ display:inline-flex; align-items:center; gap:5px; background:rgba(245,165,36,.16); border:1px solid rgba(245,165,36,.5); color:#FAD07A; font-size:9.5px; font-weight:900; letter-spacing:.5px; text-transform:uppercase; padding:4px 10px; border-radius:999px; white-space:nowrap }
+.jribbon::before{ content:"\2605"; font-size:9px }
+.jtag{ font-size:9.5px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; color:rgba(255,255,255,.55); white-space:nowrap }
+.jtitle{ font-size:13px; font-weight:700; color:rgba(255,255,255,.82); line-height:1.25; min-height:32px }
+.jbig{ font-family:var(--font-head); font-size:46px; font-weight:900; line-height:1; letter-spacing:-.02em; margin:6px 0 2px; background:linear-gradient(180deg,#FFE7A6,#F5A524); -webkit-background-clip:text; background-clip:text; color:transparent; word-break:break-word }
+.jbigsub{ font-size:12.5px; font-weight:800; color:#FAD07A; margin-bottom:15px }
+.jfacts{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin-bottom:15px }
+.jfact{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09); border-radius:10px; padding:9px 4px; text-align:center; min-width:0 }
+.jfact-v{ display:block; font-size:13px; font-weight:900; color:#fff; line-height:1.1; word-break:break-word }
+.jfact-l{ display:block; font-size:8.5px; font-weight:700; letter-spacing:.3px; text-transform:uppercase; color:rgba(255,255,255,.5); margin-top:3px }
+.jbtns{ display:flex; gap:8px; margin-top:auto }
+.jbtns .btn.orange.small{ flex:1; text-align:center; margin:0 }
+.jbtn-ghost{ flex:1; border:1px solid rgba(255,255,255,.28); background:transparent; color:#fff; font-weight:800; font-size:13px; padding:8px 12px; border-radius:10px; cursor:pointer; font-family:var(--font); transition:.15s }
+.jbtn-ghost:hover{ background:rgba(255,255,255,.1) }
+@media(max-width:420px){ .jfacts{ grid-template-columns:repeat(2,1fr) } }
+
+/* jackpot hero on the terms page */
+.jhero{ position:relative; overflow:hidden; background:linear-gradient(165deg,#20264A,#0E1830); border:1px solid rgba(255,255,255,.08); border-radius:20px; padding:26px 26px 32px; color:#fff; box-shadow:0 18px 42px rgba(10,10,30,.42) }
+.jhero .jcard-glow{ top:-55%; right:-16%; width:60%; height:170% }
+.jhero-art{ position:absolute; right:8px; bottom:-16px; width:176px; height:176px; z-index:1; opacity:.9; animation:floaty 5.5s ease-in-out infinite }
+.jhero-in{ position:relative; z-index:2; max-width:70% }
+.jhero-badges{ display:flex; gap:8px; align-items:center; margin-bottom:12px }
+.jhero-title{ font-size:15px; font-weight:700; color:rgba(255,255,255,.82); line-height:1.25 }
+.jhero-big{ font-family:var(--font-head); font-size:60px; font-weight:900; line-height:1; letter-spacing:-.02em; margin:8px 0 4px; background:linear-gradient(180deg,#FFE7A6,#F5A524); -webkit-background-clip:text; background-clip:text; color:transparent; word-break:break-word }
+.jhero-sub{ font-size:14px; font-weight:800; color:#FAD07A }
+@media(max-width:560px){ .jhero-in{ max-width:100% } .jhero-big{ font-size:44px } .jhero-art{ opacity:.22 } }

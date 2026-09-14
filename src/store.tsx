@@ -7,6 +7,8 @@ import { track, identify } from './analytics'
 import { decideLaunch } from './api/launch'
 import type { LaunchMode, LaunchBlock } from './api/launch'
 import type { Account, Profile, LimitKind } from './api'
+import { loadCcy, saveCcy, loc as locCcy } from './currency'
+import type { Ccy } from './currency'
 
 // Re-exported so existing imports (`from '../store'`) keep working.
 export type { Txn, Profile, LimitKind, Account } from './api'
@@ -38,6 +40,10 @@ interface Ctx {
   page: Page; setPage: (p: Page) => void
   legalKey: string; openLegal: (key: string) => void
   promoKey: string; openPromo: (key: string) => void
+  /** Display currency (fixed-value grid). Defaults from locale; player can override. */
+  ccy: Ccy; setCcy: (c: Ccy) => void
+  /** Localise a string of {token} money placeholders in the current currency. */
+  loc: (s: string) => string
   lobbyView: LobbyView; setLobbyView: (v: LobbyView) => void
   goLobby: (v?: LobbyView) => void
   user: Account | null
@@ -81,6 +87,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [page, setPage] = useState<Page>('lobby')
   const [legalKey, setLegalKey] = useState('')
   const [promoKey, setPromoKey] = useState('')
+  const [ccy, setCcyState] = useState<Ccy>(() => loadCcy())
+  const setCcy = (c: Ccy) => { setCcyState(c); saveCcy(c) }
+  const loc = (s: string) => locCcy(s, ccy)
   const [lobbyView, setLobbyView] = useState<LobbyView>({ mode: 'all', cat: '' })
   const goLobby = (v: LobbyView = { mode: 'all', cat: '' }) => { setLobbyView(v); setPage('lobby'); try { window.history.replaceState({}, '', window.location.pathname) } catch { /* ignore */ }; window.scrollTo({ top: 0, behavior: 'smooth' }) }
   // Legal/policy landing pages get their own shareable URL (?legal=<key>).
@@ -234,12 +243,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const closeModal = () => setModal(null)
 
   const value = useMemo<Ctx>(() => ({
-    ready, page, setPage, legalKey, openLegal, promoKey, openPromo, lobbyView, setLobbyView, goLobby, user: account, authModal, setAuthModal, resetToken,
+    ready, page, setPage, legalKey, openLegal, promoKey, openPromo, ccy, setCcy, loc, lobbyView, setLobbyView, goLobby, user: account, authModal, setAuthModal, resetToken,
     modal, openModal, closeModal, toast, showToast, register, login, logout, requestPasswordReset, resetPassword,
     deposit, withdraw, placeBet, rollback, spinWheel, openChest,
     setLimit, cancelPending, selfExclude, liftExclusion, setRealityChecks,
     toggleFav, pushRecent, requireAuth, launchGame,
-  }), [ready, page, legalKey, promoKey, lobbyView, account, authModal, resetToken, modal, toast])
+  }), [ready, page, legalKey, promoKey, ccy, lobbyView, account, authModal, resetToken, modal, toast])
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>
 }

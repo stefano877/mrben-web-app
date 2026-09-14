@@ -86,35 +86,48 @@ export const eur = (n: number) => '€' + n.toLocaleString('en-US')
 export const fmt = (n: number) => '€' + n.toFixed(2)
 
 /* ---- Offers page ---- */
-export interface Offer { tag: string; key: string; title: string; short: string; details: string; terms: string }
+// Money amounts are written as {tokens} (e.g. {minDepW}, {cap1}) and localised at
+// render time from the fixed-value currency grid in currency.ts — so a BRL account
+// sees R$ values, a NOK account sees kr, etc., all from the same source copy.
+export interface OfferFact { label: string; value: string }
+// hero = the one big headline value (localised via {tokens}); heroSub = the line under it.
+export interface Offer { tag: string; key: string; title: string; ribbon?: string; hero: string; heroSub: string; short: string; facts: OfferFact[]; details: string; terms: string }
 export const OHERO: Record<string, [string, string]> = {
   sports: ['#2A6BE0', '#0E2E77'], trophy: ['#7A2BD0', '#3B1275'], coin: ['#F5A524', '#7A3E05'], casino: ['#FF7A1A', '#B23000'],
   chest: ['#B24CE0', '#3D1268'], gem: ['#22B8FF', '#0A3A8A'], star: ['#FF5EA0', '#7A1E5A'], flag: ['#E0A21E', '#7A4A05'],
 }
-// Amounts shown in € (base). Where an account is in another currency, the fixed
-// local equivalent applies (EUR/USD/CAD/BRL/NOK grid); crypto plays under USD.
-const SPINDAY = (day: string, game: string, mech: string) => `<p><b>How it works</b></p><p>${mech} on <b>${game}</b> — up to 300 bonus spins. ${day} only.</p>
+const SPINDAY = (day: string, game: string) => `<p><b>How it works</b></p><p>Make your first deposit of the day and we boost your free spins on <b>${game}</b> in proportion to your deposit — up to <b>300 bonus spins</b>. ${day} only.</p>
 <p><b>Eligibility</b></p><ul><li>18+, existing funded players who have opted in</li><li>First successful deposit of the day (00:01–23:59 CET); one per account</li></ul>
-<p><b>Key terms</b></p><ul><li>Min deposit €20 (or local equivalent)</li><li>Spin winnings credited as bonus funds, capped at €100</li><li>Wagering 45× the bonus funds (bonus funds only)</li><li>Max bet €5 while the bonus is in play</li><li>Bonus spins valid 10 days; unused bonus funds expire after 30 days</li></ul>
+<p><b>Key terms</b></p><ul><li>Min deposit {minDepS}</li><li>Spin winnings credited as bonus funds, capped at {fsCap}</li><li>Wagering 45× the bonus funds (bonus funds only)</li><li>Max bet {maxBet} while the bonus is in play</li><li>Bonus spins valid 10 days; unused bonus funds expire after 30 days</li></ul>
 <p><small>Full Promotional and General Terms apply. Please play responsibly.</small></p>`
+const SPINFACTS: OfferFact[] = [
+  { label: 'Free spins', value: 'Up to 300' }, { label: 'Min deposit', value: '{minDepS}' },
+  { label: 'Wagering', value: '45×' }, { label: 'Max bet', value: '{maxBet}' },
+]
 
 export const offers: Offer[] = [
-  { tag: 'Sports', key: 'sports', title: 'Bet €10, Get €50 Free Bet', short: 'Bet €10 on any Mr Ben Sport market and get a €50 Free Bet once your bet settles, win or lose.', details: `<p><b>How it works</b></p><p>Bet €10 on any Mr Ben Sport market at odds of 2.00 or higher. Once your qualifying bet settles — win or lose — a €50 Free Bet is credited to your account. Use it on any market in a single transaction.</p>
+  { tag: 'Sports', key: 'sports', title: 'Bet {minDepW}, Get {sportsFreeBet} Free Bet', ribbon: 'Sportsbook', hero: '{sportsFreeBet}', heroSub: 'Free Bet — win or lose', short: 'Bet {minDepW} on any Mr Ben Sport market and get a {sportsFreeBet} Free Bet once your bet settles — win or lose.',
+    facts: [ { label: 'Free bet', value: '{sportsFreeBet}' }, { label: 'Min odds', value: '2.00' }, { label: 'Wagering', value: '10×' }, { label: 'Max win', value: '{sportsMax}' } ],
+    details: `<p><b>How it works</b></p><p>Bet {minDepW} on any Mr Ben Sport market at odds of 2.00 or higher. Once your qualifying bet settles — win or lose — a {sportsFreeBet} Free Bet is credited to your account. Use it on any market in a single transaction.</p>
 <p><b>Eligibility</b></p><ul><li>18+, new players, not resident in Great Britain</li><li>Registered, verified account, opted in</li><li>No other active bonus when you claim</li></ul>
-<p><b>Key terms</b></p><ul><li>Min deposit €10 (or local equivalent). Skrill / Neteller not eligible</li><li>Qualify by wagering €10 at odds ≥ 2.00 (cumulative or single)</li><li>Free Bet expires 7 days after being credited</li><li>Winnings credited as bonus funds; wagering 10× (bonus funds only, min odds 2.00)</li><li>Maximum winnings from bonus funds: €300. Minimum withdrawal: €10</li></ul>
-<p><small>Full Promotional and General Terms apply. Please play responsibly.</small></p>`, terms: '18+. New players only. Opt-in required. Min dep €10.' },
-  { tag: 'Casino', key: 'trophy', title: 'MrBen Welcome Offer 2026', short: 'Your first three deposits get supercharged, up to €1,300 in bonuses plus 150 bonus spins.', details: `<p><b>Your first three deposits, boosted</b></p><ul><li><b>1st deposit:</b> 300% match up to €300 + 50 bonus spins</li><li><b>2nd deposit:</b> 40% match up to €500 + 50 bonus spins</li><li><b>3rd deposit:</b> 60% match up to €500 + 50 bonus spins</li></ul><p>Up to <b>€1,300</b> in bonuses + 150 bonus spins.</p>
-<p><b>Key terms</b></p><ul><li>New players only, one per account. Min €10 per deposit; opt in via the cashier</li><li>Not combinable with other offers. Skrill / Neteller not eligible</li><li>Bonus spins on any Pragmatic Play game; spin winnings capped at €100</li><li>Wagering 55× of (bonus + deposit + spins)</li><li>Max bet €5 while a bonus is in play</li><li>Spins valid 10 days; unused bonus funds expire after 30 days</li></ul>
+<p><b>Key terms</b></p><ul><li>Min deposit {minDepW}. Skrill / Neteller not eligible</li><li>Qualify by wagering {minDepW} at odds ≥ 2.00 (cumulative or single)</li><li>Free Bet expires 7 days after being credited</li><li>Winnings credited as bonus funds; wagering 10× (bonus funds only, min odds 2.00)</li><li>Maximum winnings from bonus funds: {sportsMax}. Minimum withdrawal: {minWd}</li></ul>
+<p><small>Full Promotional and General Terms apply. Please play responsibly.</small></p>`, terms: '18+. New players only. Opt-in required. Min dep {minDepW}.' },
+  { tag: 'Casino', key: 'trophy', title: 'MrBen Welcome Offer 2026', ribbon: 'Most popular', hero: '{welcomeTotal}', heroSub: '+ 150 bonus spins', short: 'Your first three deposits get supercharged — up to {welcomeTotal} in bonuses plus 150 bonus spins.',
+    facts: [ { label: 'Match', value: 'Up to 300%' }, { label: 'Total bonus', value: 'Up to {welcomeTotal}' }, { label: 'Bonus spins', value: '150' }, { label: 'Wagering', value: '55×' } ],
+    details: `<p><b>Your first three deposits, boosted</b></p><ul><li><b>1st deposit:</b> 300% match up to {cap1} + 50 bonus spins</li><li><b>2nd deposit:</b> 40% match up to {cap23} + 50 bonus spins</li><li><b>3rd deposit:</b> 60% match up to {cap23} + 50 bonus spins</li></ul><p>Up to <b>{welcomeTotal}</b> in bonuses + 150 bonus spins.</p>
+<p><b>Key terms</b></p><ul><li>New players only, one per account. Min {minDepW} per deposit; opt in via the cashier</li><li>Not combinable with other offers. Skrill / Neteller not eligible</li><li>Bonus spins on any Pragmatic Play game; spin winnings capped at {fsCap}</li><li>Wagering 55× of (bonus + deposit + spins)</li><li>Max bet {maxBet} while a bonus is in play</li><li>Spins valid 10 days; unused bonus funds expire after 30 days</li></ul>
 <p><small>Full Promotional and General Terms apply. Please play responsibly.</small></p>`, terms: '18+. New players only. Terms apply.' },
-  { tag: 'VIP', key: 'coin', title: 'Ben’s Loyalty Program', short: 'Every spin and every hand earns loyalty points that unlock seriously rewarding perks.', details: `<p><b>Earn as you play</b></p><p>Collect loyalty points on slots and table games and redeem them for bonus funds in <b>My Account</b>. Points earned per €10 wagered:</p>
+  { tag: 'VIP', key: 'coin', title: 'Ben’s Loyalty Program', ribbon: 'VIP', hero: '2× pts', heroSub: 'on every slot spin', short: 'Every spin and every hand earns loyalty points that unlock seriously rewarding perks.',
+    facts: [ { label: '1,000 points', value: '{loyalty}' }, { label: 'Signup bonus', value: '500 pts' }, { label: 'Wagering', value: '40×' }, { label: 'Cash-out', value: 'No max' } ],
+    details: `<p><b>Earn as you play</b></p><p>Collect loyalty points on slots and table games and redeem them for bonus funds in <b>My Account</b>. Points earned per {minDepS} wagered:</p>
 <ul><li>Slots &amp; Scratchcards — 2.00 pts</li><li>Video Poker &amp; Bingo — 1.00 pt</li><li>Blackjack — 0.50 pt</li><li>Roulette — 0.25 pt</li></ul>
 <p>Plus 500 points after your first deposit.</p>
-<p><b>Redeeming</b></p><ul><li>1,000 points = €5 in bonus funds</li><li>Redeem in batches of 1,000 (min 1,000/day, max 10,000/day)</li><li>Bonus funds wagering 40×; valid 30 days; no maximum cash-out</li></ul>
+<p><b>Redeeming</b></p><ul><li>1,000 points = {loyalty} in bonus funds</li><li>Redeem in batches of 1,000 (min 1,000/day, max 10,000/day)</li><li>Bonus funds wagering 40×; valid 30 days; no maximum cash-out</li></ul>
 <p><small>Existing funded players only. Full terms apply. Please play responsibly.</small></p>`, terms: '18+. Funded players only. Terms apply.' },
-  { tag: 'Casino', key: 'casino', title: 'Monday Spin Boost', short: 'Every Monday, deposit up to €100 and receive triple the spins.', details: SPINDAY('Monday', 'Starburst', 'Deposit and get <b>triple</b> the spins (e.g. €50 → 150 spins; max deposit €100)'), terms: '18+. Existing players only.' },
-  { tag: 'Casino', key: 'chest', title: 'Tuesday Spin Boost', short: 'Get up to 300 free spins on Book of Dead every Tuesday.', details: SPINDAY('Tuesday', 'Book of Dead', 'Spins in proportion to your deposit (e.g. €100 → 100 spins, €300 → 300 spins)'), terms: '18+. Existing players only.' },
-  { tag: 'Casino', key: 'gem', title: 'Thursday Treat', short: 'Shine bright on Thursdays with up to 300 spins on Starburst.', details: SPINDAY('Thursday', 'Starburst', 'Spins in proportion to your deposit (e.g. €100 → 100 spins, €300 → 300 spins)'), terms: '18+. Existing players only.' },
-  { tag: 'Casino', key: 'star', title: 'Sunday Funday', short: 'Wrap up your week with up to 300 spins on Big Bass Bonanza.', details: SPINDAY('Sunday', 'Big Bass Bonanza 1000', 'Spins in proportion to your deposit (e.g. €100 → 100 spins, €300 → 300 spins)'), terms: '18+. Existing players only.' },
+  { tag: 'Casino', key: 'casino', title: 'Monday Spin Boost', ribbon: 'Weekly', hero: '300', heroSub: 'free spins, every Monday', short: 'Start the week right — deposit on Monday and receive triple the spins on Starburst.', facts: SPINFACTS, details: SPINDAY('Monday', 'Starburst'), terms: '18+. Existing players only.' },
+  { tag: 'Casino', key: 'chest', title: 'Tuesday Spin Boost', ribbon: 'Weekly', hero: '300', heroSub: 'free spins, every Tuesday', short: 'Get up to 300 free spins on Book of Dead every Tuesday.', facts: SPINFACTS, details: SPINDAY('Tuesday', 'Book of Dead'), terms: '18+. Existing players only.' },
+  { tag: 'Casino', key: 'gem', title: 'Thursday Treat', ribbon: 'Weekly', hero: '300', heroSub: 'free spins, every Thursday', short: 'Shine bright on Thursdays with up to 300 spins on Starburst.', facts: SPINFACTS, details: SPINDAY('Thursday', 'Starburst'), terms: '18+. Existing players only.' },
+  { tag: 'Casino', key: 'star', title: 'Sunday Funday', ribbon: 'Weekly', hero: '300', heroSub: 'free spins, every Sunday', short: 'Wrap up your week with up to 300 spins on Big Bass Bonanza.', facts: SPINFACTS, details: SPINDAY('Sunday', 'Big Bass Bonanza 1000'), terms: '18+. Existing players only.' },
 ]
 export const offerTabs = ['All', 'Casino', 'Sports', 'VIP']
 
