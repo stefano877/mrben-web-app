@@ -102,23 +102,23 @@ const SPINDAY = (day: string, game: string) => `<p><b>How it works</b></p><p>Mak
 <p><small>Full Promotional and General Terms apply. Please play responsibly.</small></p>`
 const SPINFACTS: OfferFact[] = [
   { label: 'Free spins', value: 'Up to 300' }, { label: 'Min deposit', value: '{minDepS}' },
-  { label: 'Wagering', value: '45×' }, { label: 'Max bet', value: '{maxBet}' },
+  { label: 'Max bet', value: '{maxBet}' },
 ]
 
 export const offers: Offer[] = [
   { tag: 'Sports', key: 'sports', title: 'Bet {minDepW}, Get {sportsFreeBet} Free Bet', ribbon: 'Sportsbook', hero: '{sportsFreeBet}', heroSub: 'Free Bet — win or lose', short: 'Bet {minDepW} on any Mr Ben Sport market and get a {sportsFreeBet} Free Bet once your bet settles — win or lose.',
-    facts: [ { label: 'Free bet', value: '{sportsFreeBet}' }, { label: 'Min odds', value: '2.00' }, { label: 'Wagering', value: '10×' }, { label: 'Max win', value: '{sportsMax}' } ],
+    facts: [ { label: 'Free bet', value: '{sportsFreeBet}' }, { label: 'Min odds', value: '2.00' }, { label: 'Max win', value: '{sportsMax}' } ],
     details: `<p><b>How it works</b></p><p>Bet {minDepW} on any Mr Ben Sport market at odds of 2.00 or higher. Once your qualifying bet settles — win or lose — a {sportsFreeBet} Free Bet is credited to your account. Use it on any market in a single transaction.</p>
 <p><b>Eligibility</b></p><ul><li>18+, new players, not resident in Great Britain</li><li>Registered, verified account, opted in</li><li>No other active bonus when you claim</li></ul>
 <p><b>Key terms</b></p><ul><li>Min deposit {minDepW}. Skrill / Neteller not eligible</li><li>Qualify by wagering {minDepW} at odds ≥ 2.00 (cumulative or single)</li><li>Free Bet expires 7 days after being credited</li><li>Winnings credited as bonus funds; wagering 10× (bonus funds only, min odds 2.00)</li><li>Maximum winnings from bonus funds: {sportsMax}. Minimum withdrawal: {minWd}</li></ul>
 <p><small>Full Promotional and General Terms apply. Please play responsibly.</small></p>`, terms: '18+. New players only. Opt-in required. Min dep {minDepW}.' },
   { tag: 'Casino', key: 'trophy', title: 'MrBen Welcome Offer 2026', ribbon: 'Most popular', hero: '{welcomeTotal}', heroSub: '+ 150 bonus spins', short: 'Your first three deposits get supercharged — up to {welcomeTotal} in bonuses plus 150 bonus spins.',
-    facts: [ { label: 'Match', value: 'Up to 300%' }, { label: 'Total bonus', value: 'Up to {welcomeTotal}' }, { label: 'Bonus spins', value: '150' }, { label: 'Wagering', value: '55×' } ],
+    facts: [ { label: 'Match', value: 'Up to 300%' }, { label: 'Total bonus', value: 'Up to {welcomeTotal}' }, { label: 'Bonus spins', value: '150' } ],
     details: `<p><b>Your first three deposits, boosted</b></p><ul><li><b>1st deposit:</b> 300% match up to {cap1} + 50 bonus spins</li><li><b>2nd deposit:</b> 40% match up to {cap23} + 50 bonus spins</li><li><b>3rd deposit:</b> 60% match up to {cap23} + 50 bonus spins</li></ul><p>Up to <b>{welcomeTotal}</b> in bonuses + 150 bonus spins.</p>
 <p><b>Key terms</b></p><ul><li>New players only, one per account. Min {minDepW} per deposit; opt in via the cashier</li><li>Not combinable with other offers. Skrill / Neteller not eligible</li><li>Bonus spins on any Pragmatic Play game; spin winnings capped at {fsCap}</li><li>Wagering 55× of (bonus + deposit + spins)</li><li>Max bet {maxBet} while a bonus is in play</li><li>Spins valid 10 days; unused bonus funds expire after 30 days</li></ul>
 <p><small>Full Promotional and General Terms apply. Please play responsibly.</small></p>`, terms: '18+. New players only. Terms apply.' },
   { tag: 'VIP', key: 'coin', title: 'Ben’s Loyalty Program', ribbon: 'VIP', hero: '2× pts', heroSub: 'on every slot spin', short: 'Every spin and every hand earns loyalty points that unlock seriously rewarding perks.',
-    facts: [ { label: '1,000 points', value: '{loyalty}' }, { label: 'Signup bonus', value: '500 pts' }, { label: 'Wagering', value: '40×' }, { label: 'Cash-out', value: 'No max' } ],
+    facts: [ { label: '1,000 points', value: '{loyalty}' }, { label: 'Signup bonus', value: '500 pts' }, { label: 'Cash-out', value: 'No max' } ],
     details: `<p><b>Earn as you play</b></p><p>Collect loyalty points on slots and table games and redeem them for bonus funds in <b>My Account</b>. Points earned per {minDepS} wagered:</p>
 <ul><li>Slots &amp; Scratchcards — 2.00 pts</li><li>Video Poker &amp; Bingo — 1.00 pt</li><li>Blackjack — 0.50 pt</li><li>Roulette — 0.25 pt</li></ul>
 <p>Plus 500 points after your first deposit.</p>
