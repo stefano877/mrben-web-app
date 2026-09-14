@@ -70,6 +70,11 @@ function Shell() {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [app.modal, app.authModal])
+  // VIP is members-only: if a logged-out visitor lands on it (nav, back button,
+  // or a stale link), bounce them to the lobby and offer to join.
+  useEffect(() => {
+    if (app.ready && app.page === 'vip' && !app.user) { app.setPage('lobby'); app.setAuthModal('join') }
+  }, [app.ready, app.page, app.user])
   // Region-unavailable screen. Preview only here (?geoblock=US); real geo-blocking
   // is enforced at the edge and backend, which will pass the decision in.
   const blockedRegion = previewBlockedRegion()

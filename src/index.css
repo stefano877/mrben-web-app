@@ -717,6 +717,8 @@ body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; te
 .ccy-item.on .ccy-tag{ color:var(--orange-lo) }
 .ccy-check{ color:var(--orange); font-weight:900; margin-left:6px }
 .ccy-menu-note{ font-size:10.5px; color:#9098a8; line-height:1.4; padding:8px 10px 4px; border-top:1px solid #eef0f6; margin-top:4px }
+.lang-menu{ max-height:min(70vh,360px); overflow:auto; min-width:210px }
+@media(max-width:520px){ .ccy-menu{ min-width:0; width:min(78vw,250px) } }
 
 /* ---------------- Promotions page — polished ---------------- */
 .offers-wrap{ padding-bottom:44px }

@@ -9,6 +9,8 @@ import type { LaunchMode, LaunchBlock } from './api/launch'
 import type { Account, Profile, LimitKind } from './api'
 import { loadCcy, saveCcy, loc as locCcy } from './currency'
 import type { Ccy } from './currency'
+import { loadLang, saveLang, translate } from './i18n'
+import type { Lang } from './i18n'
 
 // Re-exported so existing imports (`from '../store'`) keep working.
 export type { Txn, Profile, LimitKind, Account } from './api'
@@ -44,6 +46,10 @@ interface Ctx {
   ccy: Ccy; setCcy: (c: Ccy) => void
   /** Localise a string of {token} money placeholders in the current currency. */
   loc: (s: string) => string
+  /** Display language. Defaults from browser locale; player can override. */
+  lang: Lang; setLang: (l: Lang) => void
+  /** Translate a key (falls back to English, then `fallback`, then the key). */
+  t: (key: string, fallback?: string, vars?: Record<string, string>) => string
   lobbyView: LobbyView; setLobbyView: (v: LobbyView) => void
   goLobby: (v?: LobbyView) => void
   user: Account | null
@@ -90,6 +96,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [ccy, setCcyState] = useState<Ccy>(() => loadCcy())
   const setCcy = (c: Ccy) => { setCcyState(c); saveCcy(c) }
   const loc = (s: string) => locCcy(s, ccy)
+  const [lang, setLangState] = useState<Lang>(() => loadLang())
+  const setLang = (l: Lang) => { setLangState(l); saveLang(l) }
+  const t = (key: string, fallback?: string, vars?: Record<string, string>) => translate(lang, key, fallback, vars)
+  // Reflect the language on <html lang> for a11y / SEO on first paint and changes.
+  useEffect(() => { try { document.documentElement.lang = lang } catch { /* ignore */ } }, [lang])
   const [lobbyView, setLobbyView] = useState<LobbyView>({ mode: 'all', cat: '' })
   const goLobby = (v: LobbyView = { mode: 'all', cat: '' }) => { setLobbyView(v); setPage('lobby'); try { window.history.replaceState({}, '', window.location.pathname) } catch { /* ignore */ }; window.scrollTo({ top: 0, behavior: 'smooth' }) }
   // Legal/policy landing pages get their own shareable URL (?legal=<key>).
@@ -243,12 +254,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const closeModal = () => setModal(null)
 
   const value = useMemo<Ctx>(() => ({
-    ready, page, setPage, legalKey, openLegal, promoKey, openPromo, ccy, setCcy, loc, lobbyView, setLobbyView, goLobby, user: account, authModal, setAuthModal, resetToken,
+    ready, page, setPage, legalKey, openLegal, promoKey, openPromo, ccy, setCcy, loc, lang, setLang, t, lobbyView, setLobbyView, goLobby, user: account, authModal, setAuthModal, resetToken,
     modal, openModal, closeModal, toast, showToast, register, login, logout, requestPasswordReset, resetPassword,
     deposit, withdraw, placeBet, rollback, spinWheel, openChest,
     setLimit, cancelPending, selfExclude, liftExclusion, setRealityChecks,
     toggleFav, pushRecent, requireAuth, launchGame,
-  }), [ready, page, legalKey, promoKey, ccy, lobbyView, account, authModal, resetToken, modal, toast])
+  }), [ready, page, legalKey, promoKey, ccy, lang, lobbyView, account, authModal, resetToken, modal, toast])
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>
 }

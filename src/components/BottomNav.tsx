@@ -26,11 +26,11 @@ export default function BottomNav() {
             : 'casino'
 
   const items: { k: string; label: string; fn: () => void }[] = [
-    { k: 'casino', label: 'Casino', fn: () => app.goLobby() },
-    { k: 'sports', label: 'Sports', fn: () => app.setPage('sports') },
-    { k: 'offers', label: 'Offers', fn: () => app.setPage('offers') },
-    { k: 'mygames', label: 'My Games', fn: () => (app.user ? app.goLobby({ mode: 'favs', cat: '' }) : app.setAuthModal('login')) },
-    { k: 'account', label: app.user ? 'Account' : 'Sign in', fn: () => (app.user ? app.openModal({ type: 'account' }) : app.setAuthModal('login')) },
+    { k: 'casino', label: app.t('nav.casino'), fn: () => app.goLobby() },
+    { k: 'sports', label: app.t('tab.Sports', 'Sports'), fn: () => app.setPage('sports') },
+    { k: 'offers', label: app.t('nav.offers'), fn: () => app.setPage('offers') },
+    { k: 'mygames', label: app.t('nav.mygames'), fn: () => (app.user ? app.goLobby({ mode: 'favs', cat: '' }) : app.setAuthModal('login')) },
+    { k: 'account', label: app.user ? app.t('nav.account', 'Account') : app.t('cta.login'), fn: () => (app.user ? app.openModal({ type: 'account' }) : app.setAuthModal('login')) },
   ]
 
   return (

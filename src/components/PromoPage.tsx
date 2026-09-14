@@ -6,18 +6,19 @@ import { useApp } from '../store'
 export default function PromoPage() {
   const app = useApp()
   const o = offers.find(x => x.key === app.promoKey)
+  const tl = (key: string, fallback: string) => app.loc(app.t(key, fallback))
 
   const claim = () => {
     if (!app.requireAuth()) return
     app.setPage('offers')
     app.openModal({ type: 'wallet' })
-    app.showToast('Offer opted in. It applies on your deposit.')
+    app.showToast(app.t('promo.optedIn'))
   }
 
   if (!o) return (
     <div className="wrap">
-      <div className="offers-hero"><h2>Promotion not found</h2><p>This offer may have ended.</p></div>
-      <button className="btn orange" style={{ width: 'auto' }} onClick={() => app.setPage('offers')}>Back to promotions</button>
+      <div className="offers-hero"><h2>{app.t('promo.notFound.title')}</h2><p>{app.t('promo.notFound.sub')}</p></div>
+      <button className="btn orange" style={{ width: 'auto' }} onClick={() => app.setPage('offers')}>{app.t('promo.back')}</button>
     </div>
   )
 
@@ -26,17 +27,17 @@ export default function PromoPage() {
     <div className="wrap promo-page">
       <button className="promo-back" onClick={() => app.setPage('offers')}>
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M15 18l-6-6 6-6" /></svg>
-        All promotions
+        {app.t('promo.back')}
       </button>
 
       <div className="jhero" style={{ ['--glow' as string]: g[0] }}>
         <span className="jcard-glow" />
         <div className="jhero-art" dangerouslySetInnerHTML={{ __html: promoArt(o.key) }} />
         <div className="jhero-in">
-          <div className="jhero-badges"><span className="jribbon">{o.ribbon}</span><span className="jtag">{o.tag}</span></div>
-          <div className="jhero-title">{app.loc(o.title)}</div>
+          <div className="jhero-badges"><span className="jribbon">{app.t('ribbon.' + o.ribbon, o.ribbon || '')}</span><span className="jtag">{app.t('tab.' + o.tag, o.tag)}</span></div>
+          <div className="jhero-title">{tl('offer.' + o.key + '.title', o.title)}</div>
           <div className="jhero-big">{app.loc(o.hero)}</div>
-          <div className="jhero-sub">{app.loc(o.heroSub)}</div>
+          <div className="jhero-sub">{tl('offer.' + o.key + '.heroSub', o.heroSub)}</div>
         </div>
       </div>
 
@@ -44,22 +45,22 @@ export default function PromoPage() {
         {o.facts.map((f, j) => (
           <div className="promo-fact" key={j}>
             <span className="promo-fact-v">{app.loc(f.value)}</span>
-            <span className="promo-fact-l">{f.label}</span>
+            <span className="promo-fact-l">{app.t('fact.' + f.label, f.label)}</span>
           </div>
         ))}
       </div>
 
       <div className="promo-card">
-        <p className="promo-lead">{app.loc(o.short)}</p>
+        <p className="promo-lead">{tl('offer.' + o.key + '.short', o.short)}</p>
         <div className="promo-cta">
-          <button className="btn orange" style={{ width: 'auto' }} onClick={claim}>Claim now</button>
+          <button className="btn orange" style={{ width: 'auto' }} onClick={claim}>{app.t('cta.claim')}</button>
           <span className="promo-ccy-note">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" /></svg>
-            Shown in {app.ccy}
+            {app.t('promo.shownIn', undefined, { ccy: app.ccy })}
           </span>
         </div>
         <div className="odetails" dangerouslySetInnerHTML={{ __html: app.loc(o.details) }} />
-        <div className="promo-fine">{app.loc(o.terms)} Full Promotional and General Terms apply. 18+. Please gamble responsibly.</div>
+        <div className="promo-fine">{app.loc(o.terms)} {app.t('promo.fine')}</div>
       </div>
     </div>
   )
