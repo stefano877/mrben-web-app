@@ -7,11 +7,14 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server.js"
   },
   "dependencies": {
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "express": "^4.21.2",
+    "compression": "^1.7.5"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.0",
