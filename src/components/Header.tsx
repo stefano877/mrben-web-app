@@ -45,7 +45,16 @@ export default function Header() {
   return (
     <header className={scrolled ? 'scrolled' : ''}>
       <div className="wrap nav">
-        <div className="brand" onClick={() => app.goLobby()}><img src="/logo.png" alt="MrBen.com" /></div>
+        <div className="brand" onClick={() => app.goLobby()}>
+          <svg className="brand-logo" viewBox="0 0 196 48" width="150" height="37" role="img" aria-label="MrBen.com" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0" y="2" width="44" height="44" rx="13" fill="#101A45" />
+            <rect x="8" y="33" width="28" height="4.4" rx="2.2" fill="#fff" />
+            <rect x="15" y="12" width="14" height="23" rx="2" fill="#fff" />
+            <rect x="15" y="27" width="14" height="4.2" fill="#F35100" />
+            <circle cx="35.5" cy="13.5" r="2.4" fill="#FFCB57" />
+            <text x="54" y="33" fontFamily="Sora, Inter, system-ui, sans-serif" fontSize="27" fontWeight="800" letterSpacing="-0.6" fill="#fff">MrBen<tspan fontSize="13" fontWeight="700" dx="2" fill="rgba(255,255,255,.66)">.com</tspan></text>
+          </svg>
+        </div>
         <nav className="menu">
           {NAV.map(n => <a key={n} className={active === n ? 'on' : ''} onClick={() => nav(n)}>{n}</a>)}
         </nav>
