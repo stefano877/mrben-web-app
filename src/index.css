@@ -689,3 +689,13 @@ body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; te
 .hr-st{ font-size:11px; color:#0A8D3A; font-weight:700 }
 .hist-empty{ text-align:center; padding:26px; color:#6b7280; font-size:13.5px }
 .hist-note{ font-size:11px; color:#9098a8; margin-top:12px; text-align:center }
+
+/* ---------------- Promotion terms page (?promo=<key>) ---------------- */
+.promo-page{ padding-bottom:44px }
+.promo-card{ background:#fff; border-radius:16px; padding:24px 26px; color:#1B1D33; box-shadow:0 14px 34px rgba(60,20,0,.16) }
+.promo-card .odetails p{ margin:10px 0; line-height:1.6 }
+.promo-card .odetails b{ color:#101A45 }
+.promo-card .odetails ul{ margin:8px 0 14px; padding-left:20px }
+.promo-card .odetails li{ margin:5px 0; line-height:1.55 }
+.promo-card .odetails small{ color:#6b7280 }
+.btn.sec{ background:#F1F2F8; color:#101A45; box-shadow:none }

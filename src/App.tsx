@@ -18,6 +18,7 @@ import CookieConsent from './components/CookieConsent'
 import RealityCheck from './components/RealityCheck'
 import RegionBlock, { previewBlockedRegion } from './components/RegionBlock'
 import LegalPage from './components/LegalPage'
+import PromoPage from './components/PromoPage'
 import AffiliatePromo from './components/AffiliatePromo'
 
 function Shell() {
@@ -85,6 +86,7 @@ function Shell() {
       {app.page === 'sports' && <Sportsbook />}
       {app.page === 'vip' && <VipPage />}
       {app.page === 'legal' && <LegalPage />}
+      {app.page === 'promo' && <PromoPage />}
       {app.page === 'affiliates' && <AffiliatePromo />}
       </main>
       <Footer />

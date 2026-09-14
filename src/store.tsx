@@ -11,7 +11,7 @@ import type { Account, Profile, LimitKind } from './api'
 // Re-exported so existing imports (`from '../store'`) keep working.
 export type { Txn, Profile, LimitKind, Account } from './api'
 
-export type Page = 'lobby' | 'offers' | 'sports' | 'vip' | 'legal' | 'affiliates'
+export type Page = 'lobby' | 'offers' | 'sports' | 'vip' | 'legal' | 'affiliates' | 'promo'
 
 export type Modal =
   | { type: 'wallet' }
@@ -37,6 +37,7 @@ interface Ctx {
   ready: boolean
   page: Page; setPage: (p: Page) => void
   legalKey: string; openLegal: (key: string) => void
+  promoKey: string; openPromo: (key: string) => void
   lobbyView: LobbyView; setLobbyView: (v: LobbyView) => void
   goLobby: (v?: LobbyView) => void
   user: Account | null
@@ -79,10 +80,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
   const [page, setPage] = useState<Page>('lobby')
   const [legalKey, setLegalKey] = useState('')
+  const [promoKey, setPromoKey] = useState('')
   const [lobbyView, setLobbyView] = useState<LobbyView>({ mode: 'all', cat: '' })
   const goLobby = (v: LobbyView = { mode: 'all', cat: '' }) => { setLobbyView(v); setPage('lobby'); try { window.history.replaceState({}, '', window.location.pathname) } catch { /* ignore */ }; window.scrollTo({ top: 0, behavior: 'smooth' }) }
   // Legal/policy landing pages get their own shareable URL (?legal=<key>).
   const openLegal = (key: string) => { setLegalKey(key); setPage('legal'); try { window.history.pushState({}, '', '?legal=' + key) } catch { /* ignore */ }; window.scrollTo({ top: 0, behavior: 'auto' }) }
+  // Each promotion has its own shareable URL (?promo=<key>) — the full T&Cs page.
+  const openPromo = (key: string) => { setPromoKey(key); setPage('promo'); try { window.history.pushState({}, '', '?promo=' + key) } catch { /* ignore */ }; window.scrollTo({ top: 0, behavior: 'auto' }) }
   const [authModal, setAuthModal] = useState<AuthMode>(null)
   const [resetToken, setResetToken] = useState<string | null>(null)
   const [modal, setModal] = useState<Modal>(null)
@@ -114,6 +118,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       const lk = params.get('legal')
       if (lk) { setLegalKey(lk); setPage('legal') }
+      const pk = params.get('promo')
+      if (pk) { setPromoKey(pk); setPage('promo') }
     } catch { /* ignore */ }
   }, [])
 
@@ -228,12 +234,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const closeModal = () => setModal(null)
 
   const value = useMemo<Ctx>(() => ({
-    ready, page, setPage, legalKey, openLegal, lobbyView, setLobbyView, goLobby, user: account, authModal, setAuthModal, resetToken,
+    ready, page, setPage, legalKey, openLegal, promoKey, openPromo, lobbyView, setLobbyView, goLobby, user: account, authModal, setAuthModal, resetToken,
     modal, openModal, closeModal, toast, showToast, register, login, logout, requestPasswordReset, resetPassword,
     deposit, withdraw, placeBet, rollback, spinWheel, openChest,
     setLimit, cancelPending, selfExclude, liftExclusion, setRealityChecks,
     toggleFav, pushRecent, requireAuth, launchGame,
-  }), [ready, page, legalKey, lobbyView, account, authModal, resetToken, modal, toast])
+  }), [ready, page, legalKey, promoKey, lobbyView, account, authModal, resetToken, modal, toast])
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>
 }
