@@ -80,10 +80,10 @@ function AuthModal() {
     setErr(''); setBusy(true)
     try {
       if (mode === 'join') {
-        if (pass.length < 12) { setErr('Password must be at least 12 characters'); return }
+        if (pass.length < 12) { setErr(app.t('auth.err.pass12', 'Password must be at least 12 characters')); return }
         // Age and policy acceptance are mandatory and must be explicit (MRB-95).
-        if (!over18) { setErr('Please confirm you are at least 18 years old.'); return }
-        if (!acceptTerms) { setErr('Please accept the Terms and Privacy Policy to continue.'); return }
+        if (!over18) { setErr(app.t('auth.err.age', 'Please confirm you are at least 18 years old.')); return }
+        if (!acceptTerms) { setErr(app.t('auth.err.terms', 'Please accept the Terms and Privacy Policy to continue.')); return }
         // Drop the national leading zero so the number is valid E.164 (e.g. 07700 -> +447700).
         const nat = phone.trim().replace(/\s+/g, '').replace(/^0+/, '')
         const fullPhone = nat ? `+${dial} ${nat}` : ''
@@ -98,35 +98,35 @@ function AuthModal() {
         if (e) { setErr(e); return }
       }
       app.setAuthModal(null)
-      app.showToast(mode === 'join' ? 'Account created. Welcome to MrBen!' : 'Logged in')
+      app.showToast(mode === 'join' ? app.t('auth.toast.created', 'Account created. Welcome to MrBen!') : app.t('auth.toast.loggedIn', 'Logged in'))
     } finally { setBusy(false) }
   }
 
   return (
     <div className="overlay open" onClick={(ev) => { if (ev.target === ev.currentTarget) app.setAuthModal(null) }}>
       <div className="modal" role="dialog" aria-modal="true">
-        <div className="modal-head"><h3>{mode === 'join' ? 'Join MrBen' : 'Welcome back'}</h3><button className="x" aria-label="Close" onClick={() => app.setAuthModal(null)}>✕</button></div>
+        <div className="modal-head"><h3>{mode === 'join' ? app.t('auth.join.title', 'Join MrBen') : app.t('auth.login.title', 'Welcome back')}</h3><button className="x" aria-label={app.t('common.close', 'Close')} onClick={() => app.setAuthModal(null)}>✕</button></div>
         <div className="modal-body">
-          {mode === 'join' && <p className="muted center" style={{ marginTop: 0 }}>100% up to €200 on your first deposit</p>}
-          <div className="field"><label>Email</label><input type="email" value={email} placeholder="you@email.com" onChange={e => setEmail(e.target.value)} onBlur={() => mode === 'join' && email.trim() && fieldDone('email')} /></div>
+          {mode === 'join' && <p className="muted center" style={{ marginTop: 0 }}>{app.t('auth.join.sub', '100% up to €200 on your first deposit')}</p>}
+          <div className="field"><label>{app.t('auth.email', 'Email')}</label><input type="email" value={email} placeholder={app.t('auth.emailPh', 'you@email.com')} onChange={e => setEmail(e.target.value)} onBlur={() => mode === 'join' && email.trim() && fieldDone('email')} /></div>
           {mode === 'join' && (
-            <div className="field"><label>Username <span className="hint">3 to 20 characters</span></label><input type="text" value={username} placeholder="choose a username" maxLength={20} onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))} onBlur={() => username.trim() && fieldDone('username')} /></div>
+            <div className="field"><label>{app.t('auth.username', 'Username')} <span className="hint">{app.t('auth.usernameHint', '3 to 20 characters')}</span></label><input type="text" value={username} placeholder={app.t('auth.usernamePh', 'choose a username')} maxLength={20} onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))} onBlur={() => username.trim() && fieldDone('username')} /></div>
           )}
           {mode === 'join' && (
-            <div className="field"><label>Date of birth <span className="hint">you must be 18+</span></label><input type="date" value={dob} max={maxDob} onChange={e => setDob(e.target.value)} onBlur={() => dob && fieldDone('dob')} /></div>
+            <div className="field"><label>{app.t('auth.dob', 'Date of birth')} <span className="hint">{app.t('auth.dobHint', 'you must be 18+')}</span></label><input type="date" value={dob} max={maxDob} onChange={e => setDob(e.target.value)} onBlur={() => dob && fieldDone('dob')} /></div>
           )}
-          <div className="field"><label>Password {mode === 'join' && <span className="hint">at least 12 characters</span>}</label><input type="password" value={pass} placeholder="••••••••" onChange={e => setPass(e.target.value)} onBlur={() => mode === 'join' && pass && fieldDone('password')} onKeyDown={e => mode === 'login' && e.key === 'Enter' && submit()} /></div>
+          <div className="field"><label>{app.t('auth.password', 'Password')} {mode === 'join' && <span className="hint">{app.t('auth.pass12hint', 'at least 12 characters')}</span>}</label><input type="password" value={pass} placeholder="••••••••" onChange={e => setPass(e.target.value)} onBlur={() => mode === 'join' && pass && fieldDone('password')} onKeyDown={e => mode === 'login' && e.key === 'Enter' && submit()} /></div>
 
           {mode === 'join' && <>
             <div className="field">
-              <label>Country {detecting && <span className="hint">detecting…</span>}</label>
+              <label>{app.t('auth.country', 'Country')} {detecting && <span className="hint">{app.t('auth.detecting', 'detecting…')}</span>}</label>
               <select className="csel" value={country} onChange={e => { setCountry(e.target.value); if (e.target.value) fieldDone('country') }}>
-                <option value="" disabled>Select your country</option>
+                <option value="" disabled>{app.t('auth.selectCountry', 'Select your country')}</option>
                 {countries.map(c => <option key={c.code} value={c.code}>{flag(c.code)}  {c.name}  (+{c.dial})</option>)}
               </select>
             </div>
             <div className="field">
-              <label>Phone number <span className="hint">no leading 0</span></label>
+              <label>{app.t('auth.phone', 'Phone number')} <span className="hint">{app.t('auth.phoneHint', 'no leading 0')}</span></label>
               <div className="phone">
                 <span className="dial">{country ? `${flag(country)} +${dial}` : '+'}</span>
                 <input type="tel" value={phone} placeholder="7700 900123" onChange={e => setPhone(e.target.value.replace(/[^\d ]/g, ''))} onBlur={() => phone.trim() && fieldDone('phone')} />
@@ -134,25 +134,25 @@ function AuthModal() {
             </div>
             <label className="check">
               <input type="checkbox" checked={over18} onChange={e => setOver18(e.target.checked)} />
-              <span>I confirm I am at least 18 years old</span>
+              <span>{app.t('auth.check18', 'I confirm I am at least 18 years old')}</span>
             </label>
             <label className="check">
               <input type="checkbox" checked={acceptTerms} onChange={e => setAcceptTerms(e.target.checked)} />
-              <span>I accept the <a href="?legal=terms" target="_blank" rel="noopener">Terms and Conditions</a> and <a href="?legal=privacy" target="_blank" rel="noopener">Privacy Policy</a></span>
+              <span>{app.t('auth.acceptPre', 'I accept the ')}<a href="?legal=terms" target="_blank" rel="noopener">{app.t('auth.termsLink', 'Terms and Conditions')}</a>{app.t('auth.acceptMid', ' and ')}<a href="?legal=privacy" target="_blank" rel="noopener">{app.t('auth.privacyLink', 'Privacy Policy')}</a></span>
             </label>
             <label className="check">
               <input type="checkbox" checked={marketing} onChange={e => setMarketing(e.target.checked)} />
-              <span>Yes, send me promotions, bonuses and free spins</span>
+              <span>{app.t('auth.marketing', 'Yes, send me promotions, bonuses and free spins')}</span>
             </label>
           </>}
 
           {err && <p className="err">{err}</p>}
-          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy || (mode === 'join' && (!over18 || !acceptTerms))} onClick={submit}>{mode === 'join' ? 'Create account' : 'Log in'}</button>
-          {mode === 'login' && <div className="switchline" style={{ marginTop: 6 }}><a onClick={() => { setErr(''); app.setAuthModal('forgot') }}>Forgot password?</a></div>}
+          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy || (mode === 'join' && (!over18 || !acceptTerms))} onClick={submit}>{mode === 'join' ? app.t('auth.join.submit', 'Create account') : app.t('cta.login', 'Log in')}</button>
+          {mode === 'login' && <div className="switchline" style={{ marginTop: 6 }}><a onClick={() => { setErr(''); app.setAuthModal('forgot') }}>{app.t('auth.forgot', 'Forgot password?')}</a></div>}
           <div className="switchline">
             {mode === 'join'
-              ? <>Already have an account? <a onClick={() => { setErr(''); app.setAuthModal('login') }}>Login</a></>
-              : <>New here? <a onClick={() => { setErr(''); app.setAuthModal('join') }}>Join now</a></>}
+              ? <>{app.t('auth.haveAccount', 'Already have an account?')} <a onClick={() => { setErr(''); app.setAuthModal('login') }}>{app.t('auth.loginLink', 'Login')}</a></>
+              : <>{app.t('auth.newHere', 'New here?')} <a onClick={() => { setErr(''); app.setAuthModal('join') }}>{app.t('hero.join', 'Join now')}</a></>}
           </div>
         </div>
       </div>
@@ -176,16 +176,16 @@ function ForgotModal() {
   return (
     <div className="overlay open" onClick={ev => { if (ev.target === ev.currentTarget) app.setAuthModal(null) }}>
       <div className="modal" role="dialog" aria-modal="true">
-        <div className="modal-head"><h3>Reset your password</h3><button className="x" aria-label="Close" onClick={() => app.setAuthModal(null)}>✕</button></div>
+        <div className="modal-head"><h3>{app.t('auth.forgot.title', 'Reset your password')}</h3><button className="x" aria-label={app.t('common.close', 'Close')} onClick={() => app.setAuthModal(null)}>✕</button></div>
         <div className="modal-body">
           {sent ? <>
-            <p className="muted" style={{ marginTop: 0 }}>If an account exists for <b>{email.trim()}</b>, we have sent a link to reset your password. Check your inbox and spam folder.</p>
-            <button className="btn orange" onClick={() => app.setAuthModal('login')}>Back to login</button>
+            <p className="muted" style={{ marginTop: 0 }}>{app.t('auth.forgot.sentPre', 'If an account exists for ')}<b>{email.trim()}</b>{app.t('auth.forgot.sentPost', ', we have sent a link to reset your password. Check your inbox and spam folder.')}</p>
+            <button className="btn orange" onClick={() => app.setAuthModal('login')}>{app.t('auth.backToLogin', 'Back to login')}</button>
           </> : <>
-            <p className="muted" style={{ marginTop: 0 }}>Enter your email and we will send you a link to set a new password.</p>
-            <div className="field"><label>Email</label><input type="email" value={email} placeholder="you@email.com" onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && submit()} /></div>
-            <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy || !email.trim()} onClick={submit}>Send reset link</button>
-            <div className="switchline"><a onClick={() => app.setAuthModal('login')}>Back to login</a></div>
+            <p className="muted" style={{ marginTop: 0 }}>{app.t('auth.forgot.intro', 'Enter your email and we will send you a link to set a new password.')}</p>
+            <div className="field"><label>{app.t('auth.email', 'Email')}</label><input type="email" value={email} placeholder={app.t('auth.emailPh', 'you@email.com')} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && submit()} /></div>
+            <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy || !email.trim()} onClick={submit}>{app.t('auth.forgot.send', 'Send reset link')}</button>
+            <div className="switchline"><a onClick={() => app.setAuthModal('login')}>{app.t('auth.backToLogin', 'Back to login')}</a></div>
           </>}
         </div>
       </div>
@@ -206,8 +206,8 @@ function ResetModal() {
   const submit = async () => {
     if (busy) return
     setErr('')
-    if (pass.length < 12) { setErr('Password must be at least 12 characters'); return }
-    if (pass !== confirm) { setErr('Passwords do not match'); return }
+    if (pass.length < 12) { setErr(app.t('auth.err.pass12', 'Password must be at least 12 characters')); return }
+    if (pass !== confirm) { setErr(app.t('auth.err.match', 'Passwords do not match')); return }
     setBusy(true)
     const e = await app.resetPassword(pass)
     setBusy(false)
@@ -217,16 +217,16 @@ function ResetModal() {
   return (
     <div className="overlay open" onClick={ev => { if (ev.target === ev.currentTarget) app.setAuthModal(null) }}>
       <div className="modal" role="dialog" aria-modal="true">
-        <div className="modal-head"><h3>Set a new password</h3><button className="x" aria-label="Close" onClick={() => app.setAuthModal(null)}>✕</button></div>
+        <div className="modal-head"><h3>{app.t('auth.reset.title', 'Set a new password')}</h3><button className="x" aria-label={app.t('common.close', 'Close')} onClick={() => app.setAuthModal(null)}>✕</button></div>
         <div className="modal-body">
           {done ? <>
-            <p className="muted" style={{ marginTop: 0 }}>Your password has been updated and you have been signed out on all devices. Please log in with your new password.</p>
-            <button className="btn orange" onClick={() => app.setAuthModal('login')}>Go to login</button>
+            <p className="muted" style={{ marginTop: 0 }}>{app.t('auth.reset.done', 'Your password has been updated and you have been signed out on all devices. Please log in with your new password.')}</p>
+            <button className="btn orange" onClick={() => app.setAuthModal('login')}>{app.t('auth.reset.goLogin', 'Go to login')}</button>
           </> : <>
-            <div className="field"><label>New password <span className="hint">at least 12 characters</span></label><input type="password" value={pass} placeholder="••••••••" onChange={e => setPass(e.target.value)} /></div>
-            <div className="field"><label>Confirm password</label><input type="password" value={confirm} placeholder="••••••••" onChange={e => setConfirm(e.target.value)} onKeyDown={e => e.key === 'Enter' && submit()} /></div>
+            <div className="field"><label>{app.t('auth.newPassword', 'New password')} <span className="hint">{app.t('auth.pass12hint', 'at least 12 characters')}</span></label><input type="password" value={pass} placeholder="••••••••" onChange={e => setPass(e.target.value)} /></div>
+            <div className="field"><label>{app.t('auth.confirmPassword', 'Confirm password')}</label><input type="password" value={confirm} placeholder="••••••••" onChange={e => setConfirm(e.target.value)} onKeyDown={e => e.key === 'Enter' && submit()} /></div>
             {err && <p className="err">{err}</p>}
-            <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={submit}>Update password</button>
+            <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={submit}>{app.t('auth.reset.update', 'Update password')}</button>
           </>}
         </div>
       </div>
@@ -255,11 +255,11 @@ function GameModal({ game }: { game: Game }) {
     if (busy) return
     if (mode === 'demo') {
       // Demo play never touches the wallet or the backend: pure local fun credits.
-      if (demoBal < bet) { app.showToast('Out of demo credits — reset to keep playing'); return }
+      if (demoBal < bet) { app.showToast(app.t('game.demoOut', 'Out of demo credits — reset to keep playing')); return }
       rollReels()
       const w = Math.random() < 0.42 ? +(bet * (Math.random() * 4 + 1.5)).toFixed(2) : 0
       setDemoBal(b => +(b - bet + w).toFixed(2)); setLastBet(0)
-      if (w > 0) { setWin('WIN ' + fmt(w) + '!'); setBurst(b => b + 1); setTimeout(() => setWin(''), 900) } else setWin('')
+      if (w > 0) { setWin(app.t('game.win', 'WIN {amount}!', { amount: fmt(w) })); setBurst(b => b + 1); setTimeout(() => setWin(''), 900) } else setWin('')
       return
     }
     setBusy(true)
@@ -268,17 +268,17 @@ function GameModal({ game }: { game: Game }) {
       if (!r.ok) { app.showToast(r.error); return }
       rollReels()
       setLastBet(bet)
-      if (r.win > 0) { setWin('WIN ' + fmt(r.win) + '!'); setBurst(b => b + 1); setTimeout(() => setWin(''), 900) } else setWin('')
+      if (r.win > 0) { setWin(app.t('game.win', 'WIN {amount}!', { amount: fmt(r.win) })); setBurst(b => b + 1); setTimeout(() => setWin(''), 900) } else setWin('')
     } finally { setBusy(false) }
   }
   const rollback = async () => {
     if (busy) return
-    if (lastBet === 0) { app.showToast('Nothing to roll back'); return }
+    if (lastBet === 0) { app.showToast(app.t('game.nothingRollback', 'Nothing to roll back')); return }
     setBusy(true)
     try {
       const r = await app.rollback(lastBet)
       if (!r.ok) { app.showToast(r.error); return }
-      setLastBet(0); app.showToast('Last round rolled back')
+      setLastBet(0); app.showToast(app.t('game.rolledBack', 'Last round rolled back'))
     } finally { setBusy(false) }
   }
   const adj = (d: number) => { const i = BET_STEPS.indexOf(bet); setBet(BET_STEPS[Math.max(0, Math.min(BET_STEPS.length - 1, i + d))]) }
@@ -286,21 +286,21 @@ function GameModal({ game }: { game: Game }) {
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
       {burst > 0 && <Confetti key={burst} />}
       <div className="modal" role="dialog" aria-modal="true">
-        <div className="modal-head"><h3 style={{ fontSize: 16 }}>{game.name}</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
+        <div className="modal-head"><h3 style={{ fontSize: 16 }}>{game.name}</h3><button className="x" aria-label={app.t('common.close', 'Close')} onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
-          <div className="seg" style={{ marginBottom: 10 }}><button className={mode === 'real' ? 'on' : ''} onClick={() => { setMode('real'); setWin('') }}>Real money</button><button className={mode === 'demo' ? 'on' : ''} onClick={() => { setMode('demo'); setWin('') }}>Demo</button></div>
+          <div className="seg" style={{ marginBottom: 10 }}><button className={mode === 'real' ? 'on' : ''} onClick={() => { setMode('real'); setWin('') }}>{app.t('game.real', 'Real money')}</button><button className={mode === 'demo' ? 'on' : ''} onClick={() => { setMode('demo'); setWin('') }}>{app.t('game.demo', 'Demo')}</button></div>
           <div className="stage" style={{ background: `linear-gradient(140deg,${game.grad[0]},${game.grad[1]})` }}>
-            <div className="sbal">{mode === 'demo' ? 'Demo credits' : 'Balance'} {fmt(mode === 'demo' ? demoBal : u.balance)}</div>
+            <div className="sbal">{mode === 'demo' ? app.t('game.demoCredits', 'Demo credits') : app.t('account.balance', 'Balance')} {fmt(mode === 'demo' ? demoBal : u.balance)}</div>
             <div className="reel">{reels.map((s, i) => <span key={i}>{s}</span>)}</div>
             {win && <div className="winflash show">{win}</div>}
           </div>
-          <div style={{ fontSize: 12, color: '#7A8290', marginBottom: 11 }}>{game.studio} · {mode === 'demo' ? 'demo play, no real money' : 'real money'}</div>
-          <div className="betbar"><span className="muted" style={{ fontWeight: 800 }}>Bet per spin</span><span className="pill">{fmt(bet)}</span></div>
-          <div className="row2" style={{ marginBottom: 10 }}><button className="btn sec" onClick={() => adj(-1)}>– Bet</button><button className="btn sec" onClick={() => adj(1)}>+ Bet</button></div>
-          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={spin}>{mode === 'demo' ? 'Spin · demo' : 'Spin'}</button>
+          <div style={{ fontSize: 12, color: '#7A8290', marginBottom: 11 }}>{game.studio} · {mode === 'demo' ? app.t('game.demoPlay', 'demo play, no real money') : app.t('game.realMoney', 'real money')}</div>
+          <div className="betbar"><span className="muted" style={{ fontWeight: 800 }}>{app.t('game.betPerSpin', 'Bet per spin')}</span><span className="pill">{fmt(bet)}</span></div>
+          <div className="row2" style={{ marginBottom: 10 }}><button className="btn sec" onClick={() => adj(-1)}>{app.t('game.betMinus', '– Bet')}</button><button className="btn sec" onClick={() => adj(1)}>{app.t('game.betPlus', '+ Bet')}</button></div>
+          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={spin}>{mode === 'demo' ? app.t('game.spinDemo', 'Spin · demo') : app.t('game.spin', 'Spin')}</button>
           {mode === 'real'
-            ? <button className="btn ghost" style={{ marginTop: 8 }} disabled={busy} onClick={rollback}>Rollback last round</button>
-            : <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => { setDemoBal(1000); app.showToast('Demo credits reset') }}>Reset demo credits</button>}
+            ? <button className="btn ghost" style={{ marginTop: 8 }} disabled={busy} onClick={rollback}>{app.t('game.rollback', 'Rollback last round')}</button>
+            : <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => { setDemoBal(1000); app.showToast(app.t('game.demoReset', 'Demo credits reset')) }}>{app.t('game.resetDemo', 'Reset demo credits')}</button>}
         </div>
       </div>
     </div>
@@ -326,17 +326,28 @@ function AccountModal() {
   if (!app.user) return null
   const u = app.user
 
-  const showVal = (k: LimitKind) => (LIMIT_ROWS.find(r => r.k === k)!.money ? fmt(u.limits[k]) : `${u.limits[k]} min`)
+  // Self-exclusion periods keep their English values (the API contract) but display
+  // translated. Map the stored value to its translation key + fallback.
+  const PERIODS: [string, string, string][] = [
+    ['24 hours', 'account.period.24h', '24 hours'],
+    ['1 week', 'account.period.1w', '1 week'],
+    ['1 month', 'account.period.1m', '1 month'],
+    ['6 months', 'account.period.6m', '6 months'],
+    ['Permanent', 'account.period.perm', 'Permanent'],
+  ]
+  const periodLabel = (p: string) => { const m = PERIODS.find(x => x[0] === p); return m ? app.t(m[1], m[2]) : p }
+
+  const showVal = (k: LimitKind) => (LIMIT_ROWS.find(r => r.k === k)!.money ? fmt(u.limits[k]) : app.t('account.mins', '{n} min', { n: String(u.limits[k]) }))
   const startEdit = (k: LimitKind) => { setEditKind(k); setEditVal(String(u.limits[k])); track('rg_limit_opened', { kind: k }) }
   const saveEdit = async () => {
     if (busy || !editKind) return
     const v = parseFloat(editVal)
-    if (!v || v <= 0) { app.showToast('Enter a valid amount'); return }
+    if (!v || v <= 0) { app.showToast(app.t('account.enterValid', 'Enter a valid amount')); return }
     setBusy(true)
     try {
       const r = await app.setLimit(editKind, v)
       if (!r.ok) { app.showToast(r.error); return }
-      app.showToast(r.outcome === 'lowered' ? 'Limit lowered, effective now' : 'Increase requested, effective in 24 hours')
+      app.showToast(r.outcome === 'lowered' ? app.t('account.limitLowered', 'Limit lowered, effective now') : app.t('account.increaseRequested', 'Increase requested, effective in 24 hours'))
       setEditKind(null)
     } finally { setBusy(false) }
   }
@@ -346,7 +357,7 @@ function AccountModal() {
     try {
       const r = await app.selfExclude(exclPeriod)
       if (!r.ok) { app.showToast(r.error); return }
-      app.showToast(`Self-exclusion active for ${exclPeriod}`)
+      app.showToast(app.t('account.exclActive', 'Self-exclusion active for {period}', { period: periodLabel(exclPeriod) }))
       setExclOpen(false); setExclType('')
     } finally { setBusy(false) }
   }
@@ -354,7 +365,7 @@ function AccountModal() {
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
       <div className="modal" role="dialog" aria-modal="true">
-        <div className="modal-head"><h3>Account</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
+        <div className="modal-head"><h3>{app.t('nav.account', 'Account')}</h3><button className="x" aria-label={app.t('common.close', 'Close')} onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <div className="prof">
             <div className="avatar">{(u.username || u.email)[0].toUpperCase()}</div>
@@ -362,13 +373,13 @@ function AccountModal() {
               <div style={{ fontWeight: 900, fontSize: 18 }}>{u.username || u.email.split('@')[0]}</div>
               <div className="muted" style={{ fontSize: 13 }}>{u.email}</div>
               {(u.country || u.phone) && <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>{u.country ? `${flag(u.country)} ${byCode(u.country)?.name ?? u.country}` : ''}{u.phone ? ` · ${u.phone}` : ''}</div>}
-              <div className="kyc" style={{ marginTop: 6 }}>KYC verified{u.marketing ? ' · promos on' : ''}</div>
+              <div className="kyc" style={{ marginTop: 6 }}>{app.t('account.kyc', 'KYC verified')}{u.marketing ? app.t('account.promosOn', ' · promos on') : ''}</div>
             </div>
           </div>
           <div className="balrow">
-            <div><div className="brl">Balance</div><div className="brv">{fmt(u.balance)}</div></div>
-            <div><div className="brl">Bonus</div><div className="brv">{fmt(u.bonus)}</div></div>
-            <div><div className="brl">Points</div><div className="brv">{u.points.toLocaleString('en-US')}</div></div>
+            <div><div className="brl">{app.t('account.balance', 'Balance')}</div><div className="brv">{fmt(u.balance)}</div></div>
+            <div><div className="brl">{app.t('account.bonus', 'Bonus')}</div><div className="brv">{fmt(u.bonus)}</div></div>
+            <div><div className="brl">{app.t('account.points', 'Points')}</div><div className="brv">{u.points.toLocaleString('en-US')}</div></div>
           </div>
 
           {u.bonus > 0 && (() => {
@@ -377,80 +388,83 @@ function AccountModal() {
             const pct = target ? Math.min(100, Math.round((wagered / target) * 100)) : 0
             return (
               <div className="card2">
-                <div className="h">Active bonus</div>
+                <div className="h">{app.t('account.activeBonus', 'Active bonus')}</div>
                 <div className="lrow" style={{ display: 'block' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-                    <div className="lt">Welcome bonus · {fmt(u.bonus)}</div>
+                    <div className="lt">{app.t('account.welcomeBonus', 'Welcome bonus')} · {fmt(u.bonus)}</div>
                     <div className="ls">{fmt(wagered)} / {fmt(target)}</div>
                   </div>
                   <div className="wager-bar"><span style={{ width: pct + '%' }} /></div>
-                  <div className="ls" style={{ marginTop: 5 }}>{pct}% wagered · 35x requirement · slots contribute 100%</div>
+                  <div className="ls" style={{ marginTop: 5 }}>{app.t('account.wagerInfo', '{pct}% wagered · 35x requirement · slots contribute 100%', { pct: String(pct) })}</div>
                 </div>
               </div>
             )
           })()}
 
           <div className="card2">
-            <div className="h">Signed-in devices</div>
-            <div className="lrow"><div><div className="lt">This device</div><div className="ls">Active now</div></div><span style={{ fontSize: 11, fontWeight: 800, background: '#E6F7EF', color: '#0F9D63', padding: '3px 10px', borderRadius: 999 }}>Current</span></div>
-            <div className="lrow"><div><div className="lt">Mobile · Safari</div><div className="ls">Last seen 2 days ago</div></div></div>
-            <div style={{ marginTop: 8 }}><button className="btn sec" onClick={() => app.showToast('Signed out of all other devices')}>Sign out other devices</button></div>
+            <div className="h">{app.t('account.devices', 'Signed-in devices')}</div>
+            <div className="lrow"><div><div className="lt">{app.t('account.thisDevice', 'This device')}</div><div className="ls">{app.t('account.activeNow', 'Active now')}</div></div><span style={{ fontSize: 11, fontWeight: 800, background: '#E6F7EF', color: '#0F9D63', padding: '3px 10px', borderRadius: 999 }}>{app.t('account.current', 'Current')}</span></div>
+            <div className="lrow"><div><div className="lt">{app.t('account.deviceMobile', 'Mobile · Safari')}</div><div className="ls">{app.t('account.lastSeen', 'Last seen 2 days ago')}</div></div></div>
+            <div style={{ marginTop: 8 }}><button className="btn sec" onClick={() => app.showToast(app.t('account.signedOutOthers', 'Signed out of all other devices'))}>{app.t('account.signOutOthers', 'Sign out other devices')}</button></div>
           </div>
 
           <div className="card2" style={{ padding: '4px 17px' }}>
-            <div className="li" aria-label="Open wallet and transactions" {...clickable(() => app.openModal({ type: 'wallet' }))}><div className="lic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg></div><div><div className="lt">Wallet &amp; transactions</div><div className="ls">Deposits, withdrawals, play</div></div><div className="chev">›</div></div>
+            <div className="li" aria-label={app.t('account.openWalletAria', 'Open wallet and transactions')} {...clickable(() => app.openModal({ type: 'wallet' }))}><div className="lic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg></div><div><div className="lt">{app.t('account.walletTx', 'Wallet & transactions')}</div><div className="ls">{app.t('account.walletTxSub', 'Deposits, withdrawals, play')}</div></div><div className="chev">›</div></div>
           </div>
-          <div className="rgbanner"><div><div style={{ fontWeight: 900, fontSize: 15 }}>Responsible Gambling</div><div className="muted" style={{ fontSize: 12 }}>Decreases apply now. Increases wait 24 hours and can be cancelled.</div></div></div>
+          <div className="rgbanner"><div><div style={{ fontWeight: 900, fontSize: 15 }}>{app.t('menu.rg', 'Responsible Gambling')}</div><div className="muted" style={{ fontSize: 12 }}>{app.t('account.rgSub', 'Decreases apply now. Increases wait 24 hours and can be cancelled.')}</div></div></div>
 
           <div className="card2">
-            <div className="h">Limits</div>
-            {LIMIT_ROWS.map(r => (
+            <div className="h">{app.t('account.limits', 'Limits')}</div>
+            {LIMIT_ROWS.map(r => {
+              const rowLabel = app.t('account.limit.' + r.k, r.label)
+              return (
               <div className="lrow" key={r.k} style={{ display: 'block' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div><div className="lt">{r.label}</div><div className="ls">{r.sub}</div></div>
-                  <span className="pill" aria-label={'Change ' + r.label} {...clickable(() => (editKind === r.k ? setEditKind(null) : startEdit(r.k)))}>{showVal(r.k)} ›</span>
+                  <div><div className="lt">{rowLabel}</div><div className="ls">{app.t('account.limit.' + r.k + 'Sub', r.sub)}</div></div>
+                  <span className="pill" aria-label={app.t('account.changeAria', 'Change {label}', { label: rowLabel })} {...clickable(() => (editKind === r.k ? setEditKind(null) : startEdit(r.k)))}>{showVal(r.k)} ›</span>
                 </div>
                 {editKind === r.k && (
                   <div className="lim-edit">
                     <input type="number" value={editVal} onChange={e => setEditVal(e.target.value)} />
-                    <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={saveEdit}>Save</button>
-                    <button className="btn sec" onClick={() => setEditKind(null)}>Cancel</button>
+                    <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy} onClick={saveEdit}>{app.t('account.save', 'Save')}</button>
+                    <button className="btn sec" onClick={() => setEditKind(null)}>{app.t('account.cancel', 'Cancel')}</button>
                   </div>
                 )}
                 {u.pending[r.k] && (
                   <div className="pending-row">
-                    ⏳ Increase to {r.money ? fmt(u.pending[r.k]!.value) : `${u.pending[r.k]!.value} min`} pending, effective in {hrsLeft(u.pending[r.k]!.at)}h
-                    <span className="cancel" {...clickable(() => { void app.cancelPending(r.k); app.showToast('Pending increase cancelled') })}>Cancel</span>
+                    ⏳ {app.t('account.pending', 'Increase to {val} pending, effective in {h}h', { val: r.money ? fmt(u.pending[r.k]!.value) : app.t('account.mins', '{n} min', { n: String(u.pending[r.k]!.value) }), h: String(hrsLeft(u.pending[r.k]!.at)) })}
+                    <span className="cancel" {...clickable(() => { void app.cancelPending(r.k); app.showToast(app.t('account.pendingCancelled', 'Pending increase cancelled')) })}>{app.t('account.cancel', 'Cancel')}</span>
                   </div>
                 )}
               </div>
-            ))}
+              )
+            })}
           </div>
 
           <div className="card2">
-            <div className="lrow"><div><div className="lt" id="rc-label">Reality checks</div><div className="ls">Pop-up with time and spend</div></div><div role="switch" aria-checked={u.rc} aria-labelledby="rc-label" tabIndex={0} className={'toggle' + (u.rc ? ' on' : '')} onClick={() => { void app.setRealityChecks(!u.rc); app.showToast('Reality checks ' + (!u.rc ? 'on' : 'off')) }} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); void app.setRealityChecks(!u.rc); app.showToast('Reality checks ' + (!u.rc ? 'on' : 'off')) } }} /></div>
+            <div className="lrow"><div><div className="lt" id="rc-label">{app.t('account.rc', 'Reality checks')}</div><div className="ls">{app.t('account.rcSub', 'Pop-up with time and spend')}</div></div><div role="switch" aria-checked={u.rc} aria-labelledby="rc-label" tabIndex={0} className={'toggle' + (u.rc ? ' on' : '')} onClick={() => { void app.setRealityChecks(!u.rc); app.showToast(!u.rc ? app.t('account.rcToastOn', 'Reality checks on') : app.t('account.rcToastOff', 'Reality checks off')) }} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); void app.setRealityChecks(!u.rc); app.showToast(!u.rc ? app.t('account.rcToastOn', 'Reality checks on') : app.t('account.rcToastOff', 'Reality checks off')) } }} /></div>
             <div className="lrow" style={{ display: 'block' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div><div className="lt" style={{ color: '#E23B3B' }}>Self-exclusion</div><div className="ls">Blocks all play for the chosen period</div></div>
+                <div><div className="lt" style={{ color: '#E23B3B' }}>{app.t('account.selfExcl', 'Self-exclusion')}</div><div className="ls">{app.t('account.selfExclSub', 'Blocks all play for the chosen period')}</div></div>
                 {u.excluded
-                  ? <span className="pill" style={{ background: '#FDE7E7', color: '#E23B3B' }}>Active</span>
-                  : <span className="pill" aria-label="Start self-exclusion" {...clickable(() => setExclOpen(o => !o))}>Start ›</span>}
+                  ? <span className="pill" style={{ background: '#FDE7E7', color: '#E23B3B' }}>{app.t('account.active', 'Active')}</span>
+                  : <span className="pill" aria-label={app.t('account.startExclAria', 'Start self-exclusion')} {...clickable(() => setExclOpen(o => !o))}>{app.t('account.start', 'Start')} ›</span>}
               </div>
-              {u.excluded && <div style={{ marginTop: 8 }}><span className="demoreset" {...clickable(() => { void app.liftExclusion(); app.showToast('Self-exclusion lifted (demo)') })}>Lift (demo only)</span></div>}
+              {u.excluded && <div style={{ marginTop: 8 }}><span className="demoreset" {...clickable(() => { void app.liftExclusion(); app.showToast(app.t('account.exclLifted', 'Self-exclusion lifted (demo)')) })}>{app.t('account.lift', 'Lift (demo only)')}</span></div>}
               {!u.excluded && exclOpen && (
                 <div className="excl">
                   <select value={exclPeriod} onChange={e => setExclPeriod(e.target.value)}>
-                    {['24 hours', '1 week', '1 month', '6 months', 'Permanent'].map(p => <option key={p} value={p}>{p}</option>)}
+                    {PERIODS.map(([p, k, f]) => <option key={p} value={p}>{app.t(k, f)}</option>)}
                   </select>
-                  <p>This blocks all play and login for {exclPeriod}. It cannot be undone early. To confirm, type CONFIRM below.</p>
-                  <input type="text" value={exclType} placeholder="Type CONFIRM" onChange={e => setExclType(e.target.value)} />
-                  <button className={'btn' + (busy ? ' busy' : '')} disabled={busy || exclType.trim().toUpperCase() !== 'CONFIRM'} onClick={confirmExcl}>Confirm self-exclusion</button>
+                  <p>{app.t('account.exclConfirmP', 'This blocks all play and login for {period}. It cannot be undone early. To confirm, type CONFIRM below.', { period: periodLabel(exclPeriod) })}</p>
+                  <input type="text" value={exclType} placeholder={app.t('account.typeConfirm', 'Type CONFIRM')} onChange={e => setExclType(e.target.value)} />
+                  <button className={'btn' + (busy ? ' busy' : '')} disabled={busy || exclType.trim().toUpperCase() !== 'CONFIRM'} onClick={confirmExcl}>{app.t('account.confirmExcl', 'Confirm self-exclusion')}</button>
                 </div>
               )}
             </div>
           </div>
 
-          <button className="btn sec" onClick={() => { void app.logout(); app.closeModal(); app.showToast('Logged out') }}>Log out</button>
+          <button className="btn sec" onClick={() => { void app.logout(); app.closeModal(); app.showToast(app.t('account.loggedOut', 'Logged out')) }}>{app.t('account.logout', 'Log out')}</button>
         </div>
       </div>
     </div>
@@ -469,16 +483,16 @@ function ChestModal() {
     setOpened(true)
     const r = await app.openChest()
     if (!r.ok) { setOpened(false); app.showToast(r.error); return }
-    setTimeout(() => { setReward(r.prize); app.showToast('Mystery Chest: ' + r.prize) }, 560)
+    setTimeout(() => { setReward(r.prize); app.showToast(app.t('chest.toast', 'Mystery Chest: {prize}', { prize: r.prize })) }, 560)
   }
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
       <div className="modal" role="dialog" aria-modal="true">
-        <div className="modal-head"><h3>Mystery Chest</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
+        <div className="modal-head"><h3>{app.t('chest.title', 'Mystery Chest')}</h3><button className="x" aria-label={app.t('common.close', 'Close')} onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <div className={'chestwrap' + (opened || claimed ? ' chestopen' : ' shake')} dangerouslySetInnerHTML={{ __html: chestModalSVG() }} />
-          <div className="wresult">{reward ? <>You found <b>{reward}</b>!</> : claimed ? 'Come back tomorrow for another chest.' : 'Tap to reveal your reward!'}</div>
-          <button className="btn orange" disabled={claimed || opened} onClick={open}>{claimed || opened ? 'Claimed' : 'Open chest'}</button>
+          <div className="wresult">{reward ? <>{app.t('chest.foundPre', 'You found ')}<b>{reward}</b>!</> : claimed ? app.t('chest.comeBack', 'Come back tomorrow for another chest.') : app.t('chest.tapReveal', 'Tap to reveal your reward!')}</div>
+          <button className="btn orange" disabled={claimed || opened} onClick={open}>{claimed || opened ? app.t('chest.claimed', 'Claimed') : app.t('chest.open', 'Open chest')}</button>
         </div>
       </div>
     </div>
@@ -501,19 +515,19 @@ function WheelModal() {
     const el = document.getElementById('wheelSpin')
     if (el) { el.style.transition = 'transform 4.2s cubic-bezier(.15,.7,.15,1)'; el.style.transform = `rotate(${target}deg)` }
     window.setTimeout(() => {
-      setResult(r.prize === 'Try again' ? 'Better luck tomorrow!' : `You won ${r.prize}`)
-      app.showToast(r.prize === 'Try again' ? 'So close! Try again tomorrow.' : 'Daily wheel: ' + r.prize)
+      setResult(r.prize === 'Try again' ? app.t('wheel.tryAgain', 'Better luck tomorrow!') : app.t('wheel.won', 'You won {prize}', { prize: r.prize }))
+      app.showToast(r.prize === 'Try again' ? app.t('wheel.soClose', 'So close! Try again tomorrow.') : app.t('wheel.toast', 'Daily wheel: {prize}', { prize: r.prize }))
     }, 4300)
   }
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
       <div className="modal" role="dialog" aria-modal="true">
-        <div className="modal-head"><h3>Daily Bonus Wheel</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
+        <div className="modal-head"><h3>{app.t('wheel.title', 'Daily Bonus Wheel')}</h3><button className="x" aria-label={app.t('common.close', 'Close')} onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
-          <p className="muted center" style={{ marginTop: 0 }}>Spin once a day for a free bonus. Good luck!</p>
+          <p className="muted center" style={{ marginTop: 0 }}>{app.t('wheel.sub', 'Spin once a day for a free bonus. Good luck!')}</p>
           <div className="wheelwrap"><div className="pointer" /><div dangerouslySetInnerHTML={{ __html: wheelSVG() }} /></div>
-          <div className="wresult">{result || (claimed ? 'Come back tomorrow for another spin.' : '')}</div>
-          <button className="btn orange" disabled={claimed || spun} onClick={spin}>{claimed ? 'Come back tomorrow' : spun ? 'Spinning…' : 'SPIN'}</button>
+          <div className="wresult">{result || (claimed ? app.t('wheel.comeBack', 'Come back tomorrow for another spin.') : '')}</div>
+          <button className="btn orange" disabled={claimed || spun} onClick={spin}>{claimed ? app.t('wheel.comeBackBtn', 'Come back tomorrow') : spun ? app.t('wheel.spinning', 'Spinning…') : app.t('wheel.spin', 'SPIN')}</button>
         </div>
       </div>
     </div>
@@ -529,19 +543,19 @@ function InfoModal({ infoKey }: { infoKey: string }) {
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
       <div className="modal" role="dialog" aria-modal="true">
-        <div className="modal-head"><h3>{doc.title}</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
+        <div className="modal-head"><h3>{doc.title}</h3><button className="x" aria-label={app.t('common.close', 'Close')} onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <div className="doc" style={{ maxHeight: '62vh', overflowY: 'auto' }} dangerouslySetInnerHTML={{ __html: doc.html }} />
           {infoKey === 'rg-policy' && (
-            <button className="btn orange" onClick={() => { app.closeModal(); if (app.user) app.openModal({ type: 'account' }); else app.setAuthModal('login') }}>Manage my limits</button>
+            <button className="btn orange" onClick={() => { app.closeModal(); if (app.user) app.openModal({ type: 'account' }); else app.setAuthModal('login') }}>{app.t('info.manageLimits', 'Manage my limits')}</button>
           )}
           {infoKey === 'cookies' ? (
             <div className="row2">
-              <button className="btn sec" onClick={() => { app.closeModal(); app.showToast('Essential cookies only') }}>Essential only</button>
-              <button className="btn orange" onClick={() => { app.closeModal(); app.showToast('All cookies accepted') }}>Accept all</button>
+              <button className="btn sec" onClick={() => { app.closeModal(); app.showToast(app.t('cookie.toastEssential', 'Essential cookies only')) }}>{app.t('cookie.essential', 'Essential only')}</button>
+              <button className="btn orange" onClick={() => { app.closeModal(); app.showToast(app.t('cookie.toastAll', 'All cookies accepted')) }}>{app.t('cookie.acceptAll', 'Accept all')}</button>
             </div>
           ) : infoKey !== 'rg-policy' && (
-            <button className="btn sec" onClick={app.closeModal}>Close</button>
+            <button className="btn sec" onClick={app.closeModal}>{app.t('common.close', 'Close')}</button>
           )}
         </div>
       </div>
@@ -550,31 +564,32 @@ function InfoModal({ infoKey }: { infoKey: string }) {
 }
 
 /* ---------------- Launch blocked (MRB-37) ---------------- */
-const BLOCK_META: Record<LaunchBlock, { title: string; icon: string }> = {
-  AUTH: { title: 'Sign in to play', icon: '🔒' },
-  GEO: { title: 'Not available in your region', icon: '🌍' },
-  WALLET_PROVISIONING: { title: 'Wallet almost ready', icon: '⏳' },
-  SELF_EXCLUDED: { title: 'Play is paused', icon: '🛡️' },
-  DEMO_UNAVAILABLE: { title: 'No demo for this game', icon: '🎬' },
+const BLOCK_META: Record<LaunchBlock, { title: string; titleKey: string; icon: string }> = {
+  AUTH: { title: 'Sign in to play', titleKey: 'blocked.auth.title', icon: '🔒' },
+  GEO: { title: 'Not available in your region', titleKey: 'blocked.geo.title', icon: '🌍' },
+  WALLET_PROVISIONING: { title: 'Wallet almost ready', titleKey: 'cashier.walletTitle', icon: '⏳' },
+  SELF_EXCLUDED: { title: 'Play is paused', titleKey: 'blocked.excluded.title', icon: '🛡️' },
+  DEMO_UNAVAILABLE: { title: 'No demo for this game', titleKey: 'blocked.demo.title', icon: '🎬' },
 }
 function BlockModal({ reason, message }: { reason: LaunchBlock; message: string }) {
   const app = useApp()
   const meta = BLOCK_META[reason]
+  const title = app.t(meta.titleKey, meta.title)
   // A relevant next step per reason, never a dead end (MRB-37 R4/R5 spirit).
   const cta =
-    reason === 'DEMO_UNAVAILABLE' ? { label: 'Sign in to play', act: () => { app.closeModal(); app.setAuthModal('join') } }
-    : reason === 'SELF_EXCLUDED' ? { label: 'Responsible Gambling', act: () => { app.closeModal(); app.openModal({ type: 'account' }) } }
-    : reason === 'WALLET_PROVISIONING' ? { label: 'Open cashier', act: () => { app.closeModal(); app.openModal({ type: 'wallet' }) } }
+    reason === 'DEMO_UNAVAILABLE' ? { label: app.t('blocked.auth.title', 'Sign in to play'), act: () => { app.closeModal(); app.setAuthModal('join') } }
+    : reason === 'SELF_EXCLUDED' ? { label: app.t('menu.rg', 'Responsible Gambling'), act: () => { app.closeModal(); app.openModal({ type: 'account' }) } }
+    : reason === 'WALLET_PROVISIONING' ? { label: app.t('blocked.openCashier', 'Open cashier'), act: () => { app.closeModal(); app.openModal({ type: 'wallet' }) } }
     : null
   return (
     <div className="overlay open" onClick={(e) => { if (e.target === e.currentTarget) app.closeModal() }}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label={meta.title} style={{ maxWidth: 400 }}>
-        <div className="modal-head"><h3>{meta.title}</h3><button className="x" aria-label="Close" onClick={app.closeModal}>✕</button></div>
+      <div className="modal" role="dialog" aria-modal="true" aria-label={title} style={{ maxWidth: 400 }}>
+        <div className="modal-head"><h3>{title}</h3><button className="x" aria-label={app.t('common.close', 'Close')} onClick={app.closeModal}>✕</button></div>
         <div className="modal-body">
           <div style={{ textAlign: 'center', fontSize: 40, marginBottom: 8 }} aria-hidden="true">{meta.icon}</div>
           <p className="muted" style={{ marginTop: 0, textAlign: 'center', lineHeight: 1.55 }}>{message}</p>
           {cta && <button className="btn orange" onClick={cta.act}>{cta.label}</button>}
-          <button className="btn ghost" onClick={app.closeModal}>Close</button>
+          <button className="btn ghost" onClick={app.closeModal}>{app.t('common.close', 'Close')}</button>
         </div>
       </div>
     </div>

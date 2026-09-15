@@ -22,14 +22,14 @@ export default function VipPage() {
   return (
     <div className="wrap">
       <div className="vip-hero">
-        <h2>Ben’s VIP Club</h2>
-        <div className="vsub">Every spin and every hand earns points toward better rewards.</div>
+        <h2>{app.t('vip.clubTitle', 'Ben’s VIP Club')}</h2>
+        <div className="vsub">{app.t('vip.sub', 'Every spin and every hand earns points toward better rewards.')}</div>
         <div className="vip-tier">
           <div className="vip-badge" style={{ background: cur.c }}>{cur.n[0]}</div>
-          <div><div className="vt">{cur.n} tier</div><div className="vp">{points.toLocaleString('en-US')} loyalty points</div></div>
+          <div><div className="vt">{app.t('vip.tierLabel', '{name} tier', { name: cur.n })}</div><div className="vp">{app.t('vip.points', '{pts} loyalty points', { pts: points.toLocaleString('en-US') })}</div></div>
         </div>
         <div className="vbar"><span ref={barRef} /></div>
-        <div className="vnext">{next ? <>{(next.pts - points).toLocaleString('en-US')} points to <b>{next.n}</b></> : 'You’ve reached the top tier. Legend!'}</div>
+        <div className="vnext">{next ? <>{app.t('vip.toNext', '{pts} points to', { pts: (next.pts - points).toLocaleString('en-US') })} <b>{next.n}</b></> : app.t('vip.topTier', 'You’ve reached the top tier. Legend!')}</div>
       </div>
 
       <div className="vladder">
@@ -43,7 +43,7 @@ export default function VipPage() {
         ))}
       </div>
 
-      <div className="offers-head" style={{ marginBottom: 10 }}><h2 style={{ fontSize: 20 }}>Your perks</h2></div>
+      <div className="offers-head" style={{ marginBottom: 10 }}><h2 style={{ fontSize: 20 }}>{app.t('vip.perks', 'Your perks')}</h2></div>
       <div className="perks">
         {vipPerks.map((p, i) => (
           <div className="perk" key={i}><div className="pk-ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L20 6" /></svg></div><div><div className="pk-t">{p[1]}</div><div className="pk-s">{p[2]}</div></div></div>
@@ -52,8 +52,8 @@ export default function VipPage() {
 
       <div className="chestcard" onClick={() => (app.requireAuth() && app.openModal({ type: 'chest' }))}>
         <div dangerouslySetInnerHTML={{ __html: chestSVG() }} />
-        <div><div className="cc-t">Mystery Chest</div><div className="cc-s">A free surprise reward is waiting for you.</div></div>
-        <button className="btn" onClick={(e) => { e.stopPropagation(); if (app.requireAuth()) app.openModal({ type: 'chest' }) }}>Open chest</button>
+        <div><div className="cc-t">{app.t('chest.title', 'Mystery Chest')}</div><div className="cc-s">{app.t('vip.chestSub', 'A free surprise reward is waiting for you.')}</div></div>
+        <button className="btn" onClick={(e) => { e.stopPropagation(); if (app.requireAuth()) app.openModal({ type: 'chest' }) }}>{app.t('chest.open', 'Open chest')}</button>
       </div>
     </div>
   )

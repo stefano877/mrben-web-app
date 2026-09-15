@@ -42,13 +42,13 @@ export default function Providers() {
     <div className="dark-sec">
       <div className="wrap">
         <div className="sec-head">
-          <h2>Providers</h2>
-          <span className="seeall" onClick={() => app.showToast('All 40+ providers')}>See all</span>
+          <h2>{app.t('providers.head', 'Providers')}</h2>
+          <span className="seeall" onClick={() => app.showToast(app.t('providers.seeAllToast', 'All 40+ providers'))}>{app.t('providers.seeAll', 'See all')}</span>
         </div>
         <div className="marq">
           <div className="marq-track" style={{ animationDuration: '34s' }}>
             {list.map((p, i) => (
-              <div className="prov" key={i} onClick={() => app.showToast(p + ' games')} title={p}>
+              <div className="prov" key={i} onClick={() => app.showToast(app.t('providers.gamesToast', '{name} games', { name: p }))} title={p}>
                 <ProvLogo name={p} />
               </div>
             ))}

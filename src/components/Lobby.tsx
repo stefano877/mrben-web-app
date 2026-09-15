@@ -28,17 +28,17 @@ export default function Lobby() {
   if (q.trim() !== '') {
     const s = q.trim().toLowerCase()
     results = allGames.filter(g => g.name.toLowerCase().includes(s) || g.studio.toLowerCase().includes(s))
-    title = `Results for “${q.trim()}” (${results.length})`
+    title = app.t('lobby.results', 'Results for “{q}” ({n})', { q: q.trim(), n: String(results.length) })
   } else if (lv.mode === 'favs') {
     results = app.user ? allGames.filter(g => app.user!.favs.includes(g.name)) : []
-    title = `My Games (${results.length})`
+    title = app.t('lobby.myGames', 'My Games ({n})', { n: String(results.length) })
   } else if (lv.mode === 'cat') {
     results = allGames.filter(g => g.cat === lv.cat)
-    title = `${lv.cat} (${results.length * 40})`
+    title = app.t('lobby.catCount', '{cat} ({n})', { cat: lv.cat, n: String(results.length * 40) })
   }
 
   const onCat = (name: string) => {
-    if (name === 'Providers') { app.showToast('Providers are in the strip above'); return }
+    if (name === 'Providers') { app.showToast(app.t('lobby.providersHint', 'Providers are in the strip above')); return }
     setQ('')
     app.setLobbyView(lv.mode === 'cat' && lv.cat === name ? { mode: 'all', cat: '' } : { mode: 'cat', cat: name })
   }
@@ -50,8 +50,8 @@ export default function Lobby() {
   return (
     <>
       {!filtering && <div className="wrap"><Promos /></div>}
-      {!filtering && recent.length > 0 && <div className="wrap"><GameRow title="Continue playing" games={recent} /></div>}
-      {!filtering && <div className="wrap"><GameRow title="Best Games — Ben’s Picks" games={bens} marquee dur={48} /></div>}
+      {!filtering && recent.length > 0 && <div className="wrap"><GameRow title={app.t('lobby.continue', 'Continue playing')} games={recent} /></div>}
+      {!filtering && <div className="wrap"><GameRow title={app.t('lobby.bestGames', 'Best Games — Ben’s Picks')} games={bens} marquee dur={48} /></div>}
       {!filtering && <Providers />}
 
       <CategoryBar active={lv.mode === 'cat' ? lv.cat : ''} query={q} onCat={onCat} onQuery={setQ} />
@@ -63,7 +63,7 @@ export default function Lobby() {
             {results.length ? (
               <div className="results-grid">{results.map(g => <GameCard key={g.name} game={g} />)}</div>
             ) : (
-              <p className="empty">{lv.mode === 'favs' ? 'No favourites yet. Tap the heart on any game to save it here.' : 'No games match. Try another search.'}</p>
+              <p className="empty">{lv.mode === 'favs' ? app.t('lobby.noFavs', 'No favourites yet. Tap the heart on any game to save it here.') : app.t('lobby.noMatch', 'No games match. Try another search.')}</p>
             )}
           </section>
         ) : (

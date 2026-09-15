@@ -10,12 +10,12 @@ export default function Ticker() {
     <span className="twitem" key={i} onClick={() => app.setPage('offers')}>
       <i style={{ background: heroColor[o.key] || '#F35100' }}></i>
       <b>{o.h}: {o.big}</b>
-      <button className="tclaim" onClick={(e) => { e.stopPropagation(); claim() }}>Claim now</button>
+      <button className="tclaim" onClick={(e) => { e.stopPropagation(); claim() }}>{app.t('cta.claim', 'Claim now')}</button>
     </span>
   ))
   return (
     <div className="ticker">
-      <div className="tlabel">Offers</div>
+      <div className="tlabel">{app.t('nav.offers', 'Offers')}</div>
       <div className="twin"><div className="tmarq">{items}{items}</div></div>
     </div>
   )

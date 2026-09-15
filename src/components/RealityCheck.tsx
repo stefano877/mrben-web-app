@@ -37,13 +37,13 @@ export default function RealityCheck() {
   return (
     <div className="overlay open" onClick={keepPlaying}>
       <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 380 }}>
-        <div className="modal-head"><h3>Reality check</h3></div>
+        <div className="modal-head"><h3>{app.t('rg.rc.title', 'Reality check')}</h3></div>
         <div className="modal-body">
-          <p className="muted center" style={{ marginTop: 0 }}>You have been playing for about {elapsed} minute{elapsed === 1 ? '' : 's'}.</p>
-          <div className="balcard"><div className="l">Net this session</div><div className="a" style={{ color: net >= 0 ? '#12B39A' : '#E23B3B' }}>{net >= 0 ? '+' : '−'}{fmt(Math.abs(net))}</div></div>
-          <button className="btn orange" onClick={keepPlaying}>Keep playing</button>
-          <button className="btn sec" style={{ marginTop: 8 }} onClick={takeBreak}>Take a break</button>
-          <p className="muted center" style={{ fontSize: 12, marginTop: 12 }}>Gambling should be fun, never a way to make money. You can set limits any time in your account.</p>
+          <p className="muted center" style={{ marginTop: 0 }}>{elapsed === 1 ? app.t('rg.rc.playedOne', 'You have been playing for about 1 minute.') : app.t('rg.rc.played', 'You have been playing for about {mins} minutes.', { mins: String(elapsed) })}</p>
+          <div className="balcard"><div className="l">{app.t('rg.rc.net', 'Net this session')}</div><div className="a" style={{ color: net >= 0 ? '#12B39A' : '#E23B3B' }}>{net >= 0 ? '+' : '−'}{fmt(Math.abs(net))}</div></div>
+          <button className="btn orange" onClick={keepPlaying}>{app.t('rg.rc.keep', 'Keep playing')}</button>
+          <button className="btn sec" style={{ marginTop: 8 }} onClick={takeBreak}>{app.t('rg.rc.break', 'Take a break')}</button>
+          <p className="muted center" style={{ fontSize: 12, marginTop: 12 }}>{app.t('rg.rc.foot', 'Gambling should be fun, never a way to make money. You can set limits any time in your account.')}</p>
         </div>
       </div>
     </div>

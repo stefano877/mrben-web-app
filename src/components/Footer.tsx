@@ -5,38 +5,39 @@ export default function Footer() {
   const open = (key: string) => app.openLegal(key)
   const toTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
-  const col1: [string, () => void][] = [
-    ['Casino', () => app.goLobby()],
-    ['Responsible Gambling', () => open('rg-policy')],
-    ['Self-exclusion', () => open('self-exclusion')],
-    ['Game Rules', () => open('betting-rules')],
-    ['Complaints & procedures', () => open('complaints')],
+  // [react key, translation key, English fallback, handler]
+  const col1: [string, string, string, () => void][] = [
+    ['casino', 'nav.casino', 'Casino', () => app.goLobby()],
+    ['rg', 'menu.rg', 'Responsible Gambling', () => open('rg-policy')],
+    ['self-exclusion', 'footer.selfExclusion', 'Self-exclusion', () => open('self-exclusion')],
+    ['game-rules', 'footer.gameRules', 'Game Rules', () => open('betting-rules')],
+    ['complaints', 'footer.complaints', 'Complaints & procedures', () => open('complaints')],
   ]
-  const col2: [string, () => void][] = [
-    ['Terms & Conditions', () => open('terms')],
-    ['Promotional Terms', () => open('promo-terms')],
-    ['Privacy Policy', () => open('privacy')],
-    ['Support', () => open('support')],
-    ['Cookie Settings', () => open('cookies')],
+  const col2: [string, string, string, () => void][] = [
+    ['terms', 'footer.terms', 'Terms & Conditions', () => open('terms')],
+    ['promo-terms', 'footer.promoTerms', 'Promotional Terms', () => open('promo-terms')],
+    ['privacy', 'footer.privacy', 'Privacy Policy', () => open('privacy')],
+    ['support', 'menu.support', 'Support', () => open('support')],
+    ['cookies', 'footer.cookieSettings', 'Cookie Settings', () => open('cookies')],
   ]
-  const col3: [string, () => void][] = [
-    ['About Us', () => open('about')],
-    ['Terms of Use', () => open('terms')],
-    ['Contact Us', () => open('contact')],
+  const col3: [string, string, string, () => void][] = [
+    ['about', 'footer.about', 'About Us', () => open('about')],
+    ['terms-of-use', 'footer.termsOfUse', 'Terms of Use', () => open('terms')],
+    ['contact', 'footer.contact', 'Contact Us', () => open('contact')],
   ]
 
   return (
     <footer className="site-footer">
       <div className="wrap">
         <div className="foot-top">
-          <button className="foot-pill" onClick={() => app.showToast('Language / region')}>English</button>
-          <button className="foot-pill" onClick={toTop}>Back to top</button>
+          <button className="foot-pill" onClick={() => app.showToast(app.t('footer.langRegion', 'Language / region'))}>English</button>
+          <button className="foot-pill" onClick={toTop}>{app.t('footer.top', 'Back to top')}</button>
         </div>
 
         <div className="foot-cols">
-          <div className="foot-col"><h4>Play Now</h4>{col1.map(([t, fn]) => <a key={t} onClick={fn}>{t}</a>)}</div>
-          <div className="foot-col"><h4>Help</h4>{col2.map(([t, fn]) => <a key={t} onClick={fn}>{t}</a>)}</div>
-          <div className="foot-col"><h4>Company</h4>{col3.map(([t, fn]) => <a key={t} onClick={fn}>{t}</a>)}</div>
+          <div className="foot-col"><h4>{app.t('footer.col.play', 'Play Now')}</h4>{col1.map(([k, tk, fb, fn]) => <a key={k} onClick={fn}>{app.t(tk, fb)}</a>)}</div>
+          <div className="foot-col"><h4>{app.t('footer.col.help', 'Help')}</h4>{col2.map(([k, tk, fb, fn]) => <a key={k} onClick={fn}>{app.t(tk, fb)}</a>)}</div>
+          <div className="foot-col"><h4>{app.t('footer.col.company', 'Company')}</h4>{col3.map(([k, tk, fb, fn]) => <a key={k} onClick={fn}>{app.t(tk, fb)}</a>)}</div>
         </div>
 
         <div className="pay-row">
@@ -50,17 +51,18 @@ export default function Footer() {
 
         <div className="foot-badges">
           <span className="foot-badge"><span className="circ18">18+</span></span>
-          <span className="foot-badge">ANJOUAN LICENSED</span>
-          <span className="foot-badge" onClick={() => open('rg-policy')} style={{ cursor: 'pointer' }}>RESPONSIBLE GAMING</span>
-          <span className="foot-badge">SSL SECURE</span>
+          <span className="foot-badge">{app.t('footer.badge.anjouan', 'ANJOUAN LICENSED')}</span>
+          <span className="foot-badge" onClick={() => open('rg-policy')} style={{ cursor: 'pointer' }}>{app.t('footer.badge.rg', 'RESPONSIBLE GAMING')}</span>
+          <span className="foot-badge">{app.t('footer.badge.ssl', 'SSL SECURE')}</span>
         </div>
 
         <div className="foot-legal">
-          <div className="cop">© 2026 MrBen — Mr iGaming Group. All rights reserved.</div>
-          <p>MrBen is operated by Mr iGaming Group. Company registration number and registered office are displayed here once incorporation is complete.</p>
+          <div className="cop">{app.t('footer.copyright', '© 2026 MrBen — Mr iGaming Group. All rights reserved.')}</div>
+          <p>{app.t('footer.legal1', 'MrBen is operated by Mr iGaming Group. Company registration number and registered office are displayed here once incorporation is complete.')}</p>
           <p>
-            Licensed and regulated under the Anjouan Gaming Licence (Union of the Comoros), licence number [pending]. 18+ only.
-            Gambling can be addictive. Play responsibly. For more information read our <a onClick={() => open('rg-policy')}>responsible gambling policy</a>. Underage gambling is an offence.
+            {app.t('footer.legal2a', 'Licensed and regulated under the Anjouan Gaming Licence (Union of the Comoros), licence number [pending]. 18+ only. Gambling can be addictive. Play responsibly. For more information read our ')}
+            <a onClick={() => open('rg-policy')}>{app.t('footer.legal2link', 'responsible gambling policy')}</a>
+            {app.t('footer.legal2b', '. Underage gambling is an offence.')}
           </p>
         </div>
       </div>

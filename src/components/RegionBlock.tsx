@@ -7,6 +7,8 @@
 // with ?geoblock=<CC> in the URL. The blocklist below is the display copy source
 // and must mirror the authoritative list enforced at the edge.
 
+import { useApp } from '../store'
+
 // [CONFIRM] Restricted territories for the Anjouan licence and target markets.
 export const RESTRICTED = ['US', 'FR', 'GB', 'NL', 'AU'] as const
 
@@ -22,7 +24,8 @@ export function previewBlockedRegion(): string | null {
 }
 
 export default function RegionBlock({ country }: { country?: string }) {
-  const where = country && NAMES[country] ? NAMES[country] : 'your region'
+  const app = useApp()
+  const where = country && NAMES[country] ? app.t('region.name.' + country, NAMES[country]) : app.t('region.yourRegion', 'your region')
   return (
     <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: '#0b1020', color: '#fff', padding: 24, textAlign: 'center' }}>
       <div style={{ maxWidth: 460 }}>
@@ -30,14 +33,14 @@ export default function RegionBlock({ country }: { country?: string }) {
           <span style={{ height: 34, width: 34, display: 'grid', placeItems: 'center', borderRadius: 9, background: '#F35100', fontWeight: 900, fontSize: 18 }}>M</span>
           <span style={{ fontWeight: 800, fontSize: 20 }}>MrBen</span>
         </div>
-        <h1 style={{ fontSize: 26, fontWeight: 800, margin: '0 0 12px' }}>MrBen is not available in {where}</h1>
+        <h1 style={{ fontSize: 26, fontWeight: 800, margin: '0 0 12px' }}>{app.t('region.title', 'MrBen is not available in {where}', { where })}</h1>
         <p style={{ color: '#9aa4b2', fontSize: 15, lineHeight: 1.6, margin: '0 0 20px' }}>
-          Because of licensing and local regulations, we are not able to offer our services to players in {where}. We are sorry for the inconvenience.
+          {app.t('region.body', 'Because of licensing and local regulations, we are not able to offer our services to players in {where}. We are sorry for the inconvenience.', { where })}
         </p>
         <p style={{ color: '#6b7280', fontSize: 13, lineHeight: 1.6 }}>
-          If you believe you are seeing this in error, or you are travelling, contact <a href="mailto:support@mrben.com" style={{ color: '#F5B301' }}>support@mrben.com</a>.
+          {app.t('region.contactPre', 'If you believe you are seeing this in error, or you are travelling, contact ')}<a href="mailto:support@mrben.com" style={{ color: '#F5B301' }}>support@mrben.com</a>.
         </p>
-        <div style={{ marginTop: 24, color: '#6b7280', fontSize: 12 }}>18+ · Play responsibly · MrBen is operated under an Anjouan gaming licence.</div>
+        <div style={{ marginTop: 24, color: '#6b7280', fontSize: 12 }}>{app.t('region.foot', '18+ · Play responsibly · MrBen is operated under an Anjouan gaming licence.')}</div>
       </div>
     </div>
   )

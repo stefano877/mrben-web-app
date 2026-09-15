@@ -10,17 +10,17 @@ export default function Hero() {
   const scrollToGames = () => window.scrollTo({ top: Math.round(window.innerHeight * 0.85), behavior: 'smooth' })
 
   return (
-    <section className="hero" aria-label="Welcome to MrBen">
+    <section className="hero" aria-label={app.t('hero.welcome', 'Welcome to MrBen')}>
       <div className="hero-inner">
         <div className="hero-copy">
-          <span className="hero-badge">Welcome to MrBen</span>
-          <h1>Play like a <span>gentleman</span>.<br />Win like a legend.</h1>
-          <p>100% up to €200 plus 50 free spins on your first deposit. Crypto-fast payouts, thousands of games, one dapper host.</p>
+          <span className="hero-badge">{app.t('hero.welcome', 'Welcome to MrBen')}</span>
+          <h1>{app.t('hero.playLike', 'Play like a ')}<span>{app.t('hero.gentleman', 'gentleman')}</span>.<br />{app.t('hero.winLike', 'Win like a legend.')}</h1>
+          <p>{app.t('hero.sub', '100% up to €200 plus 50 free spins on your first deposit. Crypto-fast payouts, thousands of games, one dapper host.')}</p>
           <div className="hero-cta">
-            <button className="btn orange" onClick={() => app.setAuthModal('join')}>Join now</button>
-            <button className="btn ghost-light" onClick={scrollToGames}>Explore games</button>
+            <button className="btn orange" onClick={() => app.setAuthModal('join')}>{app.t('hero.join', 'Join now')}</button>
+            <button className="btn ghost-light" onClick={scrollToGames}>{app.t('hero.explore', 'Explore games')}</button>
           </div>
-          <div className="hero-trust">18+ · Anjouan licensed · Please play responsibly</div>
+          <div className="hero-trust">{app.t('hero.trust', '18+ · Anjouan licensed · Please play responsibly')}</div>
         </div>
         <div className="hero-art">
           {HERO_VIDEO
