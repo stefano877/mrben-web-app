@@ -86,19 +86,19 @@ export const LEGAL: Record<string, LegalDoc> = {
 <li>daily deposit limits are calculated as 24 hours, weekly deposit limits as 7 days and monthly deposit limits as 28 days; and</li>
 <li>they are measured retrospectively for the period selected.</li>
 </ul>
-<p>If you try to remove or increase your limit, it will only take effect after 24 hours. Once the 24 hour period has passed you will be required to confirm the increase by clicking on a confirmation link that will be emailed to you. Any decrease to your limit will be applied immediately. To change your deposit limit, click <a href="https://mrben.com/account/deposit-limits">here</a>.</p>
-<p>A reality check allows you to keep track of the time you have spent gambling, together with providing you with an overview of your net winnings for that session. You can set a reality check when you are playing and this can be up to any time you specify. The reality check can be activated directly from the Homepage, or from within <a href="https://mrben.com/account/reality-check">My Account</a>, Responsible Gambling section when you log into your account.</p>
-<p>You can also add a session limit. This will automatically and immediately log you out of your account once the selected duration is reached. To change your session duration limit, click <a href="https://mrben.com/account/session-limit">here</a>.</p>
+<p>If you try to remove or increase your limit, it will only take effect after 24 hours. Once the 24 hour period has passed you will be required to confirm the increase by clicking on a confirmation link that will be emailed to you. Any decrease to your limit will be applied immediately. To change your deposit limit, click here.</p>
+<p>A reality check allows you to keep track of the time you have spent gambling, together with providing you with an overview of your net winnings for that session. You can set a reality check when you are playing and this can be up to any time you specify. The reality check can be activated directly from the Homepage, or from within My Account, Responsible Gambling section when you log into your account.</p>
+<p>You can also add a session limit. This will automatically and immediately log you out of your account once the selected duration is reached. To change your session duration limit, click here.</p>
 
 <h4>Time-out (take a break)</h4>
-<p>You may temporarily block yourself from the Website for a period of twenty-four (24) hours up to six (6) weeks by accessing Responsible Gambling from within the My Account section of the Website or by clicking <a href="https://mrben.com/account/timeout">here</a>, and selecting your required time-out duration. On confirming the time-out duration, your account will be immediately suspended, and you will not be able to login to your account until the selected duration has expired. Any request to undo your time-out period will only come into effect after a 24 hour cool off period.</p>
+<p>You may temporarily block yourself from the Website for a period of twenty-four (24) hours up to six (6) weeks by accessing Responsible Gambling from within the My Account section of the Website or by clicking here, and selecting your required time-out duration. On confirming the time-out duration, your account will be immediately suspended, and you will not be able to login to your account until the selected duration has expired. Any request to undo your time-out period will only come into effect after a 24 hour cool off period.</p>
 <p>During your time-out, any balances and advance wagers that you have placed will remain and any winnings will be credited to your account. You can only access your winnings after the cool off period has ended. It is possible that bonuses may expire during the time-out period, in accordance with the bonus terms and conditions. We cannot reinstate any expired bonuses if the account is reopened after the time-out period.</p>
 
 <h4>Account closure</h4>
-<p>You can close your account at any time for any reason by simply contacting our <a href="https://mrben.com/page/contact-us">Customer Support Team</a>. Please note that an account closed under our standard account closure can be reopened at any time by contacting our Customer Support Team. However, if you feel you are at risk of developing a gambling problem, or believe you currently have a gambling problem, we would advise that you consider self-exclusion – an explanation of self-exclusion is outlined in the section below (self-exclusion).</p>
+<p>You can close your account at any time for any reason by simply contacting our Customer Support Team. Please note that an account closed under our standard account closure can be reopened at any time by contacting our Customer Support Team. However, if you feel you are at risk of developing a gambling problem, or believe you currently have a gambling problem, we would advise that you consider self-exclusion – an explanation of self-exclusion is outlined in the section below (self-exclusion).</p>
 
 <h4>Access to account history</h4>
-<p>Understanding how much you are spending, as well as the products that you gamble on, is a useful way to reflect on your activity. Customers can access a full history of deposits and withdrawals by visiting the <a href="https://mrben.com/account/profile">My Account</a> section or by clicking <a href="https://mrben.com/account/transaction-history">here</a>.</p>
+<p>Understanding how much you are spending, as well as the products that you gamble on, is a useful way to reflect on your activity. Customers can access a full history of deposits and withdrawals by visiting the My Account section or by clicking here.</p>
 
 <h4>Self-exclusion</h4>
 <p>We offer a self-exclusion facility to help you if you feel that your gambling is out of control and you want assistance to help stop. At your request, we will prevent you from using your account for a specific period, as determined by you. We will also take reasonable steps to prevent the opening of new accounts. Once the period has lapsed, your account will be reopened.</p>
@@ -106,7 +106,7 @@ export const LEGAL: Record<string, LegalDoc> = {
 <p>You are also able to request that your account be self-excluded for an indefinite period. Should you wish to undo the indefinite self-exclusion, you may contact our Customer Support Team to request this. Any cancellation of an indefinite self-exclusion will only be applied after a 7 day waiting period has lapsed, at which point your account will be reopened.</p>
 <p>Entering into self-exclusion is a joint commitment from us and you. We will take reasonable steps to prevent you re-opening your account or opening new accounts with us. However, during the period of your exclusion, you must not attempt to re-open your account or to try and open new accounts across our network.</p>
 <p>When administering the self-exclusion on your account, the onus is on you to complete the process. This requires you to confirm that you understand the exclusion restrictions and then click a link that takes you to a page where you must select the period of time you wish to be excluded for, and to confirm the self-exclusion by clicking 'submit'. You will then receive an email to confirm that self-exclusion has been successful. <b>IF YOU DO NOT COMPLETE THIS PROCESS, YOUR ACCOUNT WILL REMAIN ACTIVE.</b></p>
-<p>If you are unable to complete the automated process yourself, then you must contact <a href="https://mrben.com/page/contact-us">Customer Support</a> and request that they apply the self-exclusion for you, that you attempted the automated process, and that you want us to manually self-exclude you – please note that if you request assistance via email to self-exclude, this will not be instantaneous, and we will confirm once it has been done. Unless you state otherwise, the self-exclusion period will be set at six months. To initiate self-exclusion please click <a href="https://mrben.com/account/self-exclude?internalNavigation=true">here</a>. If you have any questions, then please contact <a href="https://mrben.com/page/contact-us">Customer Support</a>.</p>
+<p>If you are unable to complete the automated process yourself, then you must contact Customer Support and request that they apply the self-exclusion for you, that you attempted the automated process, and that you want us to manually self-exclude you – please note that if you request assistance via email to self-exclude, this will not be instantaneous, and we will confirm once it has been done. Unless you state otherwise, the self-exclusion period will be set at six months. To initiate self-exclusion please click here. If you have any questions, then please contact Customer Support.</p>
 <p>Upon activation of the self-exclusion, we will make every reasonable effort to ensure that you do not receive gambling related material. However, we cannot be held liable for any third-party affiliate marketing that you may receive that we have no control over. Please remember that if you inadvertently receive marketing material and continue to gamble, or circumvent your agreement by, for example, continuing to gamble or opening and operating new accounts, we are under no obligation to return any deposits, winnings, or other funds in respect of such activities online.</p>
 <p>If you opt to self-exclude we strongly recommend that you seek support from gambling support agencies (see the Getting Further Help section below).</p>
 
@@ -136,13 +136,13 @@ export const LEGAL: Record<string, LegalDoc> = {
 <li>Do arguments, frustrations or disappointments make you want to gamble?</li>
 <li>Do you feel depressed or even suicidal because of your gambling?</li>
 </ol>
-<p>The more you answer 'yes' to these questions, the more likely you are to have a gambling problem and we recommend that you speak to someone about your answers. Please contact our <a href="https://mrben.com/page/contact-us">Customer Support team</a> or a problem gambling support service. We also recommend that you consider Self-Exclusion.</p>
+<p>The more you answer 'yes' to these questions, the more likely you are to have a gambling problem and we recommend that you speak to someone about your answers. Please contact our Customer Support team or a problem gambling support service. We also recommend that you consider Self-Exclusion.</p>
 
 <h4>Play responsibly: getting further help</h4>
 <p>There are many organisations that can provide help and support to individuals who develop a problem with gambling. If you feel that you may have a problem controlling your gambling we strongly recommend that you contact one of the following professional organisations for help and guidance.</p>
 <ul>
-<li><b>Gambling Therapy</b> — provides online support for problem gamblers. Visit <a href="https://www.gamblingtherapy.org">www.gamblingtherapy.org</a> for further details.</li>
-<li><b>GamBlock</b> — if you wish to refrain from gambling we strongly advise you to install gambling website blocking software such as GamBlock. Please visit <a href="https://www.gamblock.com">www.gamblock.com</a>.</li>
+<li><b>Gambling Therapy</b> — provides online support for problem gamblers. Visit www.gamblingtherapy.org for further details.</li>
+<li><b>GamBlock</b> — if you wish to refrain from gambling we strongly advise you to install gambling website blocking software such as GamBlock. Please visit www.gamblock.com.</li>
 <li><b>GamCare</b> — provides responsible gambling information, and links and signposting to other international support agencies for problem gambling and related issues.</li>
 </ul>
 <p>For any other questions regarding responsible gambling please contact Customer Support.</p>
@@ -152,15 +152,15 @@ export const LEGAL: Record<string, LegalDoc> = {
 <p>We ask that if young people have access to a computer or a tablet with internet access, that you take care to keep your account number and password confidential, and that you do not leave children unattended around your device while you are using our facilities.</p>
 <p>You could use a number of parental filtering solutions that can be used to monitor or restrict access to the internet:</p>
 <ul>
-<li><a href="https://www.netnanny.com">www.netnanny.com</a> — filtering software that protects children from inappropriate web content.</li>
-<li><a href="https://www.cybersitter.27labs.com">www.cybersitter.27labs.com</a> — filtering software which allows parents to add their own sites to block.</li>
-<li><a href="https://better-internet-for-kids.europa.eu/en">www.better-internet-for-kids.europa.eu</a> — a website co-funded by the EU which provides information and resources on internet safety for kids and youth.</li>
+<li>www.netnanny.com — filtering software that protects children from inappropriate web content.</li>
+<li>www.cybersitter.27labs.com — filtering software which allows parents to add their own sites to block.</li>
+<li>www.better-internet-for-kids.europa.eu — a website co-funded by the EU which provides information and resources on internet safety for kids and youth.</li>
 </ul>
 <p>If you are worried that someone underage is using our Website, please do not hesitate to contact us and we will take the necessary steps.</p>
 <p>In accordance with our Terms of Use, if anyone is found to be under the age of 18 years old, all bets placed will become null and void and any winnings forfeited. Other legal ramifications may also apply.</p>
 
 <h4>Requesting exclusion for non-customers</h4>
-<p>Anyone has the right to request that MrBen blocks them from the ability to register an account. Should you wish to do so, please contact <a href="https://mrben.com/page/contact-us">Customer Support</a> and provide your name, email address, telephone number and address. Remember, the more information you are able to provide, the better we will be able to protect you in the future.</p>
+<p>Anyone has the right to request that MrBen blocks them from the ability to register an account. Should you wish to do so, please contact Customer Support and provide your name, email address, telephone number and address. Remember, the more information you are able to provide, the better we will be able to protect you in the future.</p>
 <p>Please note that if you breach our Responsible Gambling Policy, we may suspend or close your account.</p>`,
   },
 
