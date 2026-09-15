@@ -8,8 +8,8 @@ backend you set one environment variable and implement the endpoints below.
 
 - **Mock mode (default):** `VITE_API_BASE` unset → `src/api/mock.ts`, backed by
   `localStorage`. This is what runs on Vercel today, so the demo works with no server.
-- **Live mode:** set `VITE_API_BASE=https://api.mrben.com` in the Vercel project env
-  and redeploy → `src/api/http.ts` takes over. No component code changes.
+- **Live mode:** set `VITE_API_BASE=https://api.mrben.ai` in the Vercel project env
+  and redeploy → `src/api/backend.ts` takes over (real auth; wallet/games stay local demo until those endpoints land). No component code changes.
 
 ## Auth
 

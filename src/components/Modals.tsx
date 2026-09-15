@@ -9,6 +9,7 @@ import { LEGAL, POLICY_VERSION } from '../data/legal'
 import { track } from '../analytics'
 import Cashier from './Cashier'
 import type { LaunchBlock } from '../api/launch'
+import type { SessionSummary, TotpStatusResponse, TotpEnrolmentResponse } from '../api'
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 
 // Makes a non-<button> element operable by keyboard: focusable, and activated by
@@ -56,6 +57,8 @@ function AuthModal() {
   const [detecting, setDetecting] = useState(false)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
+  const [step, setStep] = useState<'form' | 'totp'>('form')
+  const [totpCode, setTotpCode] = useState('')
 
   // Geo-locate the player and pre-pick their country + dial code when the Join form opens.
   useEffect(() => {
@@ -67,10 +70,60 @@ function AuthModal() {
   }, [mode])
 
   useEffect(() => { if (mode === 'join') track('signup_started'); else if (mode === 'login') track('login_started') }, [mode])
+  useEffect(() => { setStep('form'); setTotpCode('') }, [mode])
+
+  const loginErrMsg = (r: { code: string; correlationId?: string }) => {
+    switch (r.code) {
+      case 'ACCOUNT_BLOCKED': return app.t('auth.err.blocked', "This account isn't available right now. Please contact support.")
+      case 'RATE_LIMITED': return app.t('auth.err.rate', 'Too many attempts. Please wait a moment and try again.')
+      case 'INTERNAL_ERROR': return app.t('auth.err.server', 'Something went wrong. Please try again.') + (r.correlationId ? ` (ref ${r.correlationId})` : '')
+      default: return app.t('auth.err.badLogin', 'Email or password is incorrect.')
+    }
+  }
+  const regErrMsg = (r: { code: string; message: string; fields?: { path: string; message: string }[] }) => {
+    switch (r.code) {
+      case 'EMAIL_ALREADY_REGISTERED': return app.t('auth.err.emailTaken', 'That email is already registered. Try logging in instead.')
+      case 'USERNAME_TAKEN': return app.t('auth.err.userTaken', 'That username is taken. Please choose another.')
+      case 'WEAK_PASSWORD': return app.t('auth.err.weakPass', 'Please choose a stronger password (at least 12 characters).')
+      case 'UNDERAGE': return app.t('auth.err.underageSrv', 'You must be at least 18 to open an account.')
+      case 'COUNTRY_BLOCKED': return app.t('auth.err.country', 'Sorry — registration is not available in your country.')
+      case 'RATE_LIMITED': return app.t('auth.err.rate', 'Too many attempts. Please wait a moment and try again.')
+      case 'VALIDATION_FAILED': return r.fields && r.fields.length ? r.fields.map(f => f.message).join('. ') : (r.message || app.t('auth.err.check', 'Please check the form and try again.'))
+      default: return r.message || app.t('auth.err.generic', 'Something went wrong. Please try again.')
+    }
+  }
+  const submitTotp = async () => {
+    if (busy) return
+    setErr(''); setBusy(true)
+    try {
+      const r = await app.verifyTotp(totpCode.trim())
+      if (r.kind === 'ok') { app.setAuthModal(null); app.showToast(app.t('auth.toast.loggedIn', 'Logged in')); return }
+      if (r.kind === 'error') {
+        if (r.code === 'TOTP_CHALLENGE_EXPIRED') { setStep('form'); setErr(app.t('auth.err.totpExpired', 'That took too long — please sign in again.')); return }
+        if (r.code === 'RATE_LIMITED') { setErr(app.t('auth.err.rate', 'Too many attempts. Please wait a moment and try again.')); return }
+        setErr(app.t('auth.err.totpBad', "That code isn't right. Please try again."))
+      }
+    } finally { setBusy(false) }
+  }
+
 
   if (!mode) return null
   if (mode === 'forgot') return <ForgotModal />
   if (mode === 'reset') return <ResetModal />
+  if (step === 'totp') return (
+    <div className="overlay open" onClick={(ev) => { if (ev.target === ev.currentTarget) app.setAuthModal(null) }}>
+      <div className="modal" role="dialog" aria-modal="true">
+        <div className="modal-head"><h3>{app.t('auth.totp.title', 'Two-step verification')}</h3><button className="x" aria-label={app.t('common.close', 'Close')} onClick={() => app.setAuthModal(null)}>✕</button></div>
+        <div className="modal-body">
+          <p className="muted" style={{ marginTop: 0 }}>{app.t('auth.totp.sub', 'Enter the 6-digit code from your authenticator app.')}</p>
+          <div className="field"><label>{app.t('account.6digit', '6-digit code')}</label><input type="text" inputMode="numeric" autoFocus value={totpCode} placeholder="123 456" onChange={e => setTotpCode(e.target.value.replace(/[^0-9 ]/g, ''))} onKeyDown={e => e.key === 'Enter' && submitTotp()} /></div>
+          {err && <p className="err">{err}</p>}
+          <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy || totpCode.trim().length < 6} onClick={submitTotp}>{app.t('auth.totp.verify', 'Verify')}</button>
+          <div className="switchline"><a onClick={() => { setStep('form'); setErr('') }}>{app.t('auth.totp.back', 'Back to sign in')}</a></div>
+        </div>
+      </div>
+    </div>
+  )
   const dial = byCode(country)?.dial ?? ''
   const maxDob = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().slice(0, 10) })()
   const fieldDone = (_f: string) => { /* field-level funnel is outside the closed analytics taxonomy (MRB-100) */ }
@@ -88,14 +141,15 @@ function AuthModal() {
         const nat = phone.trim().replace(/\s+/g, '').replace(/^0+/, '')
         const fullPhone = nat ? `+${dial} ${nat}` : ''
         track('signup_submitted')
-        const e = await app.register(email, pass, {
+        const r = await app.register(email, pass, {
           username: username.trim(), dob, phone: fullPhone, country, dial, marketing,
           ageConfirmed: true, termsAcceptedAt: new Date().toISOString(), policyVersion: POLICY_VERSION,
         })
-        if (e) { setErr(e); return }
+        if (r.kind === 'error') { setErr(regErrMsg(r)); return }
       } else {
-        const e = await app.login(email, pass)
-        if (e) { setErr(e); return }
+        const r = await app.login(email, pass)
+        if (r.kind === 'totp') { setStep('totp'); setTotpCode(''); return }
+        if (r.kind === 'error') { setErr(loginErrMsg(r)); return }
       }
       app.setAuthModal(null)
       app.showToast(mode === 'join' ? app.t('auth.toast.created', 'Account created. Welcome to MrBen!') : app.t('auth.toast.loggedIn', 'Logged in'))
@@ -315,6 +369,144 @@ const LIMIT_ROWS: { k: LimitKind; label: string; sub: string; money: boolean }[]
 ]
 const hrsLeft = (at: number) => Math.max(1, Math.ceil((at - Date.now()) / 3600000))
 
+// Live signed-in sessions (backend mode). In mock/demo mode there is no session
+// service, so we show only the current device and no fabricated history (MRB-134).
+function SessionsCard() {
+  const app = useApp()
+  const [sessions, setSessions] = useState<SessionSummary[] | null>(null)
+  const [busy, setBusy] = useState(false)
+  const load = () => { void app.listSessions().then(setSessions) }
+  useEffect(() => { if (app.supportsSecurity) load() /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [])
+
+  if (!app.supportsSecurity) {
+    return (
+      <div className="card2">
+        <div className="h">{app.t('account.devices', 'Signed-in devices')}</div>
+        <div className="lrow"><div><div className="lt">{app.t('account.thisDevice', 'This device')}</div><div className="ls">{app.t('account.activeNow', 'Active now')}</div></div><span style={{ fontSize: 11, fontWeight: 800, background: '#E6F7EF', color: '#0F9D63', padding: '3px 10px', borderRadius: 999 }}>{app.t('account.current', 'Current')}</span></div>
+      </div>
+    )
+  }
+  const others = (sessions ?? []).filter(x => !x.current).length
+  return (
+    <div className="card2">
+      <div className="h">{app.t('account.devices', 'Signed-in devices')}</div>
+      {sessions === null
+        ? <div className="ls">{app.t('common.loading', 'Loading…')}</div>
+        : sessions.length === 0
+          ? <div className="ls">{app.t('account.noSessions', 'No active sessions found.')}</div>
+          : sessions.map(x => (
+            <div className="lrow" key={x.id}>
+              <div>
+                <div className="lt">{x.current ? app.t('account.thisDevice', 'This device') : (x.userAgent || app.t('account.unknownDevice', 'Unknown device'))}</div>
+                <div className="ls">{x.current ? app.t('account.activeNow', 'Active now') : app.t('account.signedInOn', 'Signed in {when}', { when: new Date(x.createdAt).toLocaleDateString() })}</div>
+              </div>
+              {x.current && <span style={{ fontSize: 11, fontWeight: 800, background: '#E6F7EF', color: '#0F9D63', padding: '3px 10px', borderRadius: 999 }}>{app.t('account.current', 'Current')}</span>}
+            </div>
+          ))}
+      <div style={{ marginTop: 8 }}>
+        <button className={'btn sec' + (busy ? ' busy' : '')} disabled={busy || others === 0} onClick={async () => {
+          setBusy(true)
+          const r = await app.closeOtherSessions()
+          setBusy(false)
+          if (r.ok) { app.showToast(app.t('account.signedOutOthersN', 'Signed out of {n} other session(s)', { n: String(r.revoked) })); load() }
+          else app.showToast(r.error)
+        }}>{app.t('account.signOutOthers', 'Sign out other devices')}</button>
+      </div>
+    </div>
+  )
+}
+
+// Email verification + two-factor management (backend mode). Optional flows: the
+// verify banner shows for PENDING_VERIFICATION / unverified email; 2FA enrol shows
+// the secret for manual entry (recovery codes shown exactly once) — MRB-134 / MRB-24.
+function SecurityCard() {
+  const app = useApp()
+  const u = app.user!
+  const [st, setSt] = useState<TotpStatusResponse | null>(null)
+  const [enrol, setEnrol] = useState<TotpEnrolmentResponse | null>(null)
+  const [mode2, setMode2] = useState<'idle' | 'enrol' | 'disable'>('idle')
+  const [code, setCode] = useState('')
+  const [pwd, setPwd] = useState('')
+  const [codes, setCodes] = useState<string[] | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [resent, setResent] = useState(false)
+  const loadStatus = () => { void app.totpStatus().then(setSt) }
+  useEffect(() => { if (app.supportsSecurity) loadStatus() /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [])
+
+  // Only in backend mode (explicit flags). Mock/demo accounts have no email-verification concept.
+  const needVerify = u.emailVerified === false || u.status === 'PENDING_VERIFICATION'
+  if (!app.supportsSecurity && !needVerify) return null
+
+  return (
+    <div className="card2">
+      <div className="h">{app.t('account.security', 'Security')}</div>
+
+      {needVerify && (
+        <div className="lrow" style={{ display: 'block' }}>
+          <div className="lt" style={{ color: '#B26A00' }}>{app.t('account.verifyEmail', 'Verify your email')}</div>
+          <div className="ls">{app.t('account.verifyEmailSub', 'Check your inbox for the verification link to unlock everything.')}</div>
+          {app.supportsSecurity && (
+            <div style={{ marginTop: 8 }}>
+              <button className={'btn sec' + (busy ? ' busy' : '')} disabled={busy || resent} onClick={async () => {
+                setBusy(true); const r = await app.resendVerification(); setBusy(false)
+                if (r.ok) { setResent(true); app.showToast(app.t('account.verifySent', 'Verification email sent')) } else app.showToast(r.error)
+              }}>{resent ? app.t('account.verifySentShort', 'Sent ✓') : app.t('account.resend', 'Resend email')}</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {app.supportsSecurity && (
+        <div className="lrow" style={{ display: 'block' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div><div className="lt">{app.t('account.twoFA', 'Two-factor authentication')}</div><div className="ls">{st?.enabled ? app.t('account.twoFAon', 'On — an extra step protects your login') : app.t('account.twoFAoff', 'Off — add a second step at login')}</div></div>
+            {st?.enabled
+              ? <span className="pill" {...clickable(() => { setMode2(m => m === 'disable' ? 'idle' : 'disable'); setCode(''); setPwd('') })}>{app.t('account.manage', 'Manage')} ›</span>
+              : <span className="pill" {...clickable(async () => {
+                  if (mode2 === 'enrol') { setMode2('idle'); return }
+                  setBusy(true); const e = await app.totpEnrol(); setBusy(false)
+                  if (e) { setEnrol(e); setMode2('enrol'); setCode('') } else app.showToast(app.t('account.twoFAfail', 'Could not start setup. Please try again.'))
+                })}>{app.t('account.enable', 'Enable')} ›</span>}
+          </div>
+
+          {mode2 === 'enrol' && enrol && !codes && (
+            <div className="excl">
+              <p>{app.t('account.twoFAstep1', 'Add this key to your authenticator app (Google Authenticator, Authy, 1Password), then enter the 6-digit code it shows.')}</p>
+              <div className="ls" style={{ wordBreak: 'break-all', marginBottom: 8 }}><strong>{app.t('account.secretKey', 'Setup key')}:</strong> <code>{enrol.secret}</code></div>
+              <input type="text" inputMode="numeric" value={code} placeholder={app.t('account.6digit', '6-digit code')} onChange={e => setCode(e.target.value.replace(/[^0-9 ]/g, ''))} />
+              <button className={'btn orange' + (busy ? ' busy' : '')} disabled={busy || code.trim().length < 6} onClick={async () => {
+                setBusy(true); const r = await app.totpActivate(code.trim()); setBusy(false)
+                if (r.ok) { setCodes(r.recoveryCodes); loadStatus() } else app.showToast(r.error)
+              }}>{app.t('account.turnOn', 'Turn on 2FA')}</button>
+            </div>
+          )}
+
+          {codes && (
+            <div className="excl">
+              <p style={{ fontWeight: 800 }}>{app.t('account.recoveryTitle', 'Save your recovery codes')}</p>
+              <p>{app.t('account.recoverySub', 'Each works once if you lose your authenticator. They are shown only now — store them somewhere safe.')}</p>
+              <div className="ls" style={{ fontFamily: 'monospace', lineHeight: 1.9 }}>{codes.map(c => <div key={c}>{c}</div>)}</div>
+              <button className="btn orange" onClick={() => { setCodes(null); setMode2('idle'); setEnrol(null); app.showToast(app.t('account.twoFAon2', 'Two-factor authentication is on')) }}>{app.t('account.savedCodes', "I've saved them")}</button>
+            </div>
+          )}
+
+          {mode2 === 'disable' && (
+            <div className="excl">
+              <p>{app.t('account.twoFAdisableP', 'Enter your password and a current code to turn off two-factor authentication.')}</p>
+              <input type="password" value={pwd} placeholder={app.t('auth.password', 'Password')} onChange={e => setPwd(e.target.value)} />
+              <input type="text" inputMode="numeric" value={code} placeholder={app.t('account.6digit', '6-digit code')} onChange={e => setCode(e.target.value.replace(/[^0-9 ]/g, ''))} />
+              <button className={'btn' + (busy ? ' busy' : '')} disabled={busy || !pwd || code.trim().length < 6} onClick={async () => {
+                setBusy(true); const r = await app.totpDisable(pwd, code.trim()); setBusy(false)
+                if (r.ok) { setMode2('idle'); setPwd(''); setCode(''); loadStatus(); app.showToast(app.t('account.twoFAoff2', 'Two-factor authentication turned off')) } else app.showToast(r.error)
+              }}>{app.t('account.turnOff', 'Turn off 2FA')}</button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function AccountModal() {
   const app = useApp()
   const [editKind, setEditKind] = useState<LimitKind | null>(null)
@@ -401,12 +593,8 @@ function AccountModal() {
             )
           })()}
 
-          <div className="card2">
-            <div className="h">{app.t('account.devices', 'Signed-in devices')}</div>
-            <div className="lrow"><div><div className="lt">{app.t('account.thisDevice', 'This device')}</div><div className="ls">{app.t('account.activeNow', 'Active now')}</div></div><span style={{ fontSize: 11, fontWeight: 800, background: '#E6F7EF', color: '#0F9D63', padding: '3px 10px', borderRadius: 999 }}>{app.t('account.current', 'Current')}</span></div>
-            <div className="lrow"><div><div className="lt">{app.t('account.deviceMobile', 'Mobile · Safari')}</div><div className="ls">{app.t('account.lastSeen', 'Last seen 2 days ago')}</div></div></div>
-            <div style={{ marginTop: 8 }}><button className="btn sec" onClick={() => app.showToast(app.t('account.signedOutOthers', 'Signed out of all other devices'))}>{app.t('account.signOutOthers', 'Sign out other devices')}</button></div>
-          </div>
+          <SessionsCard />
+          <SecurityCard />
 
           <div className="card2" style={{ padding: '4px 17px' }}>
             <div className="li" aria-label={app.t('account.openWalletAria', 'Open wallet and transactions')} {...clickable(() => app.openModal({ type: 'wallet' }))}><div className="lic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg></div><div><div className="lt">{app.t('account.walletTx', 'Wallet & transactions')}</div><div className="ls">{app.t('account.walletTxSub', 'Deposits, withdrawals, play')}</div></div><div className="chev">›</div></div>

@@ -2,7 +2,8 @@
 // These DTOs are the boundary between the front end and Willmer's backend.
 // In mock mode they are produced locally; in HTTP mode the backend returns them.
 
-import type { UserStatus, UserRole } from './auth/types'
+import type { UserStatus, UserRole, SessionSummary, TotpStatusResponse, TotpEnrolmentResponse, TotpChallengeResponse } from './auth/types'
+export type { SessionSummary, TotpStatusResponse, TotpEnrolmentResponse } from './auth/types'
 
 export type TxnKind = 'deposit' | 'withdraw' | 'bet' | 'win' | 'bonus'
 export interface Txn { id: number; kind: TxnKind; amount: number; label: string; at: number }
@@ -77,9 +78,23 @@ export interface LimitResult { account: Account; outcome: 'lowered' | 'scheduled
 /** Thrown by any adapter on a failed call. `code` is stable; `message` is user-facing. */
 export class ApiError extends Error {
   code: string
-  constructor(code: string, message: string) {
+  correlationId?: string
+  /** Seconds to back off, from a 429 Retry-After header. */
+  retryAfter?: number
+  fields?: { path: string; message: string }[]
+  constructor(code: string, message: string, opts: { correlationId?: string; retryAfter?: number; fields?: { path: string; message: string }[] } = {}) {
     super(message)
     this.code = code
     this.name = 'ApiError'
+    this.correlationId = opts.correlationId
+    this.retryAfter = opts.retryAfter
+    this.fields = opts.fields
   }
+}
+
+/** login() resolves to a session OR a second-factor challenge (§3 of the auth brief). */
+export interface LoginChallenge { challenge: TotpChallengeResponse }
+export type LoginResult = Session | LoginChallenge
+export function isLoginChallenge(r: LoginResult): r is LoginChallenge {
+  return (r as LoginChallenge).challenge !== undefined
 }

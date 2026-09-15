@@ -14,10 +14,12 @@ import {
   ApiError,
   type Account, type Session, type RegisterInput, type Txn, type TxnKind,
   type LimitKind, type DepositResult, type BetResult, type WheelResult,
-  type ChestResult, type LimitResult,
+  type ChestResult, type LimitResult, type LoginResult,
+  type SessionSummary, type TotpStatusResponse, type TotpEnrolmentResponse,
 } from './types'
 import { createAuthClient, AuthError } from './auth/client'
-import type { AuthenticatedUser } from './auth/types'
+import { ALLOWED_ATTRIBUTION_KEYS } from './auth/types'
+import type { AuthenticatedUser, Attribution as RegAttribution } from './auth/types'
 import { getAttribution } from '../attribution'
 import { WHEEL, CHEST } from '../data'
 
@@ -66,6 +68,21 @@ function createPlayStore() {
   return { ensure, persist, mkTxn }
 }
 
+// The backend's attribution schema is STRICT: any key outside the eight allowed
+// rejects the whole registration with 400. Affiliate fields (btag/affiliateId)
+// are a separate, undecided concern (DEC-006 / MRB-10) — attribution.ts still
+// captures them locally, but they must NEVER be sent here. Whitelist first.
+function registrationAttribution(): RegAttribution | undefined {
+  const a = getAttribution()
+  if (!a) return undefined
+  const out: RegAttribution = {}
+  for (const k of ALLOWED_ATTRIBUTION_KEYS) {
+    const v = (a as Record<string, unknown>)[k]
+    if (typeof v === 'string' && v) out[k] = v
+  }
+  return Object.keys(out).length ? out : undefined
+}
+
 // ---------------------------------------------------------------------------
 // Backend adapter
 // ---------------------------------------------------------------------------
@@ -73,6 +90,9 @@ export function createBackendApi(apiBase: string): MrBenApi {
   const auth = createAuthClient(apiBase)
   const play = createPlayStore()
   let who: AuthenticatedUser | null = null
+  // A session can die between requests (revoked elsewhere, refresh failed). Drop
+  // the cached identity so the store's onSignedOut clears the UI (brief §5).
+  auth.onSignedOut(() => { who = null })
 
   const requireUser = (): AuthenticatedUser => {
     if (!who) throw new ApiError('unauthenticated', 'Please log in to continue')
@@ -101,7 +121,7 @@ export function createBackendApi(apiBase: string): MrBenApi {
     catch (e) {
       if (e instanceof AuthError) {
         const msg = e.fields && e.fields.length ? e.fields.map(f => f.message).join('. ') : e.message
-        throw new ApiError(e.code, msg)
+        throw new ApiError(e.code, msg, { correlationId: e.correlationId, retryAfter: e.retryAfter, fields: e.fields })
       }
       throw e
     }
@@ -131,17 +151,35 @@ export function createBackendApi(apiBase: string): MrBenApi {
         dob: input.profile.dob,
         phone: toE164(input.profile.phone),
         marketing: input.profile.marketing,
-        attribution: getAttribution(),
+        attribution: registrationAttribution(),
       }))
       play.ensure(who.email)
       return { token: auth.getAccessToken() ?? '', account: account() }
     },
 
-    async login(email: string, pass: string): Promise<Session> {
-      who = await viaAuth(() => auth.login(email, pass))
+    async login(email: string, pass: string): Promise<LoginResult> {
+      const outcome = await viaAuth(() => auth.login(email, pass))
+      if ('challenge' in outcome) return { challenge: outcome.challenge }
+      who = outcome.user
       play.ensure(who.email)
       return { token: auth.getAccessToken() ?? '', account: account() }
     },
+
+    async verifyTotp(code: string): Promise<Session> {
+      who = await viaAuth(() => auth.verifyTotp(code))
+      play.ensure(who.email)
+      return { token: auth.getAccessToken() ?? '', account: account() }
+    },
+
+    async verifyEmail(token: string): Promise<void> { await viaAuth(() => auth.verifyEmail(token)) },
+    async resendVerification(): Promise<void> { await viaAuth(() => auth.resendVerification()) },
+    listSessions(): Promise<SessionSummary[]> { return viaAuth(() => auth.listSessions()) },
+    closeOtherSessions(): Promise<number> { return viaAuth(() => auth.closeOtherSessions()) },
+    totpStatus(): Promise<TotpStatusResponse> { return viaAuth(() => auth.totpStatus()) },
+    totpEnrol(): Promise<TotpEnrolmentResponse> { return viaAuth(() => auth.totpEnrol()) },
+    totpActivate(code: string): Promise<string[]> { return viaAuth(() => auth.totpActivate(code)) },
+    async totpDisable(password: string, code: string): Promise<void> { await viaAuth(() => auth.totpDisable(password, code)) },
+    onSignedOut(cb: () => void): void { auth.onSignedOut(cb) },
 
     async logout(): Promise<void> { try { await auth.logout() } finally { who = null } },
 

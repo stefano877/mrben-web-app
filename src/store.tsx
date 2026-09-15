@@ -1,12 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Game } from './data'
-import { api, ApiError } from './api'
+import { api, ApiError, isLoginChallenge } from './api'
 import { affiliateConversion } from './affiliate'
 import { track, identify } from './analytics'
 import { decideLaunch } from './api/launch'
 import type { LaunchMode, LaunchBlock } from './api/launch'
-import type { Account, Profile, LimitKind } from './api'
+import type { Account, Profile, LimitKind, Session, SessionSummary, TotpStatusResponse, TotpEnrolmentResponse } from './api'
 import { loadCcy, saveCcy, loc as locCcy } from './currency'
 import type { Ccy } from './currency'
 import { loadLang, saveLang, translate } from './i18n'
@@ -35,6 +35,17 @@ type Err = { ok: false; error: string }
 export type Res<T = unknown> = Ok<T> | Err
 const errText = (e: unknown) => (e instanceof ApiError ? e.message : 'Something went wrong. Please try again.')
 
+// Auth actions resolve to one of: signed in, a second-factor challenge, or a
+// typed error. The UI switches on `code` (never message) to place inline errors
+// and to show one generic message on a failed login (no account enumeration).
+export type AuthResult =
+  | { kind: 'ok' }
+  | { kind: 'totp' }
+  | { kind: 'error'; code: string; message: string; correlationId?: string; retryAfter?: number; fields?: { path: string; message: string }[] }
+const authErr = (e: unknown): AuthResult => (e instanceof ApiError
+  ? { kind: 'error', code: e.code, message: e.message, correlationId: e.correlationId, retryAfter: e.retryAfter, fields: e.fields }
+  : { kind: 'error', code: 'NETWORK', message: 'Something went wrong. Please try again.' })
+
 type AuthMode = 'join' | 'login' | 'forgot' | 'reset' | null
 
 interface Ctx {
@@ -57,11 +68,22 @@ interface Ctx {
   resetToken: string | null
   modal: Modal; openModal: (m: Modal) => void; closeModal: () => void
   toast: string; showToast: (m: string) => void
-  register: (email: string, pass: string, profile: Profile) => Promise<string | null>
-  login: (email: string, pass: string) => Promise<string | null>
+  register: (email: string, pass: string, profile: Profile) => Promise<AuthResult>
+  login: (email: string, pass: string) => Promise<AuthResult>
+  /** Complete a login that returned a TOTP challenge. */
+  verifyTotp: (code: string) => Promise<AuthResult>
   logout: () => Promise<void>
   requestPasswordReset: (email: string) => Promise<void>
   resetPassword: (newPass: string) => Promise<string | null>
+  /** Whether the live backend's security features (sessions, 2FA, verify email) are available. */
+  supportsSecurity: boolean
+  resendVerification: () => Promise<Res>
+  listSessions: () => Promise<SessionSummary[]>
+  closeOtherSessions: () => Promise<Res<{ revoked: number }>>
+  totpStatus: () => Promise<TotpStatusResponse | null>
+  totpEnrol: () => Promise<TotpEnrolmentResponse | null>
+  totpActivate: (code: string) => Promise<{ ok: true; recoveryCodes: string[] } | { ok: false; error: string }>
+  totpDisable: (password: string, code: string) => Promise<Res>
   deposit: (amount: number, method: string) => Promise<Res<{ bonusAdded: number; firstBefore: boolean }>>
   withdraw: (amount: number, method: string) => Promise<Res>
   placeBet: (game: Game, bet: number) => Promise<Res<{ win: number }>>
@@ -116,6 +138,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Restore the session on load (mock: localStorage, http: token + /session).
   useEffect(() => {
     let alive = true
+    // A session can die between requests (revoked elsewhere, refresh reuse, a
+    // password reset). Clear the UI when the client reports sign-out (brief §5).
+    if (api.onSignedOut) api.onSignedOut(() => { if (alive) { setAccount(null); showToast('You have been signed out.') } })
     api.getSession()
       .then(s => { if (alive) setAccount(s?.account ?? null) })
       .catch(() => { /* start logged out */ })
@@ -136,6 +161,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setAuthModal('reset')
         window.history.replaceState({}, '', window.location.pathname + window.location.hash)
       }
+      const vt = params.get('verify')
+      if (vt) {
+        window.history.replaceState({}, '', window.location.pathname + window.location.hash)
+        if (api.verifyEmail) {
+          api.verifyEmail(vt)
+            .then(() => api.getSession())
+            .then(sess => { if (sess) setAccount(sess.account); showToast('Email verified — thank you!') })
+            .catch(() => showToast('That verification link is invalid or has expired.'))
+        }
+      }
       const lk = params.get('legal')
       if (lk) { setLegalKey(lk); setPage('legal') }
       const pk = params.get('promo')
@@ -148,15 +183,52 @@ export function AppProvider({ children }: { children: ReactNode }) {
     timer.current = window.setTimeout(() => setToast(''), 2400)
   }
 
-  const register = async (email: string, pass: string, profile: Profile): Promise<string | null> => {
-    try { const s = await api.register({ email, pass, profile }); setAccount(s.account); affiliateConversion('registration'); void identify(); return null }
-    catch (e) { return errText(e) }
+  const register = async (email: string, pass: string, profile: Profile): Promise<AuthResult> => {
+    try { const s = await api.register({ email, pass, profile }); setAccount(s.account); affiliateConversion('registration'); void identify(); return { kind: 'ok' } }
+    catch (e) { return authErr(e) }
   }
-  const login = async (email: string, pass: string): Promise<string | null> => {
-    try { const s = await api.login(email, pass); setAccount(s.account); void identify(); return null }
-    catch (e) { return errText(e) }
+  const login = async (email: string, pass: string): Promise<AuthResult> => {
+    try {
+      const r = await api.login(email, pass)
+      if (isLoginChallenge(r)) return { kind: 'totp' }   // second factor needed
+      setAccount(r.account); void identify(); return { kind: 'ok' }
+    } catch (e) { return authErr(e) }
+  }
+  const verifyTotp = async (code: string): Promise<AuthResult> => {
+    if (!api.verifyTotp) return { kind: 'error', code: 'UNSUPPORTED', message: 'Two-factor sign-in is not available here.' }
+    try { const s = await api.verifyTotp(code); setAccount(s.account); void identify(); return { kind: 'ok' } }
+    catch (e) { return authErr(e) }
   }
   const logout = async () => { try { await api.logout() } finally { setAccount(null) } }
+  const supportsSecurity = !!api.listSessions
+  const resendVerification = async (): Promise<Res> => {
+    if (!api.resendVerification) return { ok: false, error: 'Not available.' }
+    try { await api.resendVerification(); return { ok: true } } catch (e) { return { ok: false, error: errText(e) } }
+  }
+  const listSessions = async (): Promise<SessionSummary[]> => {
+    if (!api.listSessions) return []
+    try { return await api.listSessions() } catch { return [] }
+  }
+  const closeOtherSessions = async (): Promise<Res<{ revoked: number }>> => {
+    if (!api.closeOtherSessions) return { ok: false, error: 'Not available.' }
+    try { const revoked = await api.closeOtherSessions(); return { ok: true, revoked } } catch (e) { return { ok: false, error: errText(e) } }
+  }
+  const totpStatus = async (): Promise<TotpStatusResponse | null> => {
+    if (!api.totpStatus) return null
+    try { return await api.totpStatus() } catch { return null }
+  }
+  const totpEnrol = async (): Promise<TotpEnrolmentResponse | null> => {
+    if (!api.totpEnrol) return null
+    try { return await api.totpEnrol() } catch { return null }
+  }
+  const totpActivate = async (code: string): Promise<{ ok: true; recoveryCodes: string[] } | { ok: false; error: string }> => {
+    if (!api.totpActivate) return { ok: false, error: 'Not available.' }
+    try { const recoveryCodes = await api.totpActivate(code); return { ok: true, recoveryCodes } } catch (e) { return { ok: false, error: errText(e) } }
+  }
+  const totpDisable = async (password: string, code: string): Promise<Res> => {
+    if (!api.totpDisable) return { ok: false, error: 'Not available.' }
+    try { await api.totpDisable(password, code); return { ok: true } } catch (e) { return { ok: false, error: errText(e) } }
+  }
   // Always resolves the same way. The UI shows a generic confirmation so nobody
   // can learn from this whether an email is registered (no account enumeration).
   const requestPasswordReset = async (email: string): Promise<void> => {
@@ -255,7 +327,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<Ctx>(() => ({
     ready, page, setPage, legalKey, openLegal, promoKey, openPromo, ccy, setCcy, loc, lang, setLang, t, lobbyView, setLobbyView, goLobby, user: account, authModal, setAuthModal, resetToken,
-    modal, openModal, closeModal, toast, showToast, register, login, logout, requestPasswordReset, resetPassword,
+    modal, openModal, closeModal, toast, showToast, register, login, verifyTotp, logout, requestPasswordReset, resetPassword,
+    supportsSecurity, resendVerification, listSessions, closeOtherSessions, totpStatus, totpEnrol, totpActivate, totpDisable,
     deposit, withdraw, placeBet, rollback, spinWheel, openChest,
     setLimit, cancelPending, selfExclude, liftExclusion, setRealityChecks,
     toggleFav, pushRecent, requireAuth, launchGame,
