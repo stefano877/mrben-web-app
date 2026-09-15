@@ -534,7 +534,8 @@ body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; te
 .legal-content .doc { color: #38424f; font-size: 15px; line-height: 1.7; }
 .legal-content .doc h4 { color: #101A45; margin: 20px 0 6px; font-size: 16px; font-weight: 800; }
 .legal-content .doc p { margin: 0 0 11px; }
-.legal-content .doc ul { margin: 2px 0 12px 18px; }
+.legal-content .doc ul { margin: 2px 0 12px 18px; list-style: disc; }
+.legal-content .doc ol { margin: 2px 0 12px 20px; list-style: decimal; }
 .legal-content .doc li { margin: 0 0 5px; }
 .legal-content .doc b { color: #101A45; }
 .legal-content .doc a { color: #F35100; cursor: pointer; }

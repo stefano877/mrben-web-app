@@ -74,21 +74,94 @@ export const LEGAL: Record<string, LegalDoc> = {
 
   'rg-policy': {
     title: 'Responsible Gambling',
-    html: `<p>Gambling should always be fun, never a way to make money or escape problems. MrBen gives you the tools to stay in control.</p>
-    <h4>Tools you control</h4>
-    <ul>
-      <li><b>Deposit, loss and session limits</b> — daily, weekly or monthly. Decreases apply promptly; increases only after a cooling-off period.</li>
-      <li><b>Reality checks</b> — periodic reminders of how long you have played and your net position.</li>
-      <li><b>Time-out (cool-off)</b> — a short break during which you cannot deposit or play.</li>
-      <li><b>Self-exclusion</b> — from six months up to permanent. It cannot be reversed early.</li>
-    </ul>
-    <p>Set all of these from your account, or contact <b>support@mrben.com</b>.</p>
-    <h4>Checking yourself</h4>
-    <p>Do you gamble more than you can afford, chase losses, gamble to escape stress, or have others expressed concern? If so, please use our tools and seek support.</p>
-    <h4>Protecting minors</h4>
-    <p>Gambling by anyone under 18 is illegal and prohibited. Keep your login private and use family-filtering software if you share a device.</p>
-    <h4>Getting help</h4>
-    <p>Free, confidential support is available through organisations such as GamCare, GambleAware and Gamblers Anonymous, and national helplines in your country. You can also self-exclude with us at any time.</p>`,
+    html: `<p>We value our players and hope that you enjoy our products responsibly, and that gambling continues to be fun and entertaining. It is our mission to provide our players with the most entertaining gambling experience and it is our duty to help prevent compulsive use of and underage access to our gaming products. As a responsible, licensed gaming company, we have implemented a number of company policies and tools to promote responsible gambling.</p>
+<p>Our objective is to ensure that our players enjoy our services in a safe, secure and supportive manner.</p>
+
+<h4>Prevent problem gambling</h4>
+<p><b>Player protection tools: setting gambling limits.</b> As part of our Responsible Gambling Policy we provide you with player protection tools in order to help you control and limit your spending, temporarily take a break from your account (time out) as well as an option to self-exclude and close your account for a set period of time. Further details are outlined below.</p>
+
+<h4>Self-imposed player limits</h4>
+<p>You can set daily, weekly or monthly deposit limits which will help you to manage the amount of money you are depositing into your account for the selected period. Please note that:</p>
+<ul>
+<li>daily deposit limits are calculated as 24 hours, weekly deposit limits as 7 days and monthly deposit limits as 28 days; and</li>
+<li>they are measured retrospectively for the period selected.</li>
+</ul>
+<p>If you try to remove or increase your limit, it will only take effect after 24 hours. Once the 24 hour period has passed you will be required to confirm the increase by clicking on a confirmation link that will be emailed to you. Any decrease to your limit will be applied immediately. To change your deposit limit, click <a href="https://mrben.com/account/deposit-limits">here</a>.</p>
+<p>A reality check allows you to keep track of the time you have spent gambling, together with providing you with an overview of your net winnings for that session. You can set a reality check when you are playing and this can be up to any time you specify. The reality check can be activated directly from the Homepage, or from within <a href="https://mrben.com/account/reality-check">My Account</a>, Responsible Gambling section when you log into your account.</p>
+<p>You can also add a session limit. This will automatically and immediately log you out of your account once the selected duration is reached. To change your session duration limit, click <a href="https://mrben.com/account/session-limit">here</a>.</p>
+
+<h4>Time-out (take a break)</h4>
+<p>You may temporarily block yourself from the Website for a period of twenty-four (24) hours up to six (6) weeks by accessing Responsible Gambling from within the My Account section of the Website or by clicking <a href="https://mrben.com/account/timeout">here</a>, and selecting your required time-out duration. On confirming the time-out duration, your account will be immediately suspended, and you will not be able to login to your account until the selected duration has expired. Any request to undo your time-out period will only come into effect after a 24 hour cool off period.</p>
+<p>During your time-out, any balances and advance wagers that you have placed will remain and any winnings will be credited to your account. You can only access your winnings after the cool off period has ended. It is possible that bonuses may expire during the time-out period, in accordance with the bonus terms and conditions. We cannot reinstate any expired bonuses if the account is reopened after the time-out period.</p>
+
+<h4>Account closure</h4>
+<p>You can close your account at any time for any reason by simply contacting our <a href="https://mrben.com/page/contact-us">Customer Support Team</a>. Please note that an account closed under our standard account closure can be reopened at any time by contacting our Customer Support Team. However, if you feel you are at risk of developing a gambling problem, or believe you currently have a gambling problem, we would advise that you consider self-exclusion – an explanation of self-exclusion is outlined in the section below (self-exclusion).</p>
+
+<h4>Access to account history</h4>
+<p>Understanding how much you are spending, as well as the products that you gamble on, is a useful way to reflect on your activity. Customers can access a full history of deposits and withdrawals by visiting the <a href="https://mrben.com/account/profile">My Account</a> section or by clicking <a href="https://mrben.com/account/transaction-history">here</a>.</p>
+
+<h4>Self-exclusion</h4>
+<p>We offer a self-exclusion facility to help you if you feel that your gambling is out of control and you want assistance to help stop. At your request, we will prevent you from using your account for a specific period, as determined by you. We will also take reasonable steps to prevent the opening of new accounts. Once the period has lapsed, your account will be reopened.</p>
+<p>Should you wish to cancel your self-exclusion prior to the expiration of the self-exclusion period, this will only be considered following an internal review. Any successful cancellation of a definite self-exclusion period will be applied after a minimum 24 hour cool-off period following your request.</p>
+<p>You are also able to request that your account be self-excluded for an indefinite period. Should you wish to undo the indefinite self-exclusion, you may contact our Customer Support Team to request this. Any cancellation of an indefinite self-exclusion will only be applied after a 7 day waiting period has lapsed, at which point your account will be reopened.</p>
+<p>Entering into self-exclusion is a joint commitment from us and you. We will take reasonable steps to prevent you re-opening your account or opening new accounts with us. However, during the period of your exclusion, you must not attempt to re-open your account or to try and open new accounts across our network.</p>
+<p>When administering the self-exclusion on your account, the onus is on you to complete the process. This requires you to confirm that you understand the exclusion restrictions and then click a link that takes you to a page where you must select the period of time you wish to be excluded for, and to confirm the self-exclusion by clicking 'submit'. You will then receive an email to confirm that self-exclusion has been successful. <b>IF YOU DO NOT COMPLETE THIS PROCESS, YOUR ACCOUNT WILL REMAIN ACTIVE.</b></p>
+<p>If you are unable to complete the automated process yourself, then you must contact <a href="https://mrben.com/page/contact-us">Customer Support</a> and request that they apply the self-exclusion for you, that you attempted the automated process, and that you want us to manually self-exclude you – please note that if you request assistance via email to self-exclude, this will not be instantaneous, and we will confirm once it has been done. Unless you state otherwise, the self-exclusion period will be set at six months. To initiate self-exclusion please click <a href="https://mrben.com/account/self-exclude?internalNavigation=true">here</a>. If you have any questions, then please contact <a href="https://mrben.com/page/contact-us">Customer Support</a>.</p>
+<p>Upon activation of the self-exclusion, we will make every reasonable effort to ensure that you do not receive gambling related material. However, we cannot be held liable for any third-party affiliate marketing that you may receive that we have no control over. Please remember that if you inadvertently receive marketing material and continue to gamble, or circumvent your agreement by, for example, continuing to gamble or opening and operating new accounts, we are under no obligation to return any deposits, winnings, or other funds in respect of such activities online.</p>
+<p>If you opt to self-exclude we strongly recommend that you seek support from gambling support agencies (see the Getting Further Help section below).</p>
+
+<h4>Play responsibly: know your limits &amp; stay in control</h4>
+<p>Whilst most people do gamble responsibly, for some people gambling can become a problem. Please read the information below. It is very important especially if you are recovering from any kind of dependency.</p>
+<ul>
+<li>Always establish limits for depositing, wagering and losses before you start playing.</li>
+<li>Decide beforehand on a time limit for your playing session and stick to it. Within that period ensure that you also take regular breaks from playing.</li>
+<li>Think about how much money you spend gambling. You can track your activity in your Online Account History.</li>
+<li>Gambling is not advised if it interferes with your daily responsibilities. Make sure that the decision to gamble is yours.</li>
+<li>Gambling is not advised if you are in recovery for any dependency or are under the influence of alcohol or any other substance.</li>
+<li>Gambling is a form of entertainment. It is not a way to pay off your debts.</li>
+<li>Never try to chase your losses.</li>
+<li>Make sure you know the rules of the games you play.</li>
+<li>If you need to talk to someone about problem gambling, then contact our Customer Support team or a problem gambling support service.</li>
+</ul>
+
+<h4>Play responsibly: recognise a problem</h4>
+<p>Answering the self-assessment below will help you consider whether you have a problem:</p>
+<ol>
+<li>Do you gamble to escape from a boring or unhappy life?</li>
+<li>When gambling and you run out of money, do you feel lost, in despair and the need to gamble again as soon as possible?</li>
+<li>Do you gamble until your last penny is gone, even the fare home or the cost of a cup of tea?</li>
+<li>Have you ever lied to cover up the amount of money or time you have spent gambling?</li>
+<li>Have you ever lost interest in your family, friends or hobbies because of your gambling?</li>
+<li>After losing, do you feel you must try and win back your losses as soon as possible?</li>
+<li>Do arguments, frustrations or disappointments make you want to gamble?</li>
+<li>Do you feel depressed or even suicidal because of your gambling?</li>
+</ol>
+<p>The more you answer 'yes' to these questions, the more likely you are to have a gambling problem and we recommend that you speak to someone about your answers. Please contact our <a href="https://mrben.com/page/contact-us">Customer Support team</a> or a problem gambling support service. We also recommend that you consider Self-Exclusion.</p>
+
+<h4>Play responsibly: getting further help</h4>
+<p>There are many organisations that can provide help and support to individuals who develop a problem with gambling. If you feel that you may have a problem controlling your gambling we strongly recommend that you contact one of the following professional organisations for help and guidance.</p>
+<ul>
+<li><b>Gambling Therapy</b> — provides online support for problem gamblers. Visit <a href="https://www.gamblingtherapy.org">www.gamblingtherapy.org</a> for further details.</li>
+<li><b>GamBlock</b> — if you wish to refrain from gambling we strongly advise you to install gambling website blocking software such as GamBlock. Please visit <a href="https://www.gamblock.com">www.gamblock.com</a>.</li>
+<li><b>GamCare</b> — provides responsible gambling information, and links and signposting to other international support agencies for problem gambling and related issues.</li>
+</ul>
+<p>For any other questions regarding responsible gambling please contact Customer Support.</p>
+
+<h4>Play responsibly: preventing underage gambling</h4>
+<p>We only accept customers over 18 years of age. To diminish the chance of underage gambling, we ask for identification and documentation if we suspect a customer is under 18. Although we dedicate a lot of time and resources to ensure there are no minors playing, we feel this prevention works best as a shared responsibility between us and the minor's parents/guardians.</p>
+<p>We ask that if young people have access to a computer or a tablet with internet access, that you take care to keep your account number and password confidential, and that you do not leave children unattended around your device while you are using our facilities.</p>
+<p>You could use a number of parental filtering solutions that can be used to monitor or restrict access to the internet:</p>
+<ul>
+<li><a href="https://www.netnanny.com">www.netnanny.com</a> — filtering software that protects children from inappropriate web content.</li>
+<li><a href="https://www.cybersitter.27labs.com">www.cybersitter.27labs.com</a> — filtering software which allows parents to add their own sites to block.</li>
+<li><a href="https://better-internet-for-kids.europa.eu/en">www.better-internet-for-kids.europa.eu</a> — a website co-funded by the EU which provides information and resources on internet safety for kids and youth.</li>
+</ul>
+<p>If you are worried that someone underage is using our Website, please do not hesitate to contact us and we will take the necessary steps.</p>
+<p>In accordance with our Terms of Use, if anyone is found to be under the age of 18 years old, all bets placed will become null and void and any winnings forfeited. Other legal ramifications may also apply.</p>
+
+<h4>Requesting exclusion for non-customers</h4>
+<p>Anyone has the right to request that MrBen blocks them from the ability to register an account. Should you wish to do so, please contact <a href="https://mrben.com/page/contact-us">Customer Support</a> and provide your name, email address, telephone number and address. Remember, the more information you are able to provide, the better we will be able to protect you in the future.</p>
+<p>Please note that if you breach our Responsible Gambling Policy, we may suspend or close your account.</p>`,
   },
 
   'self-exclusion': {
